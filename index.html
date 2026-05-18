@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مطعم دبل | Double Restaurant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            gold: '#C5A059',
+                            burgundy: '#631021',
+                            cream: '#F9F6F0',
+                            dark: '#1A1A1A',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        body {
+            background-color: #F9F6F0;
+            color: #1A1A1A;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .menu-dashed {
+            border-bottom: 2px dashed rgba(99, 16, 33, 0.1);
+        }
+    </style>
+</head>
+
+<body x-data="doubleApp()" x-cloak>
+
+    <!-- Notification -->
+    <div class="fixed top-10 left-1/2 -translate-x-1/2 z-[100] w-full max-w-xs px-4 pointer-events-none">
+        <template x-if="notification.show">
+            <div
+                class="bg-brand-burgundy text-white py-3 px-6 rounded-2xl shadow-2xl flex items-center gap-3 animate__animated animate__fadeInDown">
+                <div class="bg-brand-gold p-1 rounded-full">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <span class="font-bold text-sm" x-text="notification.message"></span>
+            </div>
+        </template>
+    </div>
+
+    <!-- Landing Page -->
+    <div x-show="view === 'landing'"
+        class="relative min-h-screen flex flex-col items-center justify-center p-6 bg-brand-cream overflow-hidden">
+        <div
+            class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] opacity-40">
+        </div>
+
+        <div class="relative z-10 mb-8 animate__animated animate__zoomIn">
+            <div
+                class="relative p-2 rounded-full bg-white shadow-2xl border-4 border-brand-burgundy/10 overflow-hidden">
+                <img src="https://res.cloudinary.com/do0u3he16/image/upload/v1778623162/94e560b7-648d-4293-8f92-292d31693ea1_-----01-2-01_nqreth.jpg"
+                    class="w-48 h-48 object-cover rounded-full">
+            </div>
+        </div>
+
+        <div class="text-center z-10 mb-10 animate__animated animate__fadeInUp">
+            <h1 class="text-4xl font-black mb-2 text-brand-burgundy tracking-tight">مطعم دبل <span
+                    class="text-brand-gold">DOUBLE</span></h1>
+            <p class="text-brand-burgundy/60 text-lg font-bold">أشهى المشويات والشاورما والفطائر</p>
+        </div>
+
+        <div class="grid gap-4 w-full max-w-sm sm:max-w-md md:max-w-lg z-10">
+            <button @click="view = 'menu'"
+                class="flex items-center justify-between px-8 py-5 rounded-[24px] bg-brand-burgundy text-white shadow-xl group hover:scale-[1.02] transition-all animate__animated animate__fadeInUp"
+                style="animation-delay: 0.1s">
+                <div class="flex items-center gap-5">
+                    <svg class="w-6 h-6 text-brand-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                        <path d="M3 6h18" />
+                        <path d="M16 10a4 4 0 0 1-8 0" />
+                    </svg>
+                    <span class="text-lg font-black">اطلب الان</span>
+                </div>
+                <svg class="w-5 h-5 text-white/40 group-hover:-translate-x-1 transition-transform" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M15 18l-6-6 6-6" />
+                </svg>
+            </button>
+
+            <div class="grid grid-cols-4 gap-3 sm:gap-4 animate__animated animate__fadeInUp"
+                style="animation-delay: 0.2s">
+                <button @click="window.open('https://www.tiktok.com/@shawarma.doubel', '_blank')"
+                    class="flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl bg-white border border-brand-burgundy/5 shadow-sm text-brand-burgundy hover:bg-black hover:text-white hover:scale-105 transition-all">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.89-.6-4.13-1.47V15.5a8.074 8.074 0 0 1-3.21 6.53 8.12 8.12 0 0 1-10.89-1.12A8.135 8.135 0 0 1 10.44 7.6c.45-.06.91-.07 1.36-.01V11.8a4.13 4.13 0 0 0-3.32 3.6c-.34 2.24 1.33 4.41 3.58 4.75a4.136 4.136 0 0 0 4.67-4.12V.02h-4.21z" />
+                    </svg>
+                    <span class="text-[9px] sm:text-[11px] font-black uppercase">TikTok</span>
+                </button>
+                <button @click="window.open('https://www.snapchat.com/add/shawarma.doubel', '_blank')"
+                    class="flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl bg-white border border-brand-burgundy/5 shadow-sm text-brand-burgundy hover:bg-[#FFFC00] hover:text-black hover:scale-105 transition-all">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2.4c-4.1 0-7 3-7 6.1 0 .6.3 1.2.6 1.8.3.6.4 1.1.4 1.7 0 1.2-.8 1.8-1.7 1.8-.1 0-.3 0-.4-.1-.1-.7-.8-1.2-1.5-1.2-.8 0-1.5.7-1.5 1.5 0 .2 0 .4.1.6 1.1.5 1.7 1.4 1.7 2.4 0 2.2 2.1 3.5 4.5 3.5.3 0 .6 0 .8-.1.7.9 1.9 1.5 3.2 1.5 1.3 0 2.4-.6 3.2-1.5.3.1.6.1.8.1 2.4 0 4.5-1.3 4.5-3.5 0-1 .6-1.9 1.7-2.4.1-.2.1-.4.1-.6 0-.8-.7-1.5-1.5-1.5-.7 0-1.4.5-1.5 1.2-.1 0-.3.1-.4.1-.9 0-1.7-.6-1.7-1.8 0-.6.1-1.1.4-1.7.3-.6.6-1.2.6-1.8 0-3.1-2.9-6.1-7-6.1z" />
+                    </svg>
+                    <span class="text-[9px] sm:text-[11px] font-black uppercase">Snap</span>
+                </button>
+                <button
+                    @click="window.open('https://www.instagram.com/shawarma.doubel?igsh=M2lxeGRkMjl4MXJk', '_blank')"
+                    class="flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl bg-white border border-brand-burgundy/5 shadow-sm text-brand-burgundy hover:bg-gradient-to-tr hover:from-[#f09433] hover:via-[#dc2743] hover:to-[#bc1888] hover:text-white hover:scale-105 transition-all">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                    </svg>
+                    <span class="text-[9px] sm:text-[11px] font-black uppercase">Insta</span>
+                </button>
+                <button @click="showHours = true"
+                    class="flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl bg-white border border-brand-burgundy/5 shadow-sm text-brand-burgundy hover:bg-brand-burgundy hover:text-white hover:scale-105 transition-all">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <span class="text-[9px] sm:text-[11px] font-black uppercase">وقت العمل</span>
+                </button>
+            </div>
+
+            <button @click="window.open('https://maps.app.goo.gl/iQPoxnSL24Umq9rR6?g_st=ac', '_blank')"
+                class="flex items-center justify-between px-8 py-5 rounded-[24px] bg-brand-gold text-white shadow-lg group hover:scale-[1.02] transition-all animate__animated animate__fadeInUp"
+                style="animation-delay: 0.3s">
+                <div class="flex items-center gap-5">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    <span class="text-lg font-black">موقعنا علي الخريطة</span>
+                </div>
+                <svg class="w-5 h-5 text-white/40 group-hover:-translate-x-1 transition-transform" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M15 18l-6-6 6-6" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="mt-12 text-center z-10 opacity-40">
+            <p class="text-[10px] font-black text-brand-burgundy uppercase tracking-[0.3em] mb-1">Location</p>
+            <p class="text-xs font-bold text-brand-burgundy">الأمير نايف بن عبدالعزيز، حي البديعة، الخرج</p>
+        </div>
+    </div>
+
+    <!-- Menu Page -->
+    <div x-show="view === 'menu'" class="min-h-screen bg-brand-cream">
+        <header
+            class="sticky top-0 z-40 bg-brand-cream/90 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-brand-burgundy/10">
+            <button @click="view = 'landing'" class="p-2 rounded-full bg-white shadow-sm text-brand-burgundy">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m9 18 6-6-6-6" />
+                </svg>
+            </button>
+            <div class="flex flex-col items-center">
+                <span class="text-xl font-black text-brand-burgundy uppercase tracking-tighter">DOUBLE</span>
+            </div>
+            <button @click="showCart = true" class="relative p-2 rounded-full bg-white shadow-sm text-brand-burgundy">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="8" cy="21" r="1" />
+                    <circle cx="19" cy="21" r="1" />
+                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                </svg>
+                <span x-show="cartItemsCount() > 0"
+                    class="absolute -top-1 -right-1 bg-brand-burgundy text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm"
+                    x-text="cartItemsCount()"></span>
+            </button>
+        </header>
+
+        <div class="bg-brand-cream border-b border-brand-burgundy/5 py-6 px-6 overflow-x-auto no-scrollbar">
+            <div class="flex gap-4 min-w-max pb-2">
+                <template x-for="cat in categories" :key="cat.id">
+                    <button @click="activeCategory = cat.id; document.querySelector('main').scrollTo(0,0)"
+                        class="flex flex-col items-center justify-center p-4 rounded-[28px] transition-all duration-300 min-w-[90px] border-2"
+                        :class="activeCategory === cat.id ? 'bg-brand-burgundy text-brand-gold border-transparent shadow-xl scale-105' : 'bg-white text-brand-burgundy/40 border-brand-burgundy/5'">
+                        <span class="text-3xl mb-2 animate__animated animate__pulse animate__infinite"
+                            x-text="cat.icon"></span>
+                        <span class="text-[10px] font-black uppercase tracking-tight" x-text="cat.name"></span>
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <main class="px-6 py-8 w-full max-w-6xl mx-auto pb-40">
+            <div class="flex items-center gap-4 mb-10 overflow-hidden">
+                <div class="h-[1px] flex-1 bg-brand-burgundy/10"></div>
+                <h2 class="text-2xl font-black text-brand-burgundy"
+                    x-text="categories.find(c => c.id === activeCategory).name"></h2>
+                <div class="h-[1px] flex-1 bg-brand-burgundy/10"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                <template x-for="item in filteredItems()" :key="item.id">
+                    <div
+                        class="group animate__animated animate__fadeInUp bg-white p-6 rounded-[28px] shadow-sm border border-brand-burgundy/5 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col h-full">
+                        <div class="flex justify-between items-start gap-4 mb-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-extrabold text-brand-burgundy mb-1" x-text="item.name"></h3>
+                                <p x-show="item.description"
+                                    class="text-xs text-brand-burgundy/40 leading-relaxed italic"
+                                    x-text="item.description"></p>
+                            </div>
+                            <div
+                                class="text-brand-burgundy font-black text-lg whitespace-nowrap bg-brand-cream px-3 py-1 rounded-xl">
+                                <template x-if="!item.sizes && !item.variants">
+                                    <span><span x-text="item.price"></span> <span class="text-[10px]">ر.س</span></span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div class="mt-auto">
+                            <!-- Price Tabs for Sizes (Small/Medium/Large) -->
+                            <div x-show="item.sizes" class="grid grid-cols-3 gap-2">
+                                <template x-for="size in ['small', 'medium', 'large']" :key="size">
+                                    <template x-if="item.sizes && item.sizes[size]">
+                                        <button
+                                            @click="addToCart(item, { label: size === 'small' ? 'صغير' : size === 'medium' ? 'وسط' : 'كبير', price: item.sizes[size] })"
+                                            class="flex flex-col items-center p-3 rounded-2xl bg-brand-cream border border-brand-burgundy/5 hover:bg-brand-burgundy hover:text-white transition-all group/btn">
+                                            <span
+                                                class="text-[10px] font-bold text-brand-burgundy/60 uppercase mb-1 group-hover/btn:text-white/80"
+                                                x-text="size === 'small' ? 'صغير' : size === 'medium' ? 'وسط' : 'كبير'"></span>
+                                            <span class="font-black"><span x-text="item.sizes[size]"></span> <span
+                                                    class="text-[8px]">ر.س</span></span>
+                                        </button>
+                                    </template>
+                                </template>
+                            </div>
+
+                            <!-- Single/Double for Burger -->
+                            <div x-show="item.variants" class="grid grid-cols-2 gap-2">
+                                <template x-for="variant in ['single', 'double']" :key="variant">
+                                    <template x-if="item.variants && item.variants[variant]">
+                                        <button
+                                            @click="addToCart(item, { label: variant === 'single' ? 'سنجل' : 'دبل', price: item.variants[variant] })"
+                                            class="flex flex-col items-center p-3 rounded-2xl bg-brand-cream border border-brand-burgundy/5 hover:bg-brand-burgundy hover:text-white transition-all group/btn">
+                                            <span
+                                                class="text-[10px] font-bold text-brand-burgundy/60 uppercase mb-1 group-hover/btn:text-white/80"
+                                                x-text="variant === 'single' ? 'سنجل' : 'دبل'"></span>
+                                            <span class="font-black"><span x-text="item.variants[variant]"></span> <span
+                                                    class="text-[8px]">ر.س</span></span>
+                                        </button>
+                                    </template>
+                                </template>
+                            </div>
+
+                            <!-- Basic Add Button -->
+                            <template x-if="!item.sizes && !item.variants">
+                                <button @click="addToCart(item)"
+                                    class="w-full bg-brand-cream border border-brand-burgundy/10 text-brand-burgundy py-3 rounded-xl font-bold text-xs hover:bg-brand-burgundy hover:text-white transition-all flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 5v14M5 12h14" />
+                                    </svg>
+                                    إضافة للطلب
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </main>
+
+        <!-- Floating Cart Summary -->
+        <div x-show="cartItemsCount() > 0 && !showCart"
+            class="fixed bottom-8 left-6 right-6 z-40 animate__animated animate__slideInUp">
+            <button @click="showCart = true"
+                class="w-full bg-brand-burgundy text-white py-5 px-8 rounded-3xl shadow-2xl flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="bg-brand-gold w-10 h-10 rounded-full flex items-center justify-center text-sm font-black shadow-inner"
+                        x-text="cartItemsCount()"></div>
+                    <span class="font-bold text-lg">سلة الطلبات</span>
+                </div>
+                <div class="flex flex-col items-end">
+                    <span class="text-[10px] text-white/50 font-bold uppercase">الإجمالي</span>
+                    <span class="font-black text-xl"><span x-text="calculateTotal()"></span> ريال</span>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Cart Drawer -->
+    <div x-show="showCart" class="fixed inset-0 z-50 overflow-hidden"
+        x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+        <div class="absolute inset-0 bg-brand-dark/60 backdrop-blur-md" @click="showCart = false"></div>
+        <div class="absolute top-0 bottom-0 right-0 w-full max-w-md bg-brand-cream shadow-2xl flex flex-col"
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-x-full"
+            x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full">
+            <div class="p-8 border-b border-brand-burgundy/5 flex items-center justify-between">
+                <h2 class="text-2xl font-black text-brand-burgundy">سلة الطلبات</h2>
+                <button @click="showCart = false" class="p-3 bg-white shadow-sm rounded-full text-brand-burgundy">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto px-8 py-6 no-scrollbar">
+                <!-- Customer info -->
+                <div class="space-y-4 mb-10">
+                    <input type="text" x-model="customerName" placeholder="الاسم الكريم..."
+                        class="w-full bg-white border border-brand-burgundy/5 rounded-2xl py-5 px-6 font-bold text-brand-burgundy focus:ring-2 focus:ring-brand-gold outline-none transition-all placeholder:text-brand-burgundy/20">
+
+                    <textarea x-model="orderNotes" placeholder="ملاحظات إضافية..."
+                        class="w-full bg-white border border-brand-burgundy/5 rounded-2xl py-5 px-6 font-bold text-brand-burgundy focus:ring-2 focus:ring-brand-gold outline-none h-24 resize-none transition-all placeholder:text-brand-burgundy/20"></textarea>
+                </div>
+
+                <div
+                    class="p-2 grid grid-cols-2 gap-2 bg-brand-cream/50 rounded-[28px] mb-8 border border-brand-burgundy/5">
+                    <button @click="orderType = 'pickup'"
+                        class="py-4 rounded-[22px] transition-all font-black text-xs flex items-center justify-center gap-2"
+                        :class="orderType === 'pickup' ? 'bg-brand-burgundy text-white shadow-lg' : 'text-brand-burgundy/30'">
+                        <span>🏪</span> استلام فرع
+                    </button>
+                    <button @click="orderType = 'delivery'"
+                        class="py-4 rounded-[22px] transition-all font-black text-xs flex items-center justify-center gap-2"
+                        :class="orderType === 'delivery' ? 'bg-brand-burgundy text-white shadow-lg' : 'text-brand-burgundy/30'">
+                        <span>🛵</span> توصيل (+10)
+                    </button>
+                </div>
+
+                <template x-if="cart.length === 0">
+                    <div class="flex flex-col items-center justify-center py-20 text-brand-burgundy/20">
+                        <svg class="w-20 h-20 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <p class="font-bold">السلة بانتظار طلبك اللذيذ</p>
+                    </div>
+                </template>
+
+                <div class="space-y-6">
+                    <template x-for="item in cart" :key="item.cartId">
+                        <div class="p-5 bg-white rounded-3xl shadow-sm border border-brand-burgundy/5">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h4 class="font-black text-brand-burgundy" x-text="item.name"></h4>
+                                    <span x-show="item.selectedVariant"
+                                        class="text-[10px] font-bold text-brand-gold uppercase tracking-widest"
+                                        x-text="item.selectedVariant.label"></span>
+                                </div>
+                                <span class="font-black text-brand-burgundy"><span x-text="itemTotal(item)"></span>
+                                    ريال</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center bg-brand-cream rounded-full px-2 py-1">
+                                    <button @click="updateQty(item.cartId, -1)"
+                                        class="w-8 h-8 flex items-center justify-center text-brand-burgundy bg-white rounded-full shadow-sm">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3"
+                                            viewBox="0 0 24 24">
+                                            <path d="M20 12H4" />
+                                        </svg>
+                                    </button>
+                                    <span class="w-10 text-center font-black text-brand-burgundy"
+                                        x-text="item.quantity"></span>
+                                    <button @click="updateQty(item.cartId, 1)"
+                                        class="w-8 h-8 flex items-center justify-center text-brand-burgundy bg-white rounded-full shadow-sm">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3"
+                                            viewBox="0 0 24 24">
+                                            <path d="M12 6v12M6 12h12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <button @click="removeFromCart(item.cartId)"
+                                    class="p-2 text-red-100 bg-red-500 rounded-full shadow-lg">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div x-show="cart.length > 0" class="p-8 border-t border-brand-burgundy/5 bg-white">
+                <div class="space-y-3 mb-8">
+                    <div class="flex justify-between font-bold text-brand-burgundy/40">
+                        <span>المجموع</span>
+                        <span><span x-text="calculateSubtotal()"></span> ريال</span>
+                    </div>
+                    <div x-show="orderType === 'delivery'"
+                        class="flex justify-between font-bold text-brand-burgundy/40">
+                        <span>التوصيل</span>
+                        <span>10 ريال</span>
+                    </div>
+                    <div
+                        class="flex justify-between text-2xl font-black text-brand-burgundy pt-4 border-t border-brand-burgundy/10">
+                        <span>الإجمالي</span>
+                        <span class="text-brand-gold"><span x-text="calculateTotal()"></span> ريال</span>
+                    </div>
+                </div>
+
+                <button @click="submitOrder()"
+                    class="w-full bg-brand-burgundy text-white py-6 rounded-3xl flex items-center justify-center gap-4 font-black text-xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+                    <svg class="w-6 h-6 text-brand-gold relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span class="relative z-10">تأكيد الطلب</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hours Modal -->
+    <div x-show="showHours"
+        class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-brand-dark/80 backdrop-blur-lg" x-transition>
+        <div class="w-full max-w-sm bg-brand-cream rounded-[40px] p-10 relative shadow-2xl border border-brand-burgundy/10 overflow-hidden"
+            @click.away="showHours = false">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-brand-burgundy/5 rounded-full -mr-16 -mt-16"></div>
+            <button @click="showHours = false"
+                class="absolute top-6 left-6 p-2 rounded-full bg-white shadow-sm text-brand-burgundy">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <div class="text-center mb-8 relative">
+                <svg class="w-12 h-12 text-brand-gold mx-auto mb-4" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <h2 class="text-2xl font-black text-brand-burgundy">ساعات العمل</h2>
+            </div>
+            <div class="space-y-3">
+                <template x-for="day in ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']"
+                    :key="day">
+                    <div
+                        class="flex justify-between items-center p-4 bg-white rounded-2xl shadow-sm border border-brand-burgundy/5">
+                        <span class="font-black text-brand-burgundy text-sm" x-text="day"></span>
+                        <span class="text-brand-gold font-bold text-xs">03:00 PM – 02:30 AM</span>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // ⚠️ ضع إعدادات مشروع Firebase الخاص بك هنا ⚠️
+        const firebaseConfig = {
+            apiKey: "ضع_مفتاح_API_هنا",
+            authDomain: "project-id.firebaseapp.com",
+            projectId: "project-id",
+            storageBucket: "project-id.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456:web:abcd"
+        };
+
+        // Initialize Firebase ONLY if config is changed from default
+        let db;
+        if (firebaseConfig.apiKey !== "ضع_مفتاح_API_هنا") {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+        }
+
+        window.firebaseSaveOrder = async (orderData) => {
+            if (!db) return { success: false };
+            try {
+                const docRef = await addDoc(collection(db, "orders"), {
+                    ...orderData,
+                    createdAt: serverTimestamp(),
+                    status: 'new'
+                });
+                return { success: true, id: docRef.id };
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                return { success: false, error: e.message };
+            }
+        };
+    </script>
+
+    <script>
+        function doubleApp() {
+            return {
+                view: 'landing',
+                showHours: false,
+                activeCategory: 'pastries',
+                showCart: false,
+                orderType: 'pickup',
+                customerName: '',
+                orderNotes: '',
+                notification: { show: false, message: '' },
+                cart: [],
+                categories: [
+                    { id: 'pastries', name: 'الفطائر', icon: '🥐' },
+                    { id: 'pizza', name: 'البيتزا', icon: '🍕' },
+                    { id: 'manaqeesh', name: 'المناقيش', icon: '🫓' },
+                    { id: 'grills', name: 'المشاوي', icon: '🍢' },
+                    { id: 'shawarma', name: 'الشاورما', icon: '🌯' },
+                    { id: 'arabic', name: 'عربي دبل', icon: '🍱' },
+                    { id: 'burger', name: 'البرجر', icon: '🍔' },
+                    { id: 'sandwiches', name: 'سندوتشات', icon: '🥪' },
+                    { id: 'platters', name: 'الصحون', icon: '🍽️' },
+                    { id: 'boxes', name: 'البوكسات', icon: '📦' },
+                    { id: 'appetizers', name: 'المقبلات', icon: '🥗' },
+                    { id: 'drinks', name: 'المشروبات', icon: '🥤' },
+                    { id: 'diet', name: 'دايت توست', icon: '🍞' }
+                ],
+                menuItems: [
+                    // Pastries
+                    { id: 'p1', name: 'فطيرة خلية النحل', price: 20, category: 'pastries' },
+                    { id: 'p2', name: 'فطيرة زعتر', price: 8, category: 'pastries' },
+                    { id: 'p3', name: 'فطيرة سبانخ', price: 8, category: 'pastries' },
+                    { id: 'p4', name: 'فطيرة مارجريتا', price: 8, category: 'pastries' },
+                    { id: 'p5', name: 'فطيرة محمرة', price: 8, category: 'pastries' },
+                    { id: 'p6', name: 'فطيرة لبنة وزعتر', price: 8, category: 'pastries' },
+                    { id: 'p7', name: 'فطيرة جبن عكاوي', price: 10, category: 'pastries' },
+                    { id: 'p8', name: 'فطيرة دجاج', price: 10, category: 'pastries' },
+                    { id: 'p9', name: 'فطيرة جبن بالعسل', price: 10, category: 'pastries' },
+                    { id: 'p10', name: 'فطيرة بيض بالجبن', price: 8, category: 'pastries' },
+                    { id: 'p11', name: 'فطيرة لبنة بالعسل', price: 8, category: 'pastries' },
+                    { id: 'p12', name: 'فطيرة نوتيلا', price: 8, category: 'pastries' },
+                    { id: 'p13', name: 'فطيرة لحم', price: 10, category: 'pastries' },
+                    { id: 'p14', name: 'فطيرة جبن', price: 8, category: 'pastries' },
+                    { id: 'p15', name: 'فطيرة لبنه', price: 8, category: 'pastries' },
+                    { id: 'p16', name: 'فطيرة بيض', price: 8, category: 'pastries' },
+
+                    // Pizza
+                    { id: 'pz1', name: 'بيتزا دجاج رانش', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza' },
+                    { id: 'pz2', name: 'بيتزا دجاج باربكيو', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza' },
+                    { id: 'pz3', name: 'بيتزا عش دبل', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza' },
+                    { id: 'pz4', name: 'بيتزا مارجريتا', sizes: { small: 10, medium: 15, large: 20 }, category: 'pizza' },
+                    { id: 'pz5', name: 'بيتزا خضار', sizes: { small: 10, medium: 15, large: 20 }, category: 'pizza' },
+                    { id: 'pz6', name: 'بيتزا نقانق', sizes: { small: 10, medium: 15, large: 20 }, category: 'pizza' },
+                    { id: 'pz7', name: 'بيتزا شاورما دجاج', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza' },
+                    { id: 'pz8', name: 'بيتزا شاورما لحم', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza' },
+                    { id: 'pz9', name: 'بيتزا مكس لحوم', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza' },
+                    { id: 'pz10', name: 'بيتزا لحم', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza' },
+                    { id: 'pz11', name: 'بيتزا بيبيروني', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza' },
+                    { id: 'pz12', name: 'مشكل خضار', sizes: { small: 10, medium: 15, large: 20 }, category: 'pizza' },
+                    { id: 'pz13', name: 'مشكل جبن', sizes: { small: 10, medium: 15, large: 20 }, category: 'pizza' },
+
+                    // Manaqeesh
+                    { id: 'm1', name: 'مناقيش لحم', price: 10, category: 'manaqeesh' },
+                    { id: 'm2', name: 'مناقيش دجاج', price: 10, category: 'manaqeesh' },
+                    { id: 'm3', name: 'مناقيش عكاوي', price: 10, category: 'manaqeesh' },
+                    { id: 'm4', name: 'مناقيش لبنه', price: 8, category: 'manaqeesh' },
+                    { id: 'm5', name: 'مناقيش بيض', price: 8, category: 'manaqeesh' },
+                    { id: 'm6', name: 'مناقيش زعتر', price: 8, category: 'manaqeesh' },
+                    { id: 'm7', name: 'مناقيش محمرة', price: 8, category: 'manaqeesh' },
+                    { id: 'm8', name: 'مناقيش جبن سائل', price: 8, category: 'manaqeesh' },
+                    { id: 'm9', name: 'بوكس مناقيش (28 قطعة)', price: 35, category: 'manaqeesh' },
+                    { id: 'm10', name: 'بوكس مناقيش (24 قطعة)', price: 28, category: 'manaqeesh' },
+                    { id: 'm11', name: 'بوكس مناقيش (20 قطعة)', price: 22, category: 'manaqeesh' },
+
+                    // Boxes
+                    { id: 'b1', name: 'بوكس 10 قطع', price: 15, category: 'boxes' },
+                    { id: 'b2', name: 'بوكس 20 قطعة', price: 30, category: 'boxes' },
+                    { id: 'b3', name: 'بوكس 40 قطعة', price: 60, category: 'boxes' },
+                    { id: 'bx1', name: 'بوكس فلافل ميني', price: 15, category: 'boxes' },
+                    { id: 'bx2', name: 'بوكس فلافل دبل', price: 20, category: 'boxes' },
+                    { id: 'bx3', name: 'بوكس مشكل ميني', price: 20, category: 'boxes' },
+                    { id: 'bx4', name: 'بوكس كل وقت', price: 20, category: 'boxes' },
+                    { id: 'bx5', name: 'بوكس صغير', price: 20, category: 'boxes' },
+                    { id: 'bx6', name: 'بوكس دبل', price: 45, category: 'boxes' },
+                    { id: 'bx7', name: 'بوكس عائلي', price: 50, category: 'boxes' },
+                    { id: 'bx8', name: 'بوكس حلا السعادة ميني', price: 35, category: 'boxes' },
+                    { id: 'bx9', name: 'بوكس حلا السعادة دبل', price: 20, category: 'boxes' },
+                    { id: 'bxs1', name: 'بوكسات صحون صغير', price: 15, category: 'boxes' },
+                    { id: 'bxs2', name: 'بوكسات صحون دبل', price: 20, category: 'boxes' },
+                    { id: 'bxs3', name: 'بوكسات صحون عائلي', price: 35, category: 'boxes' },
+
+                    // Grills
+                    { id: 'g1', name: 'نفر كباب دجاج فحم', description: 'يقدم مع بطاطس + مثومة', price: 22, category: 'grills' },
+                    { id: 'g2', name: 'نفر كباب لحم فحم', description: 'يقدم مع حمص + بطاطس', price: 18, category: 'grills' },
+                    { id: 'g3', name: 'نص حبة دجاج فحم', description: 'يقدم مع بطاطس + مثومة', price: 18, category: 'grills' },
+                    { id: 'g4', name: 'حبة دجاج فحم', description: 'يقدم مع بطاطس + مثومة', price: 35, category: 'grills' },
+                    { id: 'g5', name: 'وجبة كباب لحم', description: 'يقدم مع حمص + بطاطس', price: 20, category: 'grills' },
+                    { id: 'g6', name: 'وجبة كباب دجاج', description: 'يقدم مع مثومة + بطاطس', price: 25, category: 'grills' },
+                    { id: 'g7', name: 'شيش طاووق', description: 'يقدم مع بطاطس + مثومة', price: 25, category: 'grills' },
+                    { id: 'g8', name: 'اوصال لحم', description: 'يقدم مع حمص + بطاطس', price: 25, category: 'grills' },
+                    { id: 'g9', name: 'ريش خروف', price: 35, category: 'grills' },
+                    { id: 'g10', name: 'مكس كباب لحم ودجاج', description: 'يقدم مع حمص + مثومة + بطاطس', price: 30, category: 'grills' },
+                    { id: 'g11', name: 'مكس اوصال لحم مع شيش طاووق', price: 30, category: 'grills' },
+                    { id: 'g12', name: 'وجبة دبل "مكس مشاوي"', description: 'يقدم مع 3 مقبلات + بطاطس', price: 50, category: 'grills' },
+
+                    // Shawarma
+                    { id: 'sh1', name: 'شاورما دجاج صغير', price: 5, category: 'shawarma' },
+                    { id: 'sh2', name: 'شاورما لحم صغير', price: 6, category: 'shawarma' },
+                    { id: 'sh3', name: 'شاورما دجاج كبير', price: 9, category: 'shawarma' },
+                    { id: 'sh4', name: 'شاورما لحم كبير', price: 11, category: 'shawarma' },
+                    { id: 'sh5', name: 'صاروخ دجاج', price: 8, category: 'shawarma' },
+                    { id: 'sh6', name: 'صاروخ لحم', price: 11, category: 'shawarma' },
+                    { id: 'sh7', name: 'شاورما دجاج فرط (250 جم)', price: 20, category: 'shawarma' },
+                    { id: 'sh8', name: 'شاورما لحم فرط (250 جم)', price: 22, category: 'shawarma' },
+                    { id: 'sh9', name: 'شاورما دجاج فرط (500 جم)', price: 35, category: 'shawarma' },
+                    { id: 'sh10', name: 'شاورما لحم فرط (500 جم)', price: 40, category: 'shawarma' },
+                    { id: 'sh11', name: 'علبة شاورما دجاج', sizes: { medium: 15, large: 20 }, category: 'shawarma' },
+                    { id: 'sh12', name: 'علبة شاورما لحم', sizes: { medium: 17, large: 22 }, category: 'shawarma' },
+
+                    // Arabic
+                    { id: 'a1', name: 'وجبة عربي دجاج عادي', price: 15, category: 'arabic' },
+                    { id: 'a2', name: 'وجبة عربي دجاج دبل', price: 25, category: 'arabic' },
+                    { id: 'a3', name: 'وجبة عربي دجاج عائلي', price: 40, category: 'arabic' },
+                    { id: 'a4', name: 'وجبة عربي لحم عادي', price: 17, category: 'arabic' },
+                    { id: 'a5', name: 'وجبة عربي لحم دبل', price: 27, category: 'arabic' },
+                    { id: 'a6', name: 'وجبة عربي لحم عائلي', price: 40, category: 'arabic' },
+
+                    // Sandwiches
+                    { id: 'sw1', name: 'صاروخ كباب لحم', price: 12, category: 'sandwiches' },
+                    { id: 'sw2', name: 'صاروخ كباب دجاج', price: 10, category: 'sandwiches' },
+                    { id: 'sw3', name: 'صاروخ شيش طاووق', price: 10, category: 'sandwiches' },
+                    { id: 'sw4', name: 'اوصال لحم', price: 12, category: 'sandwiches' },
+
+                    // Samoli / Saj / Kaaki (Added to Sandwiches)
+                    { id: 'ss1', name: 'فلافل سلطة وطحينة (صامولي)', price: 3, category: 'sandwiches' },
+                    { id: 'ss2', name: 'فلافل مشكل (صامولي)', price: 3, category: 'sandwiches' },
+                    { id: 'ss3', name: 'حمسة باذنجان وبطاطس (صامولي)', price: 3, category: 'sandwiches' },
+                    { id: 'ss4', name: 'كبده طازج (صامولي)', price: 5, category: 'sandwiches' },
+                    { id: 'ss5', name: 'مقلقل دجاج (صامولي)', price: 5, category: 'sandwiches' },
+                    { id: 'ss6', name: 'شكشوكة (صامولي)', price: 3, category: 'sandwiches' },
+                    { id: 'ss7', name: 'بيض مقلي (صامولي)', price: 3, category: 'sandwiches' },
+                    { id: 'ss8', name: 'جبن حلاوة (صامولي)', price: 3, category: 'sandwiches' },
+                    { id: 'sj1', name: 'فلافل سلطة وطحينة (صاج)', price: 5, category: 'sandwiches' },
+                    { id: 'sj2', name: 'كبده طازج (صاج)', price: 7, category: 'sandwiches' },
+                    { id: 'sj3', name: 'فليتا (صاج)', price: 8, category: 'sandwiches' },
+                    { id: 'kc1', name: 'فلافل سلطة وطحينة (كعكي)', price: 4, category: 'sandwiches' },
+                    { id: 'kc2', name: 'كبده طازج (كعكي)', price: 6, category: 'sandwiches' },
+
+                    // Platters (Sahoun)
+                    { id: 'pl1', name: 'صحن فلافل مشكل', price: 9, category: 'platters' },
+                    { id: 'pl2', name: 'صحن فول زيت حار', price: 6, category: 'platters' },
+                    { id: 'pl3', name: 'صحن فول زيت زيتون', price: 7, category: 'platters' },
+                    { id: 'pl4', name: 'صحن مكس مقالي مشكل', price: 6, category: 'platters' },
+                    { id: 'pl5', name: 'صحن بطاطس', price: 5, category: 'platters' },
+                    { id: 'pl6', name: 'صحن كبدة طازج', price: 12, category: 'platters' },
+                    { id: 'pl7', name: 'صحن دجاج مقلقل', price: 12, category: 'platters' },
+                    { id: 'pl8', name: 'صحن حمسه باذنجان وبطاطس', price: 5, category: 'platters' },
+                    { id: 'pl9', name: 'صحن شكشوكه', price: 7, category: 'platters' },
+                    { id: 'pl10', name: 'صحن شكشوكه نقانق', price: 5, category: 'platters' },
+                    { id: 'pl11', name: 'صحن بيض مقلي', price: 7, category: 'platters' },
+                    { id: 'pl12', name: 'لحسه شكشوكه', price: 9, category: 'platters' },
+
+                    // Burger
+                    { id: 'br1', name: 'برجر لحم', variants: { single: 9, double: 13 }, category: 'burger' },
+                    { id: 'br2', name: 'برجر دجاج', variants: { single: 8, double: 12 }, category: 'burger' },
+                    { id: 'br3', name: 'برجر كرسبي', variants: { single: 10, double: 15 }, category: 'burger' },
+                    { id: 'br4', name: 'وجبة برجر لحم', description: 'يقدم مع بطاطس + بيبسي', price: 18, category: 'burger' },
+                    { id: 'br5', name: 'وجبة برجر دجاج', description: 'يقدم مع بطاطس + بيبسي', price: 19, category: 'burger' },
+                    { id: 'br6', name: 'برجر شاورما لحم', price: 9, category: 'burger' },
+                    { id: 'br7', name: 'برجر شاورما دجاج', price: 8, category: 'burger' },
+
+                    // Appetizers
+                    { id: 'ap1', name: 'حمص', price: 5, category: 'appetizers' },
+                    { id: 'ap2', name: 'متبل', price: 5, category: 'appetizers' },
+                    { id: 'ap3', name: 'سلطة خضراء', price: 5, category: 'appetizers' },
+
+                    // Addons
+                    { id: 'ad1', name: 'إضافة جبن', price: 2, category: 'appetizers' },
+                    { id: 'ad2', name: 'ثومية', price: 1, category: 'appetizers' },
+                    { id: 'ad3', name: 'صوص', price: 2, category: 'appetizers' },
+                    { id: 'ad4', name: 'خبز صاج', price: 1, category: 'appetizers' },
+
+                    // Drinks
+                    { id: 'dr2', name: 'مياه', sizes: { small: 0.5, medium: 1, large: 2 }, category: 'drinks' },
+                    { id: 'hot1', name: 'شاي', price: 1, category: 'drinks' },
+                    { id: 'hot2', name: 'شاي اخضر', price: 2, category: 'drinks' },
+                    { id: 'hot3', name: 'شاي كرك', price: 2, category: 'drinks' },
+                    { id: 'hot4', name: 'نسكافية', price: 2, category: 'drinks' },
+                    { id: 'hot5', name: 'نسكافية حليب', price: 3, category: 'drinks' },
+                    { id: 'cld1', name: 'بيبسي', price: 3, category: 'drinks' },
+                    { id: 'cld2', name: 'كولا', price: 3, category: 'drinks' },
+                    { id: 'cld3', name: 'سفن اب', price: 3, category: 'drinks' },
+                    { id: 'cld4', name: 'عصير ربيع', price: 2.5, category: 'drinks' },
+
+                    // Diet Toast
+                    { id: 'dt1', name: 'جبن سائل دايت', price: 3, category: 'diet' },
+                    { id: 'dt2', name: 'لبنه دايت', price: 5, category: 'diet' },
+                    { id: 'dt3', name: 'لبنه عسل دايت', price: 5, category: 'diet' },
+                    { id: 'dt4', name: 'مربى دايت', price: 4, category: 'diet' },
+                    { id: 'dt5', name: 'حلاوة دايت', price: 4, category: 'diet' },
+                    { id: 'dt6', name: 'نوتيلا دايت', price: 4, category: 'diet' },
+                    { id: 'dt7', name: 'كريمة لوتس دايت', price: 4, category: 'diet' }
+                ],
+                filteredItems() {
+                    return this.menuItems.filter(i => i.category === this.activeCategory);
+                },
+                addToCart(item, variant = null) {
+                    const cartId = `${item.id}-${variant?.label || 'default'}`;
+                    const existing = this.cart.find(i => i.cartId === cartId);
+
+                    if (existing) {
+                        existing.quantity++;
+                    } else {
+                        this.cart.push({
+                            ...item,
+                            cartId: cartId,
+                            selectedVariant: variant,
+                            quantity: 1
+                        });
+                    }
+
+                    this.notification.message = `تم إضافة ${item.name} للسلة`;
+                    this.notification.show = true;
+                    setTimeout(() => this.notification.show = false, 2000);
+                },
+                removeFromCart(id) {
+                    this.cart = this.cart.filter(i => i.cartId !== id);
+                },
+                updateQty(id, delta) {
+                    const item = this.cart.find(i => i.cartId === id);
+                    if (item) {
+                        item.quantity = Math.max(1, item.quantity + delta);
+                    }
+                },
+                itemTotal(item) {
+                    const price = item.selectedVariant?.price || item.price || 0;
+                    return price * item.quantity;
+                },
+                calculateSubtotal() {
+                    return this.cart.reduce((acc, item) => acc + this.itemTotal(item), 0);
+                },
+                calculateTotal() {
+                    return this.calculateSubtotal() + (this.orderType === 'delivery' ? 10 : 0);
+                },
+                cartItemsCount() {
+                    return this.cart.reduce((acc, item) => acc + item.quantity, 0);
+                },
+                async submitOrder() {
+                    if (!this.customerName.trim()) {
+                        this.notification.message = 'فضلاً أدخل الاسم لإتمام الطلب';
+                        this.notification.show = true;
+                        setTimeout(() => this.notification.show = false, 3000);
+                        return;
+                    }
+                    
+                    // حفظ في الداتا بيز إذا كان Firebase مفعل
+                    if (window.firebaseSaveOrder && window.firebaseConfig?.apiKey !== "ضع_مفتاح_API_هنا") {
+                        await window.firebaseSaveOrder({
+                            customerName: this.customerName,
+                            orderType: this.orderType,
+                            notes: this.orderNotes,
+                            total: this.calculateTotal(),
+                            items: this.cart.map(i => ({
+                                name: i.name,
+                                variant: i.selectedVariant?.label || null,
+                                quantity: i.quantity,
+                                price: i.selectedVariant?.price || i.price
+                            }))
+                        });
+                    }
+
+                    this.sendToWhatsApp();
+                },
+                sendToWhatsApp() {
+                    const itemsText = this.cart.map(item =>
+                        `- ${item.name} ${item.selectedVariant ? `[${item.selectedVariant.label}]` : ''} (${item.quantity}×)`
+                    ).join('\n');
+
+                    const message = `*طلب جديد من مطعم دبل*\n\n` +
+                        `*الاسم:* ${this.customerName}\n` +
+                        `*الطلب:*\n${itemsText}\n\n` +
+                        (this.orderNotes ? `*ملاحظات:* ${this.orderNotes}\n\n` : '') +
+                        `*الاستلام:* ${this.orderType === 'delivery' ? 'توصيل (+10 ريال)' : 'استلام من الفرع'}\n` +
+                        `*الإجمالي:* ${this.calculateTotal()} ريال\n\n` +
+                        `شكراً لاختياركم دبل!`;
+
+                    window.open(`https://wa.me/966555107546?text=${encodeURIComponent(message)}`, '_blank');
+                    this.cart = [];
+                    this.showCart = false;
+                    this.notification.message = 'تم إرسال طلبك بنجاح!';
+                    this.notification.show = true;
+                    setTimeout(() => this.notification.show = false, 4000);
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
