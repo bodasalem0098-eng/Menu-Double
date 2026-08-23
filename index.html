@@ -75,25 +75,25 @@
       -webkit-tap-highlight-color: transparent;
     }
     body { 
-      background: linear-gradient(180deg, rgba(250, 248, 245, 0.88) 0%, rgba(243, 238, 230, 0.94) 100%), 
-                  url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80') center/cover fixed no-repeat;
+      background: linear-gradient(180deg, rgba(8, 38, 35, 0.82) 0%, rgba(5, 24, 22, 0.88) 100%), 
+                  url('https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=2000&q=85') center/cover fixed no-repeat;
       color: #0A1413; 
       min-height: 100vh;
       overflow-x: hidden;
     }
     .lux-hero-bg {
-      background: linear-gradient(135deg, rgba(7, 38, 35, 0.94) 0%, rgba(4, 22, 20, 0.90) 100%), 
-                  url('https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+      background: linear-gradient(135deg, rgba(11, 59, 54, 0.85) 0%, rgba(4, 22, 20, 0.90) 100%), 
+                  url('https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=1600&q=85') center/cover no-repeat;
     }
     .lux-card-shadow {
-      box-shadow: 0 12px 32px -4px rgba(11, 59, 54, 0.06), 0 0 0 1px rgba(11, 59, 54, 0.08);
+      box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.15);
     }
     .lux-card-hover {
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .lux-card-hover:hover {
       transform: translateY(-4px);
-      box-shadow: 0 22px 45px -8px rgba(11, 59, 54, 0.14), 0 0 0 1.5px #0E4943;
+      box-shadow: 0 24px 50px -8px rgba(0, 0, 0, 0.35), 0 0 0 2px #C89B53;
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -346,20 +346,20 @@
       return (
         <div className="min-h-screen flex flex-col pb-20 md:pb-8">
           
-          {/* TOP NAVBAR (Frosted Glass) */}
-          <header className="bg-white/85 backdrop-blur-md border-b border-[#EAE4DC] sticky top-0 z-40 px-4 py-3.5 shadow-sm">
+          {/* TOP NAVBAR (Frosted Glass Dark Emerald / White) */}
+          <header className="bg-white/90 backdrop-blur-md border-b border-[#EAE4DC]/60 sticky top-0 z-40 px-4 py-3.5 shadow-md">
             <div className="max-w-4xl mx-auto flex items-center justify-between">
               
               <div 
                 className="flex items-center gap-3 cursor-pointer group"
                 onClick={() => setView('welcome')}
               >
-                <div className="w-10 h-10 rounded-2xl bg-emeraldLaw-800 text-white flex items-center justify-center shadow-md shadow-emeraldLaw-900/10 group-hover:scale-105 transition-transform">
+                <div className="w-10 h-10 rounded-2xl bg-emeraldLaw-800 text-white flex items-center justify-center shadow-md shadow-emeraldLaw-900/15 group-hover:scale-105 transition-transform">
                   <Icon.Scale className="w-5 h-5 text-[#EBD9BA]" />
                 </div>
                 <div>
                   <h1 className="font-extrabold text-sm text-neutralDark leading-tight tracking-tight">المستشار للمحاماة</h1>
-                  <p className="text-[11px] text-emeraldLaw-700 font-medium">بوابة التوظيف المالي</p>
+                  <p className="text-[11px] text-emeraldLaw-800 font-bold">بوابة التوظيف المالي</p>
                 </div>
               </div>
 
@@ -488,11 +488,11 @@
         <div className="max-w-3xl mx-auto space-y-6 md:space-y-8 animate-fade-up">
           
           {/* HERO LUXURY CARD */}
-          <div className="lux-hero-bg rounded-[32px] p-7 md:p-12 text-white relative overflow-hidden shadow-2xl border border-emeraldLaw-900/40">
-            <div className="absolute inset-0 bg-gradient-to-t from-emeraldLaw-950/90 via-transparent to-black/30 pointer-events-none"></div>
+          <div className="lux-hero-bg rounded-[32px] p-7 md:p-12 text-white relative overflow-hidden shadow-2xl border border-white/15">
+            <div className="absolute inset-0 bg-gradient-to-t from-emeraldLaw-950/90 via-transparent to-black/20 pointer-events-none"></div>
 
             <div className="relative z-10 space-y-4 max-w-xl text-right">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#EBD9BA] text-xs font-bold shadow-sm">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-[#EBD9BA] text-xs font-bold shadow-sm">
                 <Icon.Scale className="w-3.5 h-3.5 text-[#EBD9BA]" />
                 <span>مكتب المستشار للمحاماة والاستشارات القانونية</span>
               </div>
@@ -502,19 +502,19 @@
                 <span className="text-[#EBD9BA]">واستقطاب الكفاءات المالية</span>
               </h2>
 
-              <p className="text-xs md:text-sm text-white/90 leading-relaxed font-normal pt-1 drop-shadow">
+              <p className="text-xs md:text-sm text-white/95 leading-relaxed font-normal pt-1 drop-shadow">
                 نرحب بالكفاءات المحاسبية المتميزة للانضمام إلى فريق عملنا في مدينة الرياض. اختر الإجراء المناسب للمتابعة:
               </p>
             </div>
           </div>
 
-          {/* TWO PRIMARY INTERACTIVE CHOICE CARDS (Warm White / Frosted) */}
+          {/* TWO PRIMARY INTERACTIVE CHOICE CARDS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
             
             {/* OPTION 1: APPLY */}
             <div 
               onClick={onSelectApply}
-              className="bg-white/95 backdrop-blur-sm rounded-[28px] p-7 lux-card-shadow lux-card-hover cursor-pointer border border-[#EAE4DC] flex flex-col justify-between text-right group"
+              className="bg-white/95 backdrop-blur-md rounded-[28px] p-7 lux-card-shadow lux-card-hover cursor-pointer border border-white/80 flex flex-col justify-between text-right group"
             >
               <div>
                 <div className="w-14 h-14 rounded-2xl bg-emeraldLaw-50 text-emeraldLaw-800 border border-emeraldLaw-100 flex items-center justify-center mb-5 group-hover:scale-105 group-hover:bg-emeraldLaw-800 group-hover:text-white transition-all shadow-sm">
@@ -529,7 +529,7 @@
                   التقديم على وظيفة محاسب
                 </h3>
 
-                <p className="text-xs text-luxMuted mt-2 leading-relaxed">
+                <p className="text-xs text-luxMuted mt-2 leading-relaxed font-medium">
                   تعبئة نموذج التقديم وإرفاق السيرة الذاتية والصورة الشخصية للانضمام لفريق المحاسبة.
                 </p>
               </div>
@@ -539,14 +539,14 @@
                   <span>بدء التقديم</span>
                   <Icon.ArrowLeft className="w-4 h-4" />
                 </span>
-                <span className="text-[11px] text-luxMuted font-medium">دوام كامل (حضوري)</span>
+                <span className="text-[11px] text-luxMuted font-bold">دوام كامل (حضوري)</span>
               </div>
             </div>
 
             {/* OPTION 2: TRACK */}
             <div 
               onClick={onSelectTrack}
-              className="bg-white/95 backdrop-blur-sm rounded-[28px] p-7 lux-card-shadow lux-card-hover cursor-pointer border border-[#EAE4DC] flex flex-col justify-between text-right group"
+              className="bg-white/95 backdrop-blur-md rounded-[28px] p-7 lux-card-shadow lux-card-hover cursor-pointer border border-white/80 flex flex-col justify-between text-right group"
             >
               <div>
                 <div className="w-14 h-14 rounded-2xl bg-[#FAF6EE] text-sandGold-700 border border-sandGold-200 flex items-center justify-center mb-5 group-hover:scale-105 group-hover:bg-sandGold-600 group-hover:text-white transition-all shadow-sm">
@@ -561,7 +561,7 @@
                   متابعة حالة الطلب
                 </h3>
 
-                <p className="text-xs text-luxMuted mt-2 leading-relaxed">
+                <p className="text-xs text-luxMuted mt-2 leading-relaxed font-medium">
                   الاستعلام برقم الطلب أو الهاتف لمعرفة نتيجة فحص الـ CV وموعد ورابط المقابلة الشخصية.
                 </p>
               </div>
@@ -571,24 +571,24 @@
                   <span>متابعة الطلب</span>
                   <Icon.ArrowLeft className="w-4 h-4" />
                 </span>
-                <span className="text-[11px] text-luxMuted font-medium">متابعة مباشرة</span>
+                <span className="text-[11px] text-luxMuted font-bold">متابعة مباشرة</span>
               </div>
             </div>
 
           </div>
 
           {/* Quick Badges Footer */}
-          <div className="pt-3 flex flex-wrap justify-center gap-3 text-xs font-semibold text-luxMuted">
-            <span className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-2xl border border-[#EAE4DC] shadow-sm">
-              <Icon.Shield className="w-4 h-4 text-emeraldLaw-700" />
+          <div className="pt-3 flex flex-wrap justify-center gap-3 text-xs font-bold text-white">
+            <span className="flex items-center gap-1.5 bg-emeraldLaw-900/85 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/15 shadow-md">
+              <Icon.Shield className="w-4 h-4 text-[#EBD9BA]" />
               <span>خصوصية تامة لبياناتك</span>
             </span>
-            <span className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-2xl border border-[#EAE4DC] shadow-sm">
-              <Icon.Video className="w-4 h-4 text-emeraldLaw-700" />
+            <span className="flex items-center gap-1.5 bg-emeraldLaw-900/85 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/15 shadow-md">
+              <Icon.Video className="w-4 h-4 text-[#EBD9BA]" />
               <span>مقابلات مرئية عبر Google Meet</span>
             </span>
-            <span className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-2xl border border-[#EAE4DC] shadow-sm">
-              <Icon.Building className="w-4 h-4 text-emeraldLaw-700" />
+            <span className="flex items-center gap-1.5 bg-emeraldLaw-900/85 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/15 shadow-md">
+              <Icon.Building className="w-4 h-4 text-[#EBD9BA]" />
               <span>مقر العمل: الرياض</span>
             </span>
           </div>
@@ -698,14 +698,14 @@
           <button 
             type="button" 
             onClick={onBack}
-            className="text-xs font-bold text-luxMuted hover:text-neutralDark flex items-center gap-1 mb-2"
+            className="text-xs font-bold text-white bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-xl hover:bg-black/60 flex items-center gap-1 mb-2"
           >
             <span>➔</span>
             <span>العودة للرئيسية</span>
           </button>
 
           {/* HEADER BANNER */}
-          <div className="bg-white rounded-[28px] overflow-hidden lux-card-shadow border border-[#EAE4DC] relative">
+          <div className="bg-white/95 backdrop-blur-md rounded-[28px] overflow-hidden lux-card-shadow border border-white/80 relative">
             <div className="h-3 bg-emeraldLaw-800 w-full"></div>
             <div className="p-6 md:p-8">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emeraldLaw-800 bg-emeraldLaw-50 border border-emeraldLaw-100 px-3 py-1.5 rounded-full mb-3">
@@ -727,7 +727,7 @@
           </div>
 
           {/* 1. PERSONAL INFO */}
-          <div className="bg-white rounded-[28px] p-6 md:p-7 lux-card-shadow border border-[#EAE4DC] space-y-4">
+          <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 md:p-7 lux-card-shadow border border-white/80 space-y-4">
             <div className="flex items-center gap-2.5 border-b border-[#F3EFE9] pb-3">
               <div className="w-8 h-8 rounded-xl bg-emeraldLaw-50 text-emeraldLaw-800 flex items-center justify-center font-bold text-sm">
                 <Icon.User className="w-4 h-4" />
@@ -836,7 +836,7 @@
           </div>
 
           {/* 2. PROFESSIONAL INFO */}
-          <div className="bg-white rounded-[28px] p-6 md:p-7 lux-card-shadow border border-[#EAE4DC] space-y-4">
+          <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 md:p-7 lux-card-shadow border border-white/80 space-y-4">
             <div className="flex items-center gap-2.5 border-b border-[#F3EFE9] pb-3">
               <div className="w-8 h-8 rounded-xl bg-emeraldLaw-50 text-emeraldLaw-800 flex items-center justify-center font-bold text-sm">
                 <Icon.Briefcase className="w-4 h-4" />
@@ -948,7 +948,7 @@
           </div>
 
           {/* 3. MANDATORY UPLOADS (PHOTO & CV) */}
-          <div className="bg-white rounded-[28px] p-6 md:p-7 lux-card-shadow border border-[#EAE4DC] space-y-5">
+          <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 md:p-7 lux-card-shadow border border-white/80 space-y-5">
             <div className="flex items-center gap-2.5 border-b border-[#F3EFE9] pb-3">
               <div className="w-8 h-8 rounded-xl bg-emeraldLaw-50 text-emeraldLaw-800 flex items-center justify-center font-bold text-sm">
                 <Icon.FileText className="w-4 h-4" />
@@ -1037,7 +1037,7 @@
           </div>
 
           {/* SUBMIT BUTTON */}
-          <div className="bg-white rounded-[28px] p-5 lux-card-shadow border border-[#EAE4DC] flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-5 lux-card-shadow border border-white/80 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="text-xs text-luxMuted text-center sm:text-right">
               بالضغط على إرسال، تقر بصحة جميع البيانات والمرفقات المذكورة.
             </div>
@@ -1065,7 +1065,7 @@
     /* ---------------- 2. SUCCESS CARD ---------------- */
     function SuccessCard({ code, onGoTrack, onNewApply, onGoHome }) {
       return (
-        <div className="max-w-md mx-auto my-8 bg-white rounded-[32px] p-8 lux-card-shadow border border-[#EAE4DC] text-center animate-fade-up space-y-6">
+        <div className="max-w-md mx-auto my-8 bg-white/95 backdrop-blur-md rounded-[32px] p-8 lux-card-shadow border border-white/80 text-center animate-fade-up space-y-6">
           <div className="w-20 h-20 bg-green-50 text-green-600 border border-green-200 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
             <Icon.Check className="w-8 h-8" />
           </div>
@@ -1078,7 +1078,7 @@
             </p>
           </div>
 
-          <div className="p-4 bg-emeraldLaw-50/60 border-2 border-emeraldLaw-200 rounded-2xl inline-block w-full">
+          <div className="p-4 bg-emeraldLaw-50/70 border-2 border-emeraldLaw-200 rounded-2xl inline-block w-full">
             <span className="text-[11px] text-emeraldLaw-900 font-bold block mb-1">رقم طلب التوظيف:</span>
             <span className="font-mono text-2xl font-black text-emeraldLaw-800 tracking-wider select-all">{code}</span>
           </div>
@@ -1094,7 +1094,7 @@
 
             <button
               onClick={onGoHome}
-              className="w-full h-11 border border-[#EAE4DC] text-neutralDark rounded-2xl font-bold text-xs hover:bg-[#FAF8F5]"
+              className="w-full h-11 border border-[#EAE4DC] bg-white text-neutralDark rounded-2xl font-bold text-xs hover:bg-[#FAF8F5]"
             >
               العودة للرئيسية
             </button>
@@ -1147,13 +1147,13 @@
           <button 
             type="button" 
             onClick={onBack}
-            className="text-xs font-bold text-luxMuted hover:text-neutralDark flex items-center gap-1 mb-2"
+            className="text-xs font-bold text-white bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-xl hover:bg-black/60 flex items-center gap-1 mb-2"
           >
             <span>➔</span>
             <span>العودة للرئيسية</span>
           </button>
 
-          <div className="bg-white rounded-[28px] p-6 lux-card-shadow border border-[#EAE4DC]">
+          <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 lux-card-shadow border border-white/80">
             <h2 className="font-extrabold text-base text-neutralDark mb-1">متابعة حالة طلب التوظيف</h2>
             <p className="text-xs text-luxMuted mb-4">أدخل رقم الطلب (#APP-0001) أو رقم هاتفك لمعرفة المستجدات</p>
 
@@ -1175,7 +1175,7 @@
           </div>
 
           {found ? (
-            <div className="bg-white rounded-[28px] p-6 md:p-8 lux-card-shadow border border-[#EAE4DC] space-y-6">
+            <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 md:p-8 lux-card-shadow border border-white/80 space-y-6">
               
               <div className="flex items-start justify-between border-b border-[#F3EFE9] pb-4">
                 <div className="flex items-center gap-3">
@@ -1235,7 +1235,7 @@
 
               {/* INTERVIEW DETAILS */}
               {found.interview && (
-                <div className="bg-emeraldLaw-50/60 border-2 border-emeraldLaw-200 rounded-3xl p-5 space-y-3">
+                <div className="bg-emeraldLaw-50/70 border-2 border-emeraldLaw-200 rounded-3xl p-5 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-emeraldLaw-900 flex items-center gap-1.5">
                       <Icon.Video className="w-4 h-4 text-emeraldLaw-800" />
@@ -1271,7 +1271,7 @@
 
               {/* CV Status */}
               {found.cvViewed && (
-                <div className="p-3.5 bg-[#FAF8F5] border border-[#EAE4DC] rounded-2xl text-xs text-neutralDark flex items-center gap-2">
+                <div className="p-3.5 bg-white border border-[#EAE4DC] rounded-2xl text-xs text-neutralDark flex items-center gap-2">
                   <Icon.Eye className="w-4 h-4 text-emeraldLaw-800" />
                   <span>تم فحص ومراجعة سيرتك الذاتية من قبل مسؤول التوظيف (عبدالرحمن).</span>
                 </div>
@@ -1279,7 +1279,7 @@
 
             </div>
           ) : (
-            <div className="bg-white rounded-[28px] p-8 lux-card-shadow border border-[#EAE4DC] text-center text-xs text-luxMuted">
+            <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-8 lux-card-shadow border border-white/80 text-center text-xs text-luxMuted">
               لم يتم العثور على طلب مطابق. تأكد من إدخال الرمز بشكل صحيح.
             </div>
           )}
@@ -1293,7 +1293,7 @@
       const [password, setPassword] = useState('123456');
 
       return (
-        <div className="max-w-sm mx-auto my-10 bg-white rounded-[32px] p-8 lux-card-shadow border border-[#EAE4DC] animate-fade-up">
+        <div className="max-w-sm mx-auto my-10 bg-white/95 backdrop-blur-md rounded-[32px] p-8 lux-card-shadow border border-white/80 animate-fade-up">
           <button 
             type="button" 
             onClick={onBack}
@@ -1368,7 +1368,7 @@
         <div className="space-y-5 animate-fade-up">
           
           {/* TOP ADMIN BANNER */}
-          <div className="bg-white rounded-[28px] p-6 lux-card-shadow border border-[#EAE4DC] flex flex-wrap items-center justify-between gap-4">
+          <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 lux-card-shadow border border-white/80 flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
                 <Icon.Shield className="w-5 h-5 text-emeraldLaw-800" />
@@ -1391,23 +1391,23 @@
 
           {/* STATS CARDS */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-white rounded-2xl p-4 lux-card-shadow border border-[#EAE4DC]">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl p-4 lux-card-shadow border border-white/80">
               <span className="text-xs text-luxMuted block">إجمالي المتقدمين</span>
               <strong className="text-2xl font-black text-neutralDark">{applicants.length}</strong>
             </div>
-            <div className="bg-white rounded-2xl p-4 lux-card-shadow border border-[#EAE4DC]">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl p-4 lux-card-shadow border border-white/80">
               <span className="text-xs text-luxMuted block">في المراجعة</span>
               <strong className="text-2xl font-black text-amber-600">
                 {applicants.filter(a => a.status === 'SUBMITTED' || a.status === 'CV_VIEWED').length}
               </strong>
             </div>
-            <div className="bg-white rounded-2xl p-4 lux-card-shadow border border-[#EAE4DC]">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl p-4 lux-card-shadow border border-white/80">
               <span className="text-xs text-luxMuted block">مختصرين / مقابلات</span>
               <strong className="text-2xl font-black text-purple-600">
                 {applicants.filter(a => a.status === 'SHORTLISTED' || a.status === 'INTERVIEW_SCHEDULED').length}
               </strong>
             </div>
-            <div className="bg-white rounded-2xl p-4 lux-card-shadow border border-[#EAE4DC]">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl p-4 lux-card-shadow border border-white/80">
               <span className="text-xs text-luxMuted block">مقبولين</span>
               <strong className="text-2xl font-black text-green-600">
                 {applicants.filter(a => a.status === 'ACCEPTED').length}
@@ -1416,7 +1416,7 @@
           </div>
 
           {/* SEARCH & FILTERS */}
-          <div className="bg-white rounded-[28px] p-4 lux-card-shadow border border-[#EAE4DC] flex flex-col sm:flex-row gap-3">
+          <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-4 lux-card-shadow border border-white/80 flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
               <input 
                 type="text" 
@@ -1456,10 +1456,10 @@
             
             {/* CARDS LIST */}
             <div className="md:col-span-1 space-y-3">
-              <h3 className="text-xs font-bold text-luxMuted px-1">قائمة الطلبات ({filtered.length})</h3>
+              <h3 className="text-xs font-bold text-white px-1">قائمة الطلبات ({filtered.length})</h3>
 
               {filtered.length === 0 ? (
-                <div className="bg-white rounded-2xl p-8 lux-card-shadow border border-[#EAE4DC] text-center text-xs text-luxMuted">
+                <div className="bg-white/95 backdrop-blur-md rounded-2xl p-8 lux-card-shadow border border-white/80 text-center text-xs text-luxMuted">
                   لا توجد طلبات مطابقة حالياً.
                 </div>
               ) : (
@@ -1470,10 +1470,10 @@
                       setSelectedApplicant(app);
                       onUpdateStatus(app.id, 'CV_VIEWED');
                     }}
-                    className={`bg-white rounded-2xl p-4 lux-card-shadow lux-card-hover border cursor-pointer transition-all ${
+                    className={`bg-white/95 backdrop-blur-md rounded-2xl p-4 lux-card-shadow lux-card-hover border cursor-pointer transition-all ${
                       selectedApplicant?.id === app.id 
-                        ? 'border-emeraldLaw-800 ring-2 ring-emeraldLaw-100' 
-                        : 'border-[#EAE4DC]'
+                        ? 'border-emeraldLaw-800 ring-2 ring-emeraldLaw-200' 
+                        : 'border-white/80'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -1514,7 +1514,7 @@
             {/* PROFILE DRAWER */}
             <div className="md:col-span-2">
               {selectedApplicant ? (
-                <div className="bg-white rounded-[28px] p-6 lux-card-shadow border border-[#EAE4DC] space-y-6 sticky top-20 animate-fade-up">
+                <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 lux-card-shadow border border-white/80 space-y-6 sticky top-20 animate-fade-up">
                   
                   {/* Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#F3EFE9] pb-4">
@@ -1697,7 +1697,7 @@
 
                 </div>
               ) : (
-                <div className="bg-white rounded-[28px] p-12 lux-card-shadow border border-[#EAE4DC] text-center text-xs text-luxMuted">
+                <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-12 lux-card-shadow border border-white/80 text-center text-xs text-luxMuted">
                   <span className="text-4xl block mb-2"><Icon.User className="w-10 h-10 mx-auto text-luxMuted/50" /></span>
                   <span>اختر مرشحاً من القائمة الجانبية لعرض كافة بياناته وصورته وسيرته الذاتية</span>
                 </div>
@@ -1708,7 +1708,7 @@
 
           {/* SCHEDULE MODAL */}
           {scheduleModalOpen && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-up">
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-up">
               <div className="bg-white rounded-3xl p-6 max-w-md w-full lux-card-shadow border border-[#EAE4DC] space-y-4">
                 <h3 className="font-extrabold text-base text-neutralDark">
                   جدولة مقابلة لـ: {selectedApplicant?.fullName}
