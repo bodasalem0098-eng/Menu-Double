@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>المستشار للمحاماة | بوابة التوظيف</title>
+  <title>المستشار للمحاماة | بوابة استقطاب الكفاءات</title>
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,33 +29,38 @@
             mono: ['JetBrains Mono', 'monospace'],
           },
           colors: {
-            sun: {
-              50: '#FFFAF0',
-              100: '#FFF3D4',
-              200: '#FFE59E',
-              300: '#FFD466',
-              400: '#FFC233',
-              500: '#F59E0B',
-              600: '#D97706',
-              700: '#B45309',
-              800: '#78350F',
-              900: '#451A03',
+            emeraldLaw: {
+              50: '#F0F7F6',
+              100: '#E1EFEF',
+              200: '#B8DCD8',
+              300: '#83BFB8',
+              400: '#4D9B92',
+              500: '#20796F',
+              600: '#146058',
+              700: '#0E4943',
+              800: '#0B3B36',
+              900: '#072623',
+              950: '#041614',
             },
-            neutralDark: '#1E1B18',
-            neutralMuted: '#6B6255',
+            sandGold: {
+              50: '#FAF6EE',
+              100: '#F5EDDD',
+              200: '#EBD9BA',
+              300: '#DFC293',
+              400: '#D1A96C',
+              500: '#C29147',
+              600: '#A47432',
+              700: '#7E5526',
+            },
+            luxDark: '#0A1413',
+            luxMuted: '#586A67',
           },
           animation: {
-            'float-slow': 'float 6s ease-in-out infinite',
-            'float-delayed': 'float 7s ease-in-out 2s infinite',
-            'fade-up': 'fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'fade-up': 'fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
           },
           keyframes: {
-            float: {
-              '0%, 100%': { transform: 'translateY(0px)' },
-              '50%': { transform: 'translateY(-8px)' },
-            },
             fadeUp: {
-              '0%': { opacity: '0', transform: 'translateY(16px)' },
+              '0%': { opacity: '0', transform: 'translateY(14px)' },
               '100%': { opacity: '1', transform: 'translateY(0)' },
             }
           }
@@ -70,44 +75,38 @@
       -webkit-tap-highlight-color: transparent;
     }
     body { 
-      background-color: #F8FAFC; 
-      color: #0F172A; 
+      background-color: #FAF8F5; 
+      color: #0A1413; 
       overflow-x: hidden;
     }
-    .card-shadow {
-      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(226, 232, 240, 0.9);
+    .lux-hero {
+      background: linear-gradient(145deg, #09322E 0%, #062320 60%, #031412 100%);
     }
-    .card-shadow-hover {
+    .lux-card-shadow {
+      box-shadow: 0 10px 30px -4px rgba(11, 59, 54, 0.05), 0 0 0 1px rgba(11, 59, 54, 0.08);
+    }
+    .lux-card-hover {
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .card-shadow-hover:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px -10px rgba(245, 158, 11, 0.12), 0 0 0 1.5px rgba(245, 158, 11, 0.4);
-    }
-    .g-stripe {
-      background: linear-gradient(90deg, #F59E0B 0%, #FBBF24 50%, #FCD34D 100%);
+    .lux-card-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 40px -8px rgba(11, 59, 54, 0.12), 0 0 0 1.5px #0E4943;
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-[#F8FAFC] min-h-screen text-[#0F172A] relative">
-  
-  <!-- Crisp ambient background -->
-  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-    <div class="absolute -top-32 right-0 w-[500px] h-[500px] bg-amber-200/20 rounded-full blur-3xl animate-float-slow"></div>
-    <div class="absolute top-1/2 -left-40 w-[450px] h-[450px] bg-yellow-100/40 rounded-full blur-3xl animate-float-delayed"></div>
-  </div>
+<body class="bg-[#FAF8F5] min-h-screen text-[#0A1413]">
 
-  <div id="root" class="relative z-10"></div>
+  <div id="root"></div>
 
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // --- CRISP VECTOR SVG ICONS ---
-    const Icons = {
-      Scale: () => (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    // --- UNIFIED CRISP VECTOR ICON SYSTEM (Lucide-Style 1.75px Consistent Stroke) ---
+    const Icon = {
+      Scale: ({ className = "w-5 h-5" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
           <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
           <path d="M7 21h10"/>
@@ -115,20 +114,20 @@
           <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
         </svg>
       ),
-      Briefcase: () => (
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      Briefcase: ({ className = "w-5 h-5" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
           <rect width="20" height="14" x="2" y="6" rx="2"/>
         </svg>
       ),
-      User: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      User: ({ className = "w-5 h-5" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
           <circle cx="12" cy="7" r="4"/>
         </svg>
       ),
-      FileText: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      FileText: ({ className = "w-5 h-5" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
           <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
           <path d="M10 9H8"/>
@@ -136,93 +135,88 @@
           <path d="M16 17H8"/>
         </svg>
       ),
-      Camera: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      Camera: ({ className = "w-5 h-5" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
           <circle cx="12" cy="13" r="3"/>
         </svg>
       ),
-      Search: () => (
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      Search: ({ className = "w-5 h-5" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8"/>
           <path d="m21 21-4.3-4.3"/>
         </svg>
       ),
-      ShieldCheck: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      Shield: ({ className = "w-5 h-5" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
           <path d="m9 12 2 2 4-4"/>
         </svg>
       ),
-      Check: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      Check: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="20 6 9 17 4 12"/>
         </svg>
       ),
-      Calendar: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      Calendar: ({ className = "w-5 h-5" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <rect width="18" height="18" x="3" y="4" rx="2"/>
           <line x1="16" x2="16" y1="2" y2="6"/>
           <line x1="8" x2="8" y1="2" y2="6"/>
           <line x1="3" x2="21" y1="10" y2="10"/>
         </svg>
       ),
-      Video: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      Video: ({ className = "w-5 h-5" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="m22 8-6 4 6 4V8Z"/>
           <rect width="14" height="12" x="2" y="6" rx="2"/>
         </svg>
       ),
-      Phone: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      Phone: ({ className = "w-5 h-5" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
         </svg>
       ),
-      MessageSquare: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      MessageSquare: ({ className = "w-5 h-5" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
       ),
-      UploadCloud: () => (
-        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      UploadCloud: ({ className = "w-6 h-6" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
           <path d="M12 12v9"/>
           <path d="m16 16-4-4-4 4"/>
         </svg>
       ),
-      Download: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      Download: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="7 10 12 15 17 10"/>
           <line x1="12" x2="12" y1="15" y2="3"/>
         </svg>
       ),
-      Trash: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      Trash: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 6h18"/>
           <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
           <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
         </svg>
       ),
-      Eye: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      Eye: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
           <circle cx="12" cy="12" r="3"/>
         </svg>
       ),
-      Sparkles: () => (
-        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
-        </svg>
-      ),
-      ArrowLeft: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      ArrowLeft: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 12H5"/>
           <path d="m12 19-7-7 7-7"/>
         </svg>
       ),
-      Building: () => (
-        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      Building: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
           <path d="M9 22v-4h6v4"/>
           <path d="M8 6h.01"/>
@@ -233,11 +227,15 @@
           <path d="M16 14h.01"/>
         </svg>
       ),
+      ChevronLeft: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+      )
     };
 
-    // STORAGE KEYS
-    const STORAGE_KEY = 'hireflow_applicants_v4';
-    const SEQ_KEY = 'hireflow_seq_v4';
+    const STORAGE_KEY = 'hireflow_applicants_v5';
+    const SEQ_KEY = 'hireflow_seq_v5';
 
     function App() {
       const [view, setView] = useState('welcome'); // welcome, form, success, track, adminLogin, admin
@@ -245,7 +243,6 @@
       const [lastSubmittedCode, setLastSubmittedCode] = useState('');
       const [selectedApplicant, setSelectedApplicant] = useState(null);
 
-      // Load data
       useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
@@ -339,32 +336,32 @@
       };
 
       const handleResetAll = () => {
-        if (confirm('هل تريد مسح جميع المتقدمين وإعادة ترقيم الطلبات من APP-0001؟')) {
+        if (confirm('هل تريد مسح جميع المتقدمين وتصفير العداد إلى APP-0001؟')) {
           localStorage.removeItem(STORAGE_KEY);
           localStorage.removeItem(SEQ_KEY);
           setApplicants([]);
           setSelectedApplicant(null);
-          alert('تم مسح جميع البيانات وتصفير العداد إلى APP-0001 بنجاح.');
+          alert('تم تصفير البيانات والترقيم بنجاح.');
         }
       };
 
       return (
         <div className="min-h-screen flex flex-col pb-20 md:pb-8">
           
-          {/* TOP NAVBAR */}
-          <header className="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 px-4 py-3.5">
+          {/* TOP NAVBAR (Prestigious Law Firm Header) */}
+          <header className="bg-white border-b border-[#EAE4DC] sticky top-0 z-40 px-4 py-3.5">
             <div className="max-w-4xl mx-auto flex items-center justify-between">
               
               <div 
                 className="flex items-center gap-3 cursor-pointer group"
                 onClick={() => setView('welcome')}
               >
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center text-white shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform">
-                  <Icons.Scale />
+                <div className="w-10 h-10 rounded-2xl bg-emeraldLaw-800 text-white flex items-center justify-center shadow-md shadow-emeraldLaw-900/10 group-hover:scale-105 transition-transform">
+                  <Icon.Scale className="w-5 h-5 text-[#EBD9BA]" />
                 </div>
                 <div>
-                  <h1 className="font-extrabold text-sm text-slate-900 leading-tight tracking-tight">المستشار للمحاماة</h1>
-                  <p className="text-[11px] text-slate-500 font-medium">بوابة التوظيف الرسمية</p>
+                  <h1 className="font-extrabold text-sm text-neutralDark leading-tight tracking-tight">المستشار للمحاماة</h1>
+                  <p className="text-[11px] text-emeraldLaw-700 font-medium">بوابة التوظيف المالي</p>
                 </div>
               </div>
 
@@ -372,7 +369,7 @@
                 {view !== 'welcome' && (
                   <button
                     onClick={() => setView('welcome')}
-                    className="text-xs font-bold px-3.5 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
+                    className="text-xs font-bold px-3.5 py-2 rounded-xl text-neutralDark hover:bg-[#F3EFE9] transition-colors"
                   >
                     الرئيسية
                   </button>
@@ -381,16 +378,16 @@
                 {view === 'admin' ? (
                   <button
                     onClick={() => setView('welcome')}
-                    className="text-xs font-bold px-3.5 py-2 rounded-xl bg-amber-50 text-amber-900 border border-amber-200"
+                    className="text-xs font-bold px-4 py-2 rounded-xl bg-emeraldLaw-50 text-emeraldLaw-800 border border-emeraldLaw-200"
                   >
                     بوابة المتقدمين
                   </button>
                 ) : (
                   <button
                     onClick={() => setView('adminLogin')}
-                    className="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-900 text-white shadow-sm flex items-center gap-1.5 hover:bg-slate-800 transition-transform active:scale-95"
+                    className="text-xs font-bold px-4 py-2 rounded-xl bg-emeraldLaw-800 hover:bg-emeraldLaw-900 text-white shadow-sm flex items-center gap-1.5 transition-transform active:scale-95"
                   >
-                    <Icons.ShieldCheck />
+                    <Icon.Shield className="w-4 h-4 text-[#EBD9BA]" />
                     <span>لوحة الإدارة</span>
                   </button>
                 )}
@@ -398,10 +395,8 @@
             </div>
           </header>
 
-          {/* MAIN CONTAINER */}
+          {/* MAIN VIEW */}
           <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-5 md:py-8">
-            
-            {/* VIEW 0: CLEAN WHITE WELCOME GATEWAY (تقديم أو استعلام) */}
             {view === 'welcome' && (
               <WelcomeGateway 
                 onSelectApply={() => setView('form')}
@@ -409,7 +404,6 @@
               />
             )}
 
-            {/* VIEW 1: FORM */}
             {view === 'form' && (
               <ApplicantForm 
                 onSubmit={handleFormSubmit} 
@@ -417,7 +411,6 @@
               />
             )}
 
-            {/* VIEW 2: SUCCESS */}
             {view === 'success' && (
               <SuccessCard 
                 code={lastSubmittedCode} 
@@ -427,7 +420,6 @@
               />
             )}
 
-            {/* VIEW 3: TRACK */}
             {view === 'track' && (
               <TrackView 
                 applicants={applicants} 
@@ -436,7 +428,6 @@
               />
             )}
 
-            {/* VIEW 4: ADMIN LOGIN */}
             {view === 'adminLogin' && (
               <AdminLogin 
                 onLogin={() => setView('admin')} 
@@ -444,7 +435,6 @@
               />
             )}
 
-            {/* VIEW 5: ADMIN DASHBOARD */}
             {view === 'admin' && (
               <AdminDashboard 
                 applicants={applicants}
@@ -458,34 +448,34 @@
             )}
           </main>
 
-          {/* MOBILE BOTTOM BAR */}
-          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-200 p-2 flex justify-around items-center z-40 text-[11px] font-bold text-slate-600 shadow-lg">
+          {/* MOBILE BOTTOM NAVIGATION */}
+          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-[#EAE4DC] p-2 flex justify-around items-center z-40 text-[11px] font-bold text-neutralDark shadow-lg">
             <button 
               onClick={() => setView('welcome')} 
-              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-2xl transition-all ${view === 'welcome' ? 'text-amber-600 bg-amber-50' : ''}`}
+              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-2xl transition-all ${view === 'welcome' ? 'text-emeraldLaw-800 bg-emeraldLaw-50' : ''}`}
             >
-              <Icons.Scale />
+              <Icon.Scale className="w-4 h-4" />
               <span>الرئيسية</span>
             </button>
             <button 
               onClick={() => setView('form')} 
-              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-2xl transition-all ${view === 'form' ? 'text-amber-600 bg-amber-50' : ''}`}
+              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-2xl transition-all ${view === 'form' ? 'text-emeraldLaw-800 bg-emeraldLaw-50' : ''}`}
             >
-              <Icons.Briefcase />
+              <Icon.Briefcase className="w-4 h-4" />
               <span>تقديم جديد</span>
             </button>
             <button 
               onClick={() => setView('track')} 
-              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-2xl transition-all ${view === 'track' ? 'text-amber-600 bg-amber-50' : ''}`}
+              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-2xl transition-all ${view === 'track' ? 'text-emeraldLaw-800 bg-emeraldLaw-50' : ''}`}
             >
-              <Icons.Search />
+              <Icon.Search className="w-4 h-4" />
               <span>متابعة الطلب</span>
             </button>
             <button 
               onClick={() => setView(view === 'admin' ? 'admin' : 'adminLogin')} 
-              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-2xl transition-all ${view === 'admin' || view === 'adminLogin' ? 'text-amber-600 bg-amber-50' : ''}`}
+              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-2xl transition-all ${view === 'admin' || view === 'adminLogin' ? 'text-emeraldLaw-800 bg-emeraldLaw-50' : ''}`}
             >
-              <Icons.ShieldCheck />
+              <Icon.Shield className="w-4 h-4" />
               <span>الإدارة</span>
             </button>
           </div>
@@ -494,112 +484,115 @@
       );
     }
 
-    /* ---------------- 0. CLEAN WHITE WELCOME GATEWAY (تقديم أو استعلام) ---------------- */
+    /* ---------------- 0. LUXURY WELCOME GATEWAY ---------------- */
     function WelcomeGateway({ onSelectApply, onSelectTrack }) {
       return (
-        <div className="max-w-2xl mx-auto py-6 md:py-10 space-y-8 animate-fade-up">
+        <div className="max-w-3xl mx-auto space-y-6 md:space-y-8 animate-fade-up">
           
-          {/* Main Hero Title */}
-          <div className="text-center space-y-3">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold shadow-sm">
-              <Icons.Sparkles />
-              <span>بوابة التوظيف المالي والمهني</span>
+          {/* HERO LUXURY CARD (Dark Emerald Luxury Header inspired by Nature Leaf design) */}
+          <div className="lux-hero rounded-[32px] p-7 md:p-12 text-white relative overflow-hidden shadow-2xl">
+            {/* Subtle background ring */}
+            <div className="absolute -top-12 -left-12 w-64 h-64 rounded-full border border-white/10 pointer-events-none"></div>
+            <div className="absolute -bottom-16 -right-16 w-80 h-80 rounded-full border border-white/5 pointer-events-none"></div>
+
+            <div className="relative z-10 space-y-4 max-w-xl text-right">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[#EBD9BA] text-xs font-bold">
+                <Icon.Scale className="w-3.5 h-3.5 text-[#EBD9BA]" />
+                <span>مكتب المستشار للمحاماة والاستشارات القانونية</span>
+              </div>
+
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">
+                بوابة التوظيف <br className="hidden sm:block" />
+                <span className="text-[#EBD9BA]">واستقطاب الكفاءات</span>
+              </h2>
+
+              <p className="text-xs md:text-sm text-white/80 leading-relaxed font-normal pt-1">
+                نرحب بالكفاءات المحاسبية المتميزة للانضمام إلى فريق عملنا في مدينة الرياض. اختر الإجراء المناسب للمتابعة:
+              </p>
             </div>
-            
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
-              مكتب المستشار للمحاماة <br className="hidden sm:block" /> والاستشارات القانونية
-            </h2>
-            
-            <p className="text-sm md:text-base text-slate-500 max-w-lg mx-auto leading-relaxed">
-              يسرنا استقبال الكفاءات المالية والمحاسبية للانضمام لفريق عملنا في مدينة الرياض. اختر الإجراء المناسب للمتابعة:
-            </p>
           </div>
 
-          {/* TWO PRIMARY CHOICE CARDS (White Clean Cards) */}
+          {/* TWO PRIMARY INTERACTIVE CHOICE CARDS (Clean White Cards) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
             
-            {/* OPTION 1: APPLY NOW */}
+            {/* OPTION 1: APPLY */}
             <div 
               onClick={onSelectApply}
-              className="bg-white rounded-3xl p-7 card-shadow card-shadow-hover cursor-pointer border border-slate-200/80 flex flex-col justify-between text-right group relative overflow-hidden"
+              className="bg-white rounded-[28px] p-7 lux-card-shadow lux-card-hover cursor-pointer border border-[#EAE4DC] flex flex-col justify-between text-right group"
             >
-              <div className="absolute top-0 right-0 left-0 h-2 bg-gradient-to-r from-amber-500 to-yellow-400"></div>
-
               <div>
-                <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-amber-500 group-hover:text-white transition-all shadow-sm">
-                  <Icons.Briefcase />
+                <div className="w-14 h-14 rounded-2xl bg-emeraldLaw-50 text-emeraldLaw-800 border border-emeraldLaw-100 flex items-center justify-center mb-5 group-hover:scale-105 group-hover:bg-emeraldLaw-800 group-hover:text-white transition-all shadow-sm">
+                  <Icon.Briefcase className="w-6 h-6" />
                 </div>
 
-                <div className="inline-block text-[11px] font-extrabold text-amber-700 bg-amber-50/80 px-2.5 py-0.5 rounded-full mb-2">
+                <div className="inline-block text-[11px] font-extrabold text-emeraldLaw-800 bg-emeraldLaw-50 px-3 py-1 rounded-full mb-2">
                   فرصة متاحة الآن
                 </div>
 
-                <h3 className="text-xl font-extrabold text-slate-900 group-hover:text-amber-600 transition-colors">
+                <h3 className="text-xl font-extrabold text-neutralDark group-hover:text-emeraldLaw-800 transition-colors">
                   التقديم على وظيفة محاسب
                 </h3>
 
-                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                <p className="text-xs text-luxMuted mt-2 leading-relaxed">
                   تعبئة نموذج التقديم وإرفاق السيرة الذاتية والصورة الشخصية للانضمام لفريق المحاسبة.
                 </p>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-xs font-bold text-amber-600 flex items-center gap-1.5">
+              <div className="mt-6 pt-4 border-t border-[#F3EFE9] flex items-center justify-between">
+                <span className="text-xs font-bold text-emeraldLaw-800 flex items-center gap-1.5 group-hover:translate-x-[-4px] transition-transform">
                   <span>بدء التقديم</span>
-                  <Icons.ArrowLeft />
+                  <Icon.ArrowLeft className="w-4 h-4" />
                 </span>
-                <span className="text-[11px] text-slate-400 font-medium">دوام كامل</span>
+                <span className="text-[11px] text-luxMuted font-medium">دوام كامل (حضوري)</span>
               </div>
             </div>
 
-            {/* OPTION 2: TRACK APPLICATION */}
+            {/* OPTION 2: TRACK */}
             <div 
               onClick={onSelectTrack}
-              className="bg-white rounded-3xl p-7 card-shadow card-shadow-hover cursor-pointer border border-slate-200/80 flex flex-col justify-between text-right group relative overflow-hidden"
+              className="bg-white rounded-[28px] p-7 lux-card-shadow lux-card-hover cursor-pointer border border-[#EAE4DC] flex flex-col justify-between text-right group"
             >
-              <div className="absolute top-0 right-0 left-0 h-2 bg-gradient-to-r from-slate-700 to-slate-900"></div>
-
               <div>
-                <div className="w-14 h-14 rounded-2xl bg-slate-50 text-slate-800 border border-slate-200 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-slate-900 group-hover:text-white transition-all shadow-sm">
-                  <Icons.Search />
+                <div className="w-14 h-14 rounded-2xl bg-[#FAF6EE] text-sandGold-700 border border-sandGold-200 flex items-center justify-center mb-5 group-hover:scale-105 group-hover:bg-sandGold-600 group-hover:text-white transition-all shadow-sm">
+                  <Icon.Search className="w-6 h-6" />
                 </div>
 
-                <div className="inline-block text-[11px] font-extrabold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-full mb-2">
+                <div className="inline-block text-[11px] font-extrabold text-sandGold-700 bg-sandGold-50 px-3 py-1 rounded-full mb-2">
                   استعلام فوري
                 </div>
 
-                <h3 className="text-xl font-extrabold text-slate-900 group-hover:text-slate-700 transition-colors">
+                <h3 className="text-xl font-extrabold text-neutralDark group-hover:text-sandGold-700 transition-colors">
                   متابعة حالة الطلب
                 </h3>
 
-                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                  الاستعلام عن نتيجة فحص الـ CV، حالة القبول، وموعد ورابط المقابلة عبر Google Meet.
+                <p className="text-xs text-luxMuted mt-2 leading-relaxed">
+                  الاستعلام برقم الطلب أو الهاتف لمعرفة نتيجة فحص الـ CV وموعد ورابط المقابلة الشخصية.
                 </p>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <span>استعلام بالرقم أو الهاتف</span>
-                  <Icons.ArrowLeft />
+              <div className="mt-6 pt-4 border-t border-[#F3EFE9] flex items-center justify-between">
+                <span className="text-xs font-bold text-sandGold-700 flex items-center gap-1.5 group-hover:translate-x-[-4px] transition-transform">
+                  <span>متابعة الطلب</span>
+                  <Icon.ArrowLeft className="w-4 h-4" />
                 </span>
-                <span className="text-[11px] text-slate-400 font-medium">متابعة مباشرة</span>
+                <span className="text-[11px] text-luxMuted font-medium">متابعة مباشرة</span>
               </div>
             </div>
 
           </div>
 
           {/* Quick Badges Footer */}
-          <div className="pt-4 flex flex-wrap justify-center gap-4 text-xs font-semibold text-slate-500">
-            <span className="flex items-center gap-1.5 bg-white px-3.5 py-2 rounded-2xl border border-slate-200 shadow-sm">
-              <Icons.ShieldCheck />
+          <div className="pt-3 flex flex-wrap justify-center gap-3 text-xs font-semibold text-luxMuted">
+            <span className="flex items-center gap-1.5 bg-white px-4 py-2 rounded-2xl border border-[#EAE4DC] shadow-sm">
+              <Icon.Shield className="w-4 h-4 text-emeraldLaw-700" />
               <span>خصوصية تامة لبياناتك</span>
             </span>
-            <span className="flex items-center gap-1.5 bg-white px-3.5 py-2 rounded-2xl border border-slate-200 shadow-sm">
-              <Icons.Video />
+            <span className="flex items-center gap-1.5 bg-white px-4 py-2 rounded-2xl border border-[#EAE4DC] shadow-sm">
+              <Icon.Video className="w-4 h-4 text-emeraldLaw-700" />
               <span>مقابلات مرئية عبر Google Meet</span>
             </span>
-            <span className="flex items-center gap-1.5 bg-white px-3.5 py-2 rounded-2xl border border-slate-200 shadow-sm">
-              <Icons.Building />
+            <span className="flex items-center gap-1.5 bg-white px-4 py-2 rounded-2xl border border-[#EAE4DC] shadow-sm">
+              <Icon.Building className="w-4 h-4 text-emeraldLaw-700" />
               <span>مقر العمل: الرياض</span>
             </span>
           </div>
@@ -710,46 +703,46 @@
           <button 
             type="button" 
             onClick={onBack}
-            className="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 mb-2"
+            className="text-xs font-bold text-luxMuted hover:text-neutralDark flex items-center gap-1 mb-2"
           >
             <span>➔</span>
             <span>العودة للرئيسية</span>
           </button>
 
           {/* HEADER BANNER */}
-          <div className="bg-white rounded-3xl overflow-hidden card-shadow border border-slate-200 relative">
-            <div className="h-3 g-stripe w-full"></div>
+          <div className="bg-white rounded-[28px] overflow-hidden lux-card-shadow border border-[#EAE4DC] relative">
+            <div className="h-3 bg-emeraldLaw-800 w-full"></div>
             <div className="p-6 md:p-8">
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full mb-3">
-                <Icons.Sparkles />
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emeraldLaw-800 bg-emeraldLaw-50 border border-emeraldLaw-100 px-3 py-1.5 rounded-full mb-3">
+                <Icon.Building className="w-3.5 h-3.5" />
                 <span>المملكة العربية السعودية · الرياض</span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-2xl md:text-3xl font-extrabold text-neutralDark tracking-tight">
                 استمارة التقديم — محاسب مالي
               </h2>
-              <p className="text-xs md:text-sm text-slate-500 mt-2 leading-relaxed">
+              <p className="text-xs md:text-sm text-luxMuted mt-2 leading-relaxed">
                 مكتب <strong>المستشار للمحاماة والاستشارات القانونية</strong> يرحب بالكفاءات المالية. 
                 يرجى ملء البيانات وإرفاق الصورة الحديثة والسيرة الذاتية بدقة.
               </p>
-              <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap gap-4 text-xs font-semibold text-slate-600">
-                <span className="flex items-center gap-1"><Icons.Building /> دوام كامل (حضوري)</span>
+              <div className="mt-4 pt-4 border-t border-[#F3EFE9] flex flex-wrap gap-4 text-xs font-semibold text-emeraldLaw-800">
+                <span className="flex items-center gap-1"><Icon.Briefcase className="w-3.5 h-3.5" /> دوام كامل (حضوري)</span>
                 <span className="text-red-500 font-bold">* الحقول المميزة إلزامية</span>
               </div>
             </div>
           </div>
 
           {/* 1. PERSONAL INFO */}
-          <div className="bg-white rounded-3xl p-6 md:p-7 card-shadow border border-slate-200 space-y-4">
-            <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-sm">
-                <Icons.User />
+          <div className="bg-white rounded-[28px] p-6 md:p-7 lux-card-shadow border border-[#EAE4DC] space-y-4">
+            <div className="flex items-center gap-2.5 border-b border-[#F3EFE9] pb-3">
+              <div className="w-8 h-8 rounded-xl bg-emeraldLaw-50 text-emeraldLaw-800 flex items-center justify-center font-bold text-sm">
+                <Icon.User className="w-4 h-4" />
               </div>
-              <h3 className="font-extrabold text-base text-slate-900">المعلومات الشخصية</h3>
+              <h3 className="font-extrabold text-base text-neutralDark">المعلومات الشخصية</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                <label className="block text-xs font-bold text-neutralDark mb-1.5">
                   الاسم الرباعي كاملاً <span className="text-red-500">*</span>
                 </label>
                 <input 
@@ -757,13 +750,13 @@
                   placeholder="اكتب اسمك كما في الهوية..."
                   value={formData.fullName}
                   onChange={e => setFormData({ ...formData, fullName: e.target.value })}
-                  className={`w-full h-12 px-4 rounded-2xl bg-white border ${errors.fullName ? 'border-red-400 bg-red-50/20' : 'border-slate-200 focus:border-amber-500'} text-sm focus:outline-none transition-colors`}
+                  className={`w-full h-12 px-4 rounded-2xl bg-[#FAF8F5] border ${errors.fullName ? 'border-red-400 bg-red-50/20' : 'border-[#EAE4DC] focus:border-emeraldLaw-700'} text-sm focus:outline-none transition-colors`}
                 />
                 {errors.fullName && <p className="text-[11px] text-red-500 mt-1 font-semibold">{errors.fullName}</p>}
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                <label className="block text-xs font-bold text-neutralDark mb-1.5">
                   رقم الهاتف (واتساب) <span className="text-red-500">*</span>
                 </label>
                 <input 
@@ -772,25 +765,25 @@
                   placeholder="05XXXXXXXX"
                   value={formData.phone}
                   onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                  className={`w-full h-12 px-4 rounded-2xl bg-white border ${errors.phone ? 'border-red-400' : 'border-slate-200 focus:border-amber-500'} text-sm text-right focus:outline-none`}
+                  className={`w-full h-12 px-4 rounded-2xl bg-[#FAF8F5] border ${errors.phone ? 'border-red-400' : 'border-[#EAE4DC] focus:border-emeraldLaw-700'} text-sm text-right focus:outline-none`}
                 />
                 {errors.phone && <p className="text-[11px] text-red-500 mt-1 font-semibold">{errors.phone}</p>}
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">البريد الإلكتروني</label>
+                <label className="block text-xs font-bold text-neutralDark mb-1.5">البريد الإلكتروني</label>
                 <input 
                   type="email"
                   dir="ltr"
                   placeholder="example@gmail.com"
                   value={formData.email}
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full h-12 px-4 rounded-2xl bg-white border border-slate-200 focus:border-amber-500 text-sm text-right focus:outline-none"
+                  className="w-full h-12 px-4 rounded-2xl bg-[#FAF8F5] border border-[#EAE4DC] focus:border-emeraldLaw-700 text-sm text-right focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                <label className="block text-xs font-bold text-neutralDark mb-1.5">
                   العمر (بالسنوات) <span className="text-red-500">*</span>
                 </label>
                 <input 
@@ -798,13 +791,13 @@
                   placeholder="مثال: 28"
                   value={formData.age}
                   onChange={e => setFormData({ ...formData, age: e.target.value })}
-                  className={`w-full h-12 px-4 rounded-2xl bg-white border ${errors.age ? 'border-red-400' : 'border-slate-200 focus:border-amber-500'} text-sm focus:outline-none`}
+                  className={`w-full h-12 px-4 rounded-2xl bg-[#FAF8F5] border ${errors.age ? 'border-red-400' : 'border-[#EAE4DC] focus:border-emeraldLaw-700'} text-sm focus:outline-none`}
                 />
                 {errors.age && <p className="text-[11px] text-red-500 mt-1 font-semibold">{errors.age}</p>}
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                <label className="block text-xs font-bold text-neutralDark mb-1.5">
                   الجنسية <span className="text-red-500">*</span>
                 </label>
                 <input 
@@ -812,17 +805,17 @@
                   placeholder="سعودي / مصري / أردني..."
                   value={formData.nationality}
                   onChange={e => setFormData({ ...formData, nationality: e.target.value })}
-                  className={`w-full h-12 px-4 rounded-2xl bg-white border ${errors.nationality ? 'border-red-400' : 'border-slate-200 focus:border-amber-500'} text-sm focus:outline-none`}
+                  className={`w-full h-12 px-4 rounded-2xl bg-[#FAF8F5] border ${errors.nationality ? 'border-red-400' : 'border-[#EAE4DC] focus:border-emeraldLaw-700'} text-sm focus:outline-none`}
                 />
                 {errors.nationality && <p className="text-[11px] text-red-500 mt-1 font-semibold">{errors.nationality}</p>}
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">الحالة الاجتماعية</label>
+                <label className="block text-xs font-bold text-neutralDark mb-1.5">الحالة الاجتماعية</label>
                 <select 
                   value={formData.maritalStatus}
                   onChange={e => setFormData({ ...formData, maritalStatus: e.target.value })}
-                  className="w-full h-12 px-4 rounded-2xl bg-white border border-slate-200 focus:border-amber-500 text-sm focus:outline-none"
+                  className="w-full h-12 px-4 rounded-2xl bg-[#FAF8F5] border border-[#EAE4DC] focus:border-emeraldLaw-700 text-sm focus:outline-none"
                 >
                   <option value="">اختر...</option>
                   <option value="أعزب/عزباء">أعزب / عزباء</option>
@@ -832,7 +825,7 @@
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                <label className="block text-xs font-bold text-neutralDark mb-1.5">
                   مدينة الإقامة الحالية <span className="text-red-500">*</span>
                 </label>
                 <input 
@@ -840,7 +833,7 @@
                   placeholder="مثال: الرياض"
                   value={formData.city}
                   onChange={e => setFormData({ ...formData, city: e.target.value })}
-                  className={`w-full h-12 px-4 rounded-2xl bg-white border ${errors.city ? 'border-red-400' : 'border-slate-200 focus:border-amber-500'} text-sm focus:outline-none`}
+                  className={`w-full h-12 px-4 rounded-2xl bg-[#FAF8F5] border ${errors.city ? 'border-red-400' : 'border-[#EAE4DC] focus:border-emeraldLaw-700'} text-sm focus:outline-none`}
                 />
                 {errors.city && <p className="text-[11px] text-red-500 mt-1 font-semibold">{errors.city}</p>}
               </div>
@@ -848,23 +841,23 @@
           </div>
 
           {/* 2. PROFESSIONAL INFO */}
-          <div className="bg-white rounded-3xl p-6 md:p-7 card-shadow border border-slate-200 space-y-4">
-            <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-sm">
-                <Icons.Briefcase />
+          <div className="bg-white rounded-[28px] p-6 md:p-7 lux-card-shadow border border-[#EAE4DC] space-y-4">
+            <div className="flex items-center gap-2.5 border-b border-[#F3EFE9] pb-3">
+              <div className="w-8 h-8 rounded-xl bg-emeraldLaw-50 text-emeraldLaw-800 flex items-center justify-center font-bold text-sm">
+                <Icon.Briefcase className="w-4 h-4" />
               </div>
-              <h3 className="font-extrabold text-base text-slate-900">الخبرة والمعلومات المهنية</h3>
+              <h3 className="font-extrabold text-base text-neutralDark">الخبرة والمعلومات المهنية</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                <label className="block text-xs font-bold text-neutralDark mb-1.5">
                   المؤهل العلمي <span className="text-red-500">*</span>
                 </label>
                 <select 
                   value={formData.qualification}
                   onChange={e => setFormData({ ...formData, qualification: e.target.value })}
-                  className={`w-full h-12 px-4 rounded-2xl bg-white border ${errors.qualification ? 'border-red-400' : 'border-slate-200 focus:border-amber-500'} text-sm focus:outline-none`}
+                  className={`w-full h-12 px-4 rounded-2xl bg-[#FAF8F5] border ${errors.qualification ? 'border-red-400' : 'border-[#EAE4DC] focus:border-emeraldLaw-700'} text-sm focus:outline-none`}
                 >
                   <option value="">اختر المؤهل...</option>
                   <option value="بكالوريوس محاسبة">بكالوريوس محاسبة</option>
@@ -877,7 +870,7 @@
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                <label className="block text-xs font-bold text-neutralDark mb-1.5">
                   سنوات الخبرة في المحاسبة <span className="text-red-500">*</span>
                 </label>
                 <input 
@@ -885,50 +878,50 @@
                   placeholder="مثال: 3"
                   value={formData.yearsExperience}
                   onChange={e => setFormData({ ...formData, yearsExperience: e.target.value })}
-                  className={`w-full h-12 px-4 rounded-2xl bg-white border ${errors.yearsExperience ? 'border-red-400' : 'border-slate-200 focus:border-amber-500'} text-sm focus:outline-none`}
+                  className={`w-full h-12 px-4 rounded-2xl bg-[#FAF8F5] border ${errors.yearsExperience ? 'border-red-400' : 'border-[#EAE4DC] focus:border-emeraldLaw-700'} text-sm focus:outline-none`}
                 />
                 {errors.yearsExperience && <p className="text-[11px] text-red-500 mt-1 font-semibold">{errors.yearsExperience}</p>}
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">المسمى الوظيفي الحالي أو الأخير</label>
+                <label className="block text-xs font-bold text-neutralDark mb-1.5">المسمى الوظيفي الحالي أو الأخير</label>
                 <input 
                   type="text"
                   placeholder="محاسب عام / محاسب تكاليف"
                   value={formData.currentJob}
                   onChange={e => setFormData({ ...formData, currentJob: e.target.value })}
-                  className="w-full h-12 px-4 rounded-2xl bg-white border border-slate-200 focus:border-amber-500 text-sm focus:outline-none"
+                  className="w-full h-12 px-4 rounded-2xl bg-[#FAF8F5] border border-[#EAE4DC] focus:border-emeraldLaw-700 text-sm focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">الراتب المتوقع (ريال سعودي)</label>
+                <label className="block text-xs font-bold text-neutralDark mb-1.5">الراتب المتوقع (ريال سعودي)</label>
                 <input 
                   type="text"
                   placeholder="مثال: 8,500 ريال"
                   value={formData.expectedSalary}
                   onChange={e => setFormData({ ...formData, expectedSalary: e.target.value })}
-                  className="w-full h-12 px-4 rounded-2xl bg-white border border-slate-200 focus:border-amber-500 text-sm focus:outline-none"
+                  className="w-full h-12 px-4 rounded-2xl bg-[#FAF8F5] border border-[#EAE4DC] focus:border-emeraldLaw-700 text-sm focus:outline-none"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">البرامج المحاسبية التي تجيدها</label>
+                <label className="block text-xs font-bold text-neutralDark mb-1.5">البرامج المحاسبية التي تجيدها</label>
                 <input 
                   type="text"
                   placeholder="QuickBooks, SAP, Odoo, سماك, دفترة..."
                   value={formData.accountingSoftware}
                   onChange={e => setFormData({ ...formData, accountingSoftware: e.target.value })}
-                  className="w-full h-12 px-4 rounded-2xl bg-white border border-slate-200 focus:border-amber-500 text-sm focus:outline-none"
+                  className="w-full h-12 px-4 rounded-2xl bg-[#FAF8F5] border border-[#EAE4DC] focus:border-emeraldLaw-700 text-sm focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">مستوى Excel</label>
+                <label className="block text-xs font-bold text-neutralDark mb-1.5">مستوى Excel</label>
                 <select 
                   value={formData.excelLevel}
                   onChange={e => setFormData({ ...formData, excelLevel: e.target.value })}
-                  className="w-full h-12 px-4 rounded-2xl bg-white border border-slate-200 focus:border-amber-500 text-sm focus:outline-none"
+                  className="w-full h-12 px-4 rounded-2xl bg-[#FAF8F5] border border-[#EAE4DC] focus:border-emeraldLaw-700 text-sm focus:outline-none"
                 >
                   <option value="">اختر المستوى...</option>
                   <option value="خبير (Advanced Formulas, Pivot Tables)">خبير (Advanced Formulas, Pivot)</option>
@@ -938,7 +931,7 @@
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">خبرة ضريبة القيمة المضافة (VAT)</label>
+                <label className="block text-xs font-bold text-neutralDark mb-1.5">خبرة ضريبة القيمة المضافة (VAT)</label>
                 <div className="flex gap-2">
                   {['خبرة ممتازة', 'متوسطة', 'لا توجد'].map(opt => (
                     <button
@@ -947,8 +940,8 @@
                       onClick={() => setFormData({ ...formData, hasVatExp: opt })}
                       className={`flex-1 h-12 rounded-2xl text-xs font-bold border transition-all ${
                         formData.hasVatExp === opt 
-                          ? 'bg-amber-500 text-white border-amber-500 shadow-sm' 
-                          : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50'
+                          ? 'bg-emeraldLaw-800 text-white border-emeraldLaw-800 shadow-sm' 
+                          : 'bg-[#FAF8F5] border-[#EAE4DC] text-neutralDark hover:bg-[#F3EFE9]'
                       }`}
                     >
                       {opt}
@@ -960,18 +953,18 @@
           </div>
 
           {/* 3. MANDATORY UPLOADS (PHOTO & CV) */}
-          <div className="bg-white rounded-3xl p-6 md:p-7 card-shadow border border-slate-200 space-y-5">
-            <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-sm">
-                <Icons.FileText />
+          <div className="bg-white rounded-[28px] p-6 md:p-7 lux-card-shadow border border-[#EAE4DC] space-y-5">
+            <div className="flex items-center gap-2.5 border-b border-[#F3EFE9] pb-3">
+              <div className="w-8 h-8 rounded-xl bg-emeraldLaw-50 text-emeraldLaw-800 flex items-center justify-center font-bold text-sm">
+                <Icon.FileText className="w-4 h-4" />
               </div>
-              <h3 className="font-extrabold text-base text-slate-900">المرفقات الإلزامية (الصورة + السيرة الذاتية)</h3>
+              <h3 className="font-extrabold text-base text-neutralDark">المرفقات الإلزامية (الصورة + السيرة الذاتية)</h3>
             </div>
 
             {/* Photo Upload */}
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <label className="block text-xs font-bold text-slate-800 mb-2 flex items-center gap-1.5">
-                <Icons.Camera />
+            <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EAE4DC]">
+              <label className="block text-xs font-bold text-neutralDark mb-2 flex items-center gap-1.5">
+                <Icon.Camera className="w-4 h-4 text-emeraldLaw-800" />
                 <span>الصورة الشخصية الحديثة <span className="text-red-500">* (إلزامية)</span></span>
               </label>
               
@@ -981,7 +974,7 @@
                     <img 
                       src={formData.photoBase64} 
                       alt="Preview" 
-                      className="w-24 h-24 rounded-2xl object-cover border-2 border-amber-400 shadow-md"
+                      className="w-24 h-24 rounded-2xl object-cover border-2 border-emeraldLaw-700 shadow-md"
                     />
                     <button
                       type="button"
@@ -992,52 +985,52 @@
                     </button>
                   </div>
                 ) : (
-                  <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-slate-300 bg-white flex flex-col items-center justify-center text-slate-400 text-xs p-2">
-                    <Icons.Camera />
-                    <span className="mt-1">لا توجد صورة</span>
+                  <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-[#D4CBBE] bg-white flex flex-col items-center justify-center text-luxMuted text-xs p-2">
+                    <Icon.Camera className="w-5 h-5 mb-1" />
+                    <span>لا توجد صورة</span>
                   </div>
                 )}
 
                 <div className="flex-1 text-center sm:text-right">
-                  <label className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold cursor-pointer shadow-md shadow-amber-500/20 transition-transform active:scale-95">
-                    <Icons.Camera />
+                  <label className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-emeraldLaw-800 hover:bg-emeraldLaw-900 text-white text-xs font-bold cursor-pointer shadow-md shadow-emeraldLaw-900/10 transition-transform active:scale-95">
+                    <Icon.Camera className="w-4 h-4" />
                     <span>اختيار صورة من الجهاز</span>
                     <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                   </label>
-                  <p className="text-[11px] text-slate-400 mt-1.5">صيغ JPG أو PNG. واضحة الملامح.</p>
+                  <p className="text-[11px] text-luxMuted mt-1.5">صيغ JPG أو PNG. واضحة الملامح.</p>
                   {errors.photo && <p className="text-[11px] text-red-500 mt-1 font-bold">{errors.photo}</p>}
                 </div>
               </div>
             </div>
 
             {/* CV Upload */}
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <label className="block text-xs font-bold text-slate-800 mb-2 flex items-center gap-1.5">
-                <Icons.FileText />
+            <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#EAE4DC]">
+              <label className="block text-xs font-bold text-neutralDark mb-2 flex items-center gap-1.5">
+                <Icon.FileText className="w-4 h-4 text-emeraldLaw-800" />
                 <span>السيرة الذاتية (CV) <span className="text-red-500">* (إلزامية)</span></span>
               </label>
 
-              <div className="border-2 border-dashed border-slate-300 bg-white rounded-2xl p-6 text-center hover:border-amber-500 transition-colors">
+              <div className="border-2 border-dashed border-[#D4CBBE] bg-white rounded-2xl p-6 text-center hover:border-emeraldLaw-700 transition-colors">
                 {formData.cvBase64 ? (
                   <div className="space-y-2">
-                    <div className="w-12 h-12 bg-green-100 text-green-700 rounded-2xl flex items-center justify-center mx-auto">
-                      <Icons.FileText />
+                    <div className="w-12 h-12 bg-green-50 text-green-700 rounded-2xl flex items-center justify-center mx-auto">
+                      <Icon.FileText className="w-6 h-6" />
                     </div>
-                    <p className="text-sm font-extrabold text-green-700">تم اختيار: {formData.cvName}</p>
-                    <label className="inline-block text-xs font-bold text-amber-600 underline cursor-pointer">
+                    <p className="text-sm font-extrabold text-green-800">تم اختيار: {formData.cvName}</p>
+                    <label className="inline-block text-xs font-bold text-emeraldLaw-800 underline cursor-pointer">
                       تغيير الملف
                       <input type="file" accept=".pdf,.doc,.docx" onChange={handleCvUpload} className="hidden" />
                     </label>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 bg-amber-50 text-amber-800 rounded-2xl flex items-center justify-center mb-2">
-                      <Icons.UploadCloud />
+                    <div className="w-12 h-12 bg-emeraldLaw-50 text-emeraldLaw-800 rounded-2xl flex items-center justify-center mb-2">
+                      <Icon.UploadCloud className="w-6 h-6" />
                     </div>
-                    <p className="text-xs font-bold text-slate-800">اضغط لرفع ملف السيرة الذاتية</p>
-                    <p className="text-[11px] text-slate-400 mt-1">صيغ مدعومة: PDF, Word (الحد الأقصى 8MB)</p>
-                    <label className="mt-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold cursor-pointer transition-colors">
-                      <Icons.UploadCloud />
+                    <p className="text-xs font-bold text-neutralDark">اضغط لرفع ملف السيرة الذاتية</p>
+                    <p className="text-[11px] text-luxMuted mt-1">صيغ مدعومة: PDF, Word (الحد الأقصى 8MB)</p>
+                    <label className="mt-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-emeraldLaw-50 hover:bg-emeraldLaw-100 text-emeraldLaw-900 text-xs font-bold cursor-pointer transition-colors">
+                      <Icon.UploadCloud className="w-4 h-4" />
                       <span>اختيار ملف الـ CV</span>
                       <input type="file" accept=".pdf,.doc,.docx" onChange={handleCvUpload} className="hidden" />
                     </label>
@@ -1049,22 +1042,22 @@
           </div>
 
           {/* SUBMIT BUTTON */}
-          <div className="bg-white rounded-3xl p-5 card-shadow border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="text-xs text-slate-500 text-center sm:text-right">
+          <div className="bg-white rounded-[28px] p-5 lux-card-shadow border border-[#EAE4DC] flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="text-xs text-luxMuted text-center sm:text-right">
               بالضغط على إرسال، تقر بصحة جميع البيانات والمرفقات المذكورة.
             </div>
 
             <button 
               type="submit"
               disabled={isSubmitting}
-              className="w-full sm:w-auto px-8 h-12 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-extrabold text-sm shadow-lg shadow-amber-500/30 transition-transform active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full sm:w-auto px-8 h-12 rounded-2xl bg-emeraldLaw-800 hover:bg-emeraldLaw-900 text-white font-extrabold text-sm shadow-lg shadow-emeraldLaw-900/20 transition-transform active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <span>جاري إرسال الطلب...</span>
               ) : (
                 <>
                   <span>إرسال طلب التوظيف الآن</span>
-                  <Icons.ArrowLeft />
+                  <Icon.ArrowLeft className="w-4 h-4 text-[#EBD9BA]" />
                 </>
               )}
             </button>
@@ -1077,36 +1070,36 @@
     /* ---------------- 2. SUCCESS CARD ---------------- */
     function SuccessCard({ code, onGoTrack, onNewApply, onGoHome }) {
       return (
-        <div className="max-w-md mx-auto my-8 bg-white rounded-3xl p-8 card-shadow border border-slate-200 text-center animate-fade-up space-y-6">
-          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
-            <Icons.Check />
+        <div className="max-w-md mx-auto my-8 bg-white rounded-[32px] p-8 lux-card-shadow border border-[#EAE4DC] text-center animate-fade-up space-y-6">
+          <div className="w-20 h-20 bg-green-50 text-green-600 border border-green-200 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
+            <Icon.Check className="w-8 h-8" />
           </div>
 
           <div>
-            <h2 className="text-2xl font-extrabold text-slate-900">تم إرسال طلبك بنجاح!</h2>
-            <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+            <h2 className="text-2xl font-extrabold text-neutralDark">تم إرسال طلبك بنجاح!</h2>
+            <p className="text-xs text-luxMuted mt-2 leading-relaxed">
               تم استلام طلبك لوظيفة <strong>محاسب</strong> لدى مكتب المستشار للمحاماة.
               يمكنك متابعة حالة طلبك في أي وقت باستخدام رقم الطلب.
             </p>
           </div>
 
-          <div className="p-4 bg-amber-50 border-2 border-amber-200 rounded-2xl inline-block w-full">
-            <span className="text-[11px] text-amber-800 font-bold block mb-1">رقم طلب التوظيف:</span>
-            <span className="font-mono text-2xl font-black text-amber-600 tracking-wider select-all">{code}</span>
+          <div className="p-4 bg-emeraldLaw-50/60 border-2 border-emeraldLaw-200 rounded-2xl inline-block w-full">
+            <span className="text-[11px] text-emeraldLaw-900 font-bold block mb-1">رقم طلب التوظيف:</span>
+            <span className="font-mono text-2xl font-black text-emeraldLaw-800 tracking-wider select-all">{code}</span>
           </div>
 
           <div className="space-y-2 pt-2">
             <button
               onClick={onGoTrack}
-              className="w-full h-12 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-2xl font-bold text-sm shadow-md shadow-amber-500/25 hover:opacity-95 flex items-center justify-center gap-1.5"
+              className="w-full h-12 bg-emeraldLaw-800 hover:bg-emeraldLaw-900 text-white rounded-2xl font-bold text-sm shadow-md shadow-emeraldLaw-900/15 hover:opacity-95 flex items-center justify-center gap-1.5"
             >
               <span>متابعة حالة الطلب</span>
-              <Icons.ArrowLeft />
+              <Icon.ArrowLeft className="w-4 h-4 text-[#EBD9BA]" />
             </button>
 
             <button
               onClick={onGoHome}
-              className="w-full h-11 border border-slate-200 text-slate-700 rounded-2xl font-bold text-xs hover:bg-slate-50"
+              className="w-full h-11 border border-[#EAE4DC] text-neutralDark rounded-2xl font-bold text-xs hover:bg-[#FAF8F5]"
             >
               العودة للرئيسية
             </button>
@@ -1159,15 +1152,15 @@
           <button 
             type="button" 
             onClick={onBack}
-            className="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 mb-2"
+            className="text-xs font-bold text-luxMuted hover:text-neutralDark flex items-center gap-1 mb-2"
           >
             <span>➔</span>
             <span>العودة للرئيسية</span>
           </button>
 
-          <div className="bg-white rounded-3xl p-6 card-shadow border border-slate-200">
-            <h2 className="font-extrabold text-base text-slate-900 mb-1">متابعة حالة طلب التوظيف</h2>
-            <p className="text-xs text-slate-500 mb-4">أدخل رقم الطلب (#APP-0001) أو رقم هاتفك لمعرفة المستجدات</p>
+          <div className="bg-white rounded-[28px] p-6 lux-card-shadow border border-[#EAE4DC]">
+            <h2 className="font-extrabold text-base text-neutralDark mb-1">متابعة حالة طلب التوظيف</h2>
+            <p className="text-xs text-luxMuted mb-4">أدخل رقم الطلب (#APP-0001) أو رقم هاتفك لمعرفة المستجدات</p>
 
             <form onSubmit={handleSearch} className="flex gap-2">
               <input 
@@ -1175,11 +1168,11 @@
                 placeholder="مثال: APP-0001 أو 05XXXXXXXX"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                className="flex-1 h-12 px-4 rounded-2xl bg-white border border-slate-200 focus:border-amber-500 text-sm focus:outline-none"
+                className="flex-1 h-12 px-4 rounded-2xl bg-[#FAF8F5] border border-[#EAE4DC] focus:border-emeraldLaw-700 text-sm focus:outline-none"
               />
               <button 
                 type="submit"
-                className="px-6 h-12 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl text-xs shadow-md shadow-amber-500/20"
+                className="px-6 h-12 bg-emeraldLaw-800 hover:bg-emeraldLaw-900 text-white font-bold rounded-2xl text-xs shadow-md shadow-emeraldLaw-900/10"
               >
                 استعلام
               </button>
@@ -1187,23 +1180,23 @@
           </div>
 
           {found ? (
-            <div className="bg-white rounded-3xl p-6 md:p-8 card-shadow border border-slate-200 space-y-6">
+            <div className="bg-white rounded-[28px] p-6 md:p-8 lux-card-shadow border border-[#EAE4DC] space-y-6">
               
-              <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-start justify-between border-b border-[#F3EFE9] pb-4">
                 <div className="flex items-center gap-3">
                   {found.photoBase64 ? (
-                    <img src={found.photoBase64} alt={found.fullName} className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shadow-sm" />
+                    <img src={found.photoBase64} alt={found.fullName} className="w-14 h-14 rounded-2xl object-cover border border-[#EAE4DC] shadow-sm" />
                   ) : (
-                    <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-800 flex items-center justify-center font-bold text-xl">
-                      <Icons.User />
+                    <div className="w-14 h-14 rounded-2xl bg-emeraldLaw-50 text-emeraldLaw-800 flex items-center justify-center font-bold text-xl">
+                      <Icon.User className="w-6 h-6" />
                     </div>
                   )}
                   <div>
-                    <span className="font-mono text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                    <span className="font-mono text-xs font-bold text-emeraldLaw-800 bg-emeraldLaw-50 px-2.5 py-0.5 rounded-full border border-emeraldLaw-100">
                       {found.code}
                     </span>
-                    <h3 className="font-extrabold text-lg text-slate-900 mt-1">{found.fullName}</h3>
-                    <p className="text-xs text-slate-500">المسمى: محاسب مالي</p>
+                    <h3 className="font-extrabold text-lg text-neutralDark mt-1">{found.fullName}</h3>
+                    <p className="text-xs text-luxMuted">المسمى: محاسب مالي</p>
                   </div>
                 </div>
 
@@ -1211,8 +1204,8 @@
                   found.status === 'ACCEPTED' ? 'bg-green-100 text-green-800' :
                   found.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
                   found.status === 'INTERVIEW_SCHEDULED' ? 'bg-purple-100 text-purple-800' :
-                  found.status === 'SHORTLISTED' ? 'bg-amber-100 text-amber-800' :
-                  'bg-orange-50 text-amber-700'
+                  found.status === 'SHORTLISTED' ? 'bg-emeraldLaw-100 text-emeraldLaw-800' :
+                  'bg-emeraldLaw-50 text-emeraldLaw-700'
                 }`}>
                   {found.status}
                 </span>
@@ -1220,9 +1213,9 @@
 
               {/* TIMELINE */}
               <div>
-                <h4 className="text-xs font-bold text-slate-500 mb-4">مسار مراجعة الطلب</h4>
+                <h4 className="text-xs font-bold text-luxMuted mb-4">مسار مراجعة الطلب</h4>
                 <div className="flex justify-between relative">
-                  <div className="absolute top-4 right-2 left-2 h-1 bg-slate-100 z-0"></div>
+                  <div className="absolute top-4 right-2 left-2 h-1 bg-[#F3EFE9] z-0"></div>
                   {stages.map((st, i) => {
                     const currentIdx = getStageIdx(found.status);
                     const isDone = i <= currentIdx;
@@ -1231,12 +1224,12 @@
                       <div key={st.key} className="flex flex-col items-center relative z-10 w-16 text-center">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                           isDone 
-                            ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30' 
-                            : 'bg-white border-2 border-slate-200 text-slate-300'
-                        } ${isCurrent ? 'ring-4 ring-amber-200' : ''}`}>
-                          {isDone ? <Icons.Check /> : i + 1}
+                            ? 'bg-emeraldLaw-800 text-white shadow-md shadow-emeraldLaw-900/20' 
+                            : 'bg-white border-2 border-[#EAE4DC] text-luxMuted'
+                        } ${isCurrent ? 'ring-4 ring-emeraldLaw-100' : ''}`}>
+                          {isDone ? <Icon.Check className="w-4 h-4" /> : i + 1}
                         </div>
-                        <span className={`text-[10px] font-bold mt-2 ${isCurrent ? 'text-amber-700' : 'text-slate-500'}`}>
+                        <span className={`text-[10px] font-bold mt-2 ${isCurrent ? 'text-emeraldLaw-800' : 'text-luxMuted'}`}>
                           {st.label}
                         </span>
                       </div>
@@ -1247,25 +1240,25 @@
 
               {/* INTERVIEW DETAILS */}
               {found.interview && (
-                <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-3xl p-5 space-y-3">
+                <div className="bg-emeraldLaw-50/60 border-2 border-emeraldLaw-200 rounded-3xl p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-800 flex items-center gap-1.5">
-                      <Icons.Video />
+                    <span className="text-xs font-bold text-emeraldLaw-900 flex items-center gap-1.5">
+                      <Icon.Video className="w-4 h-4 text-emeraldLaw-800" />
                       <span>تم تحديد موعد مقابلة شخصية (Online)</span>
                     </span>
-                    <span className="text-[10px] font-bold bg-white text-amber-800 px-2.5 py-1 rounded-full border border-amber-200">
+                    <span className="text-[10px] font-bold bg-white text-emeraldLaw-800 px-2.5 py-1 rounded-full border border-emeraldLaw-200">
                       Google Meet
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs py-1">
                     <div>
-                      <span className="text-slate-500 block">الموعد:</span>
-                      <strong className="text-slate-900 text-sm">{found.interview.date}</strong>
+                      <span className="text-luxMuted block">الموعد:</span>
+                      <strong className="text-neutralDark text-sm">{found.interview.date}</strong>
                     </div>
                     <div>
-                      <span className="text-slate-500 block">الوقت:</span>
-                      <strong className="text-slate-900 text-sm">{found.interview.time}</strong>
+                      <span className="text-luxMuted block">الوقت:</span>
+                      <strong className="text-neutralDark text-sm">{found.interview.time}</strong>
                     </div>
                   </div>
 
@@ -1273,7 +1266,7 @@
                     <a 
                       href={found.interview.meetLink}
                       target="_blank"
-                      className="block w-full text-center h-11 leading-[44px] bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold rounded-2xl text-xs shadow-md shadow-amber-500/25 hover:opacity-95"
+                      className="block w-full text-center h-11 leading-[44px] bg-emeraldLaw-800 hover:bg-emeraldLaw-900 text-white font-bold rounded-2xl text-xs shadow-md shadow-emeraldLaw-900/10 hover:opacity-95"
                     >
                       الانضمام إلى المقابلة عبر Google Meet ➔
                     </a>
@@ -1283,15 +1276,15 @@
 
               {/* CV Status */}
               {found.cvViewed && (
-                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-700 flex items-center gap-2">
-                  <Icons.Eye />
+                <div className="p-3.5 bg-[#FAF8F5] border border-[#EAE4DC] rounded-2xl text-xs text-neutralDark flex items-center gap-2">
+                  <Icon.Eye className="w-4 h-4 text-emeraldLaw-800" />
                   <span>تم فحص ومراجعة سيرتك الذاتية من قبل مسؤول التوظيف (عبدالرحمن).</span>
                 </div>
               )}
 
             </div>
           ) : (
-            <div className="bg-white rounded-3xl p-8 card-shadow border border-slate-200 text-center text-xs text-slate-500">
+            <div className="bg-white rounded-[28px] p-8 lux-card-shadow border border-[#EAE4DC] text-center text-xs text-luxMuted">
               لم يتم العثور على طلب مطابق. تأكد من إدخال الرمز بشكل صحيح.
             </div>
           )}
@@ -1305,48 +1298,48 @@
       const [password, setPassword] = useState('123456');
 
       return (
-        <div className="max-w-sm mx-auto my-10 bg-white rounded-3xl p-8 card-shadow border border-slate-200 animate-fade-up">
+        <div className="max-w-sm mx-auto my-10 bg-white rounded-[32px] p-8 lux-card-shadow border border-[#EAE4DC] animate-fade-up">
           <button 
             type="button" 
             onClick={onBack}
-            className="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 mb-4"
+            className="text-xs font-bold text-luxMuted hover:text-neutralDark flex items-center gap-1 mb-4"
           >
             <span>➔</span>
             <span>العودة للرئيسية</span>
           </button>
 
           <div className="text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center mx-auto mb-3 shadow-inner">
-              <Icons.ShieldCheck />
+            <div className="w-14 h-14 rounded-2xl bg-emeraldLaw-50 text-emeraldLaw-800 border border-emeraldLaw-100 flex items-center justify-center mx-auto mb-3 shadow-inner">
+              <Icon.Shield className="w-6 h-6" />
             </div>
-            <h2 className="text-xl font-extrabold text-slate-900">دخول لوحة الإدارة</h2>
-            <p className="text-xs text-slate-500 mt-1">مسؤول التوظيف — الأستاذ عبدالرحمن</p>
+            <h2 className="text-xl font-extrabold text-neutralDark">دخول لوحة الإدارة</h2>
+            <p className="text-xs text-luxMuted mt-1">مسؤول التوظيف — الأستاذ عبدالرحمن</p>
           </div>
 
           <form onSubmit={(e) => { e.preventDefault(); onLogin(); }} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-800 mb-1">البريد الإلكتروني</label>
+              <label className="block text-xs font-bold text-neutralDark mb-1">البريد الإلكتروني</label>
               <input 
                 type="email" 
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full h-11 px-4 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:border-amber-500"
+                className="w-full h-11 px-4 rounded-xl bg-[#FAF8F5] border border-[#EAE4DC] text-sm focus:outline-none focus:border-emeraldLaw-700"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-800 mb-1">كلمة المرور</label>
+              <label className="block text-xs font-bold text-neutralDark mb-1">كلمة المرور</label>
               <input 
                 type="password" 
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full h-11 px-4 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:border-amber-500"
+                className="w-full h-11 px-4 rounded-xl bg-[#FAF8F5] border border-[#EAE4DC] text-sm focus:outline-none focus:border-emeraldLaw-700"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold text-sm shadow-md transition-transform active:scale-95 mt-2"
+              className="w-full h-12 bg-emeraldLaw-800 hover:bg-emeraldLaw-900 text-white rounded-2xl font-bold text-sm shadow-md transition-transform active:scale-95 mt-2"
             >
               تسجيل الدخول
             </button>
@@ -1380,13 +1373,13 @@
         <div className="space-y-5 animate-fade-up">
           
           {/* TOP ADMIN BANNER */}
-          <div className="bg-white rounded-3xl p-6 card-shadow border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+          <div className="bg-white rounded-[28px] p-6 lux-card-shadow border border-[#EAE4DC] flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-amber-500"><Icons.ShieldCheck /></span>
-                <h2 className="text-xl font-extrabold text-slate-900">لوحة تحكم التوظيف — عبدالرحمن</h2>
+                <Icon.Shield className="w-5 h-5 text-emeraldLaw-800" />
+                <h2 className="text-xl font-extrabold text-neutralDark">لوحة تحكم التوظيف — عبدالرحمن</h2>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">مكتب المستشار للمحاماة (moabdo038@gmail.com)</p>
+              <p className="text-xs text-luxMuted mt-0.5">مكتب المستشار للمحاماة (moabdo038@gmail.com)</p>
             </div>
 
             <div className="flex gap-2">
@@ -1395,7 +1388,7 @@
                 className="text-xs font-bold px-3.5 py-2 rounded-xl bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 flex items-center gap-1"
                 title="تصفير العداد إلى APP-0001"
               >
-                <Icons.Trash />
+                <Icon.Trash className="w-4 h-4" />
                 <span>تصفير العداد</span>
               </button>
             </div>
@@ -1403,24 +1396,24 @@
 
           {/* STATS CARDS */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-white rounded-2xl p-4 card-shadow border border-slate-200">
-              <span className="text-xs text-slate-500 block">إجمالي المتقدمين</span>
-              <strong className="text-2xl font-black text-slate-900">{applicants.length}</strong>
+            <div className="bg-white rounded-2xl p-4 lux-card-shadow border border-[#EAE4DC]">
+              <span className="text-xs text-luxMuted block">إجمالي المتقدمين</span>
+              <strong className="text-2xl font-black text-neutralDark">{applicants.length}</strong>
             </div>
-            <div className="bg-white rounded-2xl p-4 card-shadow border border-slate-200">
-              <span className="text-xs text-slate-500 block">في المراجعة</span>
+            <div className="bg-white rounded-2xl p-4 lux-card-shadow border border-[#EAE4DC]">
+              <span className="text-xs text-luxMuted block">في المراجعة</span>
               <strong className="text-2xl font-black text-amber-600">
                 {applicants.filter(a => a.status === 'SUBMITTED' || a.status === 'CV_VIEWED').length}
               </strong>
             </div>
-            <div className="bg-white rounded-2xl p-4 card-shadow border border-slate-200">
-              <span className="text-xs text-slate-500 block">مختصرين / مقابلات</span>
+            <div className="bg-white rounded-2xl p-4 lux-card-shadow border border-[#EAE4DC]">
+              <span className="text-xs text-luxMuted block">مختصرين / مقابلات</span>
               <strong className="text-2xl font-black text-purple-600">
                 {applicants.filter(a => a.status === 'SHORTLISTED' || a.status === 'INTERVIEW_SCHEDULED').length}
               </strong>
             </div>
-            <div className="bg-white rounded-2xl p-4 card-shadow border border-slate-200">
-              <span className="text-xs text-slate-500 block">مقبولين</span>
+            <div className="bg-white rounded-2xl p-4 lux-card-shadow border border-[#EAE4DC]">
+              <span className="text-xs text-luxMuted block">مقبولين</span>
               <strong className="text-2xl font-black text-green-600">
                 {applicants.filter(a => a.status === 'ACCEPTED').length}
               </strong>
@@ -1428,17 +1421,17 @@
           </div>
 
           {/* SEARCH & FILTERS */}
-          <div className="bg-white rounded-3xl p-4 card-shadow border border-slate-200 flex flex-col sm:flex-row gap-3">
+          <div className="bg-white rounded-[28px] p-4 lux-card-shadow border border-[#EAE4DC] flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
               <input 
                 type="text" 
                 placeholder="بحث بالاسم أو الهاتف أو الرمز (APP-0001)..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full h-11 pr-10 pl-4 rounded-xl bg-white border border-slate-200 text-xs focus:outline-none focus:border-amber-500"
+                className="w-full h-11 pr-10 pl-4 rounded-xl bg-[#FAF8F5] border border-[#EAE4DC] text-xs focus:outline-none focus:border-emeraldLaw-700"
               />
-              <div className="absolute right-3.5 top-3.5 text-slate-400 pointer-events-none">
-                <Icons.Search />
+              <div className="absolute right-3.5 top-3.5 text-luxMuted pointer-events-none">
+                <Icon.Search className="w-4 h-4" />
               </div>
             </div>
             
@@ -1454,7 +1447,7 @@
                   key={f.id}
                   onClick={() => setFilterStatus(f.id)}
                   className={`px-3.5 h-11 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                    filterStatus === f.id ? 'bg-amber-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    filterStatus === f.id ? 'bg-emeraldLaw-800 text-white shadow-sm' : 'bg-[#FAF8F5] text-neutralDark hover:bg-[#F3EFE9]'
                   }`}
                 >
                   {f.label}
@@ -1468,10 +1461,10 @@
             
             {/* CARDS LIST */}
             <div className="md:col-span-1 space-y-3">
-              <h3 className="text-xs font-bold text-slate-500 px-1">قائمة الطلبات ({filtered.length})</h3>
+              <h3 className="text-xs font-bold text-luxMuted px-1">قائمة الطلبات ({filtered.length})</h3>
 
               {filtered.length === 0 ? (
-                <div className="bg-white rounded-2xl p-8 card-shadow border border-slate-200 text-center text-xs text-slate-500">
+                <div className="bg-white rounded-2xl p-8 lux-card-shadow border border-[#EAE4DC] text-center text-xs text-luxMuted">
                   لا توجد طلبات مطابقة حالياً.
                 </div>
               ) : (
@@ -1482,39 +1475,39 @@
                       setSelectedApplicant(app);
                       onUpdateStatus(app.id, 'CV_VIEWED');
                     }}
-                    className={`bg-white rounded-2xl p-4 card-shadow card-shadow-hover border cursor-pointer transition-all ${
+                    className={`bg-white rounded-2xl p-4 lux-card-shadow lux-card-hover border cursor-pointer transition-all ${
                       selectedApplicant?.id === app.id 
-                        ? 'border-amber-500 ring-2 ring-amber-200' 
-                        : 'border-slate-200'
+                        ? 'border-emeraldLaw-800 ring-2 ring-emeraldLaw-100' 
+                        : 'border-[#EAE4DC]'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       {app.photoBase64 ? (
-                        <img src={app.photoBase64} alt="" className="w-12 h-12 rounded-xl object-cover border border-slate-200" />
+                        <img src={app.photoBase64} alt="" className="w-12 h-12 rounded-xl object-cover border border-[#EAE4DC]" />
                       ) : (
-                        <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center font-bold text-sm">
-                          <Icons.User />
+                        <div className="w-12 h-12 rounded-xl bg-emeraldLaw-50 text-emeraldLaw-800 flex items-center justify-center font-bold text-sm">
+                          <Icon.User className="w-5 h-5" />
                         </div>
                       )}
 
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-center">
-                          <strong className="text-xs font-extrabold text-slate-900 truncate block">{app.fullName}</strong>
-                          <span className="font-mono text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                          <strong className="text-xs font-extrabold text-neutralDark truncate block">{app.fullName}</strong>
+                          <span className="font-mono text-[10px] font-bold text-emeraldLaw-800 bg-emeraldLaw-50 px-1.5 py-0.5 rounded border border-emeraldLaw-100">
                             {app.code}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-500 mt-0.5">{app.qualification} • {app.yearsExperience} سنوات خبرة</p>
+                        <p className="text-[11px] text-luxMuted mt-0.5">{app.qualification} • {app.yearsExperience} سنوات خبرة</p>
                         
-                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#F3EFE9]">
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                             app.status === 'ACCEPTED' ? 'bg-green-100 text-green-800' :
-                            app.status === 'SHORTLISTED' ? 'bg-amber-100 text-amber-800' :
-                            'bg-orange-50 text-amber-800'
+                            app.status === 'SHORTLISTED' ? 'bg-emeraldLaw-100 text-emeraldLaw-800' :
+                            'bg-emeraldLaw-50 text-emeraldLaw-800'
                           }`}>
                             {app.status}
                           </span>
-                          <span className="text-[10px] text-slate-500">{app.city}</span>
+                          <span className="text-[10px] text-luxMuted">{app.city}</span>
                         </div>
                       </div>
                     </div>
@@ -1526,30 +1519,30 @@
             {/* PROFILE DRAWER */}
             <div className="md:col-span-2">
               {selectedApplicant ? (
-                <div className="bg-white rounded-3xl p-6 card-shadow border border-slate-200 space-y-6 sticky top-20 animate-fade-up">
+                <div className="bg-white rounded-[28px] p-6 lux-card-shadow border border-[#EAE4DC] space-y-6 sticky top-20 animate-fade-up">
                   
                   {/* Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#F3EFE9] pb-4">
                     <div className="flex items-center gap-3">
                       {selectedApplicant.photoBase64 ? (
                         <img 
                           src={selectedApplicant.photoBase64} 
                           alt="" 
-                          className="w-16 h-16 rounded-2xl object-cover border-2 border-amber-400 shadow-md"
+                          className="w-16 h-16 rounded-2xl object-cover border-2 border-emeraldLaw-700 shadow-md"
                         />
                       ) : (
-                        <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-800 flex items-center justify-center font-bold text-2xl">
-                          <Icons.User />
+                        <div className="w-16 h-16 rounded-2xl bg-emeraldLaw-50 text-emeraldLaw-800 flex items-center justify-center font-bold text-2xl">
+                          <Icon.User className="w-8 h-8" />
                         </div>
                       )}
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="font-extrabold text-lg text-slate-900">{selectedApplicant.fullName}</h3>
-                          <span className="font-mono text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                          <h3 className="font-extrabold text-lg text-neutralDark">{selectedApplicant.fullName}</h3>
+                          <span className="font-mono text-xs font-bold text-emeraldLaw-800 bg-emeraldLaw-50 px-2 py-0.5 rounded-full border border-emeraldLaw-100">
                             {selectedApplicant.code}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-500 mt-0.5">
+                        <p className="text-xs text-luxMuted mt-0.5">
                           {selectedApplicant.phone} {selectedApplicant.email && `• ${selectedApplicant.email}`}
                         </p>
                       </div>
@@ -1559,7 +1552,7 @@
                       <select
                         value={selectedApplicant.status}
                         onChange={(e) => onUpdateStatus(selectedApplicant.id, e.target.value)}
-                        className="h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none"
+                        className="h-10 px-3 rounded-xl bg-[#FAF8F5] border border-[#EAE4DC] text-xs font-bold text-neutralDark focus:outline-none"
                       >
                         <option value="SUBMITTED">SUBMITTED (جديد)</option>
                         <option value="CV_VIEWED">CV_VIEWED (تم الفحص)</option>
@@ -1571,9 +1564,9 @@
 
                       <button
                         onClick={() => setScheduleModalOpen(true)}
-                        className="h-10 px-3.5 bg-slate-900 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1 hover:bg-slate-800"
+                        className="h-10 px-3.5 bg-emeraldLaw-800 hover:bg-emeraldLaw-900 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1"
                       >
-                        <Icons.Calendar />
+                        <Icon.Calendar className="w-4 h-4" />
                         <span>مقابلة</span>
                       </button>
                     </div>
@@ -1584,43 +1577,43 @@
                     <a 
                       href={`https://wa.me/${selectedApplicant.phone.replace(/[^0-9]/g, '')}`}
                       target="_blank"
-                      className="flex-1 h-10 rounded-xl bg-green-50 text-green-700 border border-green-200 text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-green-100"
+                      className="flex-1 h-10 rounded-xl bg-green-50 text-green-800 border border-green-200 text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-green-100"
                     >
-                      <Icons.MessageSquare />
+                      <Icon.MessageSquare className="w-4 h-4" />
                       <span>واتساب مباشر</span>
                     </a>
                     <a 
                       href={`tel:${selectedApplicant.phone}`}
-                      className="flex-1 h-10 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-blue-100"
+                      className="flex-1 h-10 rounded-xl bg-emeraldLaw-50 text-emeraldLaw-800 border border-emeraldLaw-200 text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-emeraldLaw-100"
                     >
-                      <Icons.Phone />
+                      <Icon.Phone className="w-4 h-4" />
                       <span>اتصال هاتفي</span>
                     </a>
                   </div>
 
                   {/* DATA GRID */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs bg-slate-50/70 p-4 rounded-2xl border border-slate-200">
-                    <div><span className="text-slate-500 block">العمر:</span> <strong>{selectedApplicant.age} سنة</strong></div>
-                    <div><span className="text-slate-500 block">الجنسية:</span> <strong>{selectedApplicant.nationality}</strong></div>
-                    <div><span className="text-slate-500 block">المدينة:</span> <strong>{selectedApplicant.city}</strong></div>
-                    <div><span className="text-slate-500 block">المؤهل:</span> <strong>{selectedApplicant.qualification}</strong></div>
-                    <div><span className="text-slate-500 block">سنوات الخبرة:</span> <strong>{selectedApplicant.yearsExperience} سنوات</strong></div>
-                    <div><span className="text-slate-500 block">الراتب المتوقع:</span> <strong>{selectedApplicant.expectedSalary || 'لم يحدد'}</strong></div>
-                    <div className="sm:col-span-2"><span className="text-slate-500 block">الوظيفة السابقة:</span> <strong>{selectedApplicant.currentJob || 'لا يوجد'}</strong></div>
-                    <div><span className="text-slate-500 block">مستوى Excel:</span> <strong>{selectedApplicant.excelLevel || 'غير محدد'}</strong></div>
-                    <div className="col-span-2 sm:col-span-3"><span className="text-slate-500 block">البرامج المحاسبية:</span> <strong>{selectedApplicant.accountingSoftware || 'لم يحدد'}</strong></div>
-                    <div><span className="text-slate-500 block">خبرة VAT:</span> <strong>{selectedApplicant.hasVatExp || 'لا'}</strong></div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs bg-[#FAF8F5] p-4 rounded-2xl border border-[#EAE4DC]">
+                    <div><span className="text-luxMuted block">العمر:</span> <strong>{selectedApplicant.age} سنة</strong></div>
+                    <div><span className="text-luxMuted block">الجنسية:</span> <strong>{selectedApplicant.nationality}</strong></div>
+                    <div><span className="text-luxMuted block">المدينة:</span> <strong>{selectedApplicant.city}</strong></div>
+                    <div><span className="text-luxMuted block">المؤهل:</span> <strong>{selectedApplicant.qualification}</strong></div>
+                    <div><span className="text-luxMuted block">سنوات الخبرة:</span> <strong>{selectedApplicant.yearsExperience} سنوات</strong></div>
+                    <div><span className="text-luxMuted block">الراتب المتوقع:</span> <strong>{selectedApplicant.expectedSalary || 'لم يحدد'}</strong></div>
+                    <div className="sm:col-span-2"><span className="text-luxMuted block">الوظيفة السابقة:</span> <strong>{selectedApplicant.currentJob || 'لا يوجد'}</strong></div>
+                    <div><span className="text-luxMuted block">مستوى Excel:</span> <strong>{selectedApplicant.excelLevel || 'غير محدد'}</strong></div>
+                    <div className="col-span-2 sm:col-span-3"><span className="text-luxMuted block">البرامج المحاسبية:</span> <strong>{selectedApplicant.accountingSoftware || 'لم يحدد'}</strong></div>
+                    <div><span className="text-luxMuted block">خبرة VAT:</span> <strong>{selectedApplicant.hasVatExp || 'لا'}</strong></div>
                   </div>
 
                   {/* CV BOX */}
-                  <div className="p-4 bg-white rounded-2xl border-2 border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
+                  <div className="p-4 bg-white rounded-2xl border-2 border-[#EAE4DC] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
                     <div className="flex items-center gap-3 text-right">
-                      <div className="w-10 h-10 bg-amber-50 text-amber-800 rounded-xl flex items-center justify-center">
-                        <Icons.FileText />
+                      <div className="w-10 h-10 bg-emeraldLaw-50 text-emeraldLaw-800 rounded-xl flex items-center justify-center">
+                        <Icon.FileText className="w-5 h-5" />
                       </div>
                       <div>
-                        <strong className="text-xs text-slate-900 block">ملف السيرة الذاتية (CV)</strong>
-                        <span className="text-[11px] text-slate-500">{selectedApplicant.cvName || 'CV_Accountant.pdf'}</span>
+                        <strong className="text-xs text-neutralDark block">ملف السيرة الذاتية (CV)</strong>
+                        <span className="text-[11px] text-luxMuted">{selectedApplicant.cvName || 'CV_Accountant.pdf'}</span>
                       </div>
                     </div>
 
@@ -1628,15 +1621,15 @@
                       <a
                         href={selectedApplicant.cvBase64}
                         download={selectedApplicant.cvName || 'CV.pdf'}
-                        className="px-5 h-10 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm"
+                        className="px-5 h-10 bg-emeraldLaw-800 hover:bg-emeraldLaw-900 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm"
                       >
-                        <Icons.Download />
+                        <Icon.Download className="w-4 h-4" />
                         <span>تحميل ومعاينة الـ CV</span>
                       </a>
                     ) : (
                       <button 
                         onClick={() => alert('تم تسجيل فحص السيرة الذاتية')}
-                        className="px-4 h-10 bg-slate-900 text-white rounded-xl text-xs font-bold"
+                        className="px-4 h-10 bg-neutralDark text-white rounded-xl text-xs font-bold"
                       >
                         فحص الـ CV
                       </button>
@@ -1647,7 +1640,7 @@
                   {selectedApplicant.interview && (
                     <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-xs space-y-2">
                       <strong className="text-purple-900 block text-sm flex items-center gap-1.5">
-                        <Icons.Video />
+                        <Icon.Video className="w-4 h-4" />
                         <span>مقابلة شخصية مجدولة</span>
                       </strong>
                       <div className="flex gap-4 text-purple-800">
@@ -1666,10 +1659,10 @@
 
                   {/* NOTES */}
                   <div>
-                    <h4 className="font-extrabold text-xs text-slate-500 mb-2">ملاحظات سرية للإدارة</h4>
+                    <h4 className="font-extrabold text-xs text-luxMuted mb-2">ملاحظات سرية للإدارة</h4>
                     <div className="space-y-2 mb-3">
                       {selectedApplicant.notes && selectedApplicant.notes.map((n, i) => (
-                        <div key={i} className="bg-amber-50/70 border border-amber-200 p-2.5 rounded-xl text-xs text-amber-900 flex justify-between">
+                        <div key={i} className="bg-amber-50/80 border border-amber-200 p-2.5 rounded-xl text-xs text-amber-900 flex justify-between">
                           <span>💬 {n.text}</span>
                           <span className="text-[10px] text-amber-700/60">{n.date}</span>
                         </div>
@@ -1681,7 +1674,7 @@
                         type="text" 
                         id="newNoteInput"
                         placeholder="أضف تقييم أو ملاحظة داخلية للمرشح..."
-                        className="flex-1 h-10 px-3 rounded-xl bg-white border border-slate-200 text-xs focus:outline-none focus:border-amber-500"
+                        className="flex-1 h-10 px-3 rounded-xl bg-[#FAF8F5] border border-[#EAE4DC] text-xs focus:outline-none focus:border-emeraldLaw-700"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             const val = e.target.value.trim();
@@ -1700,7 +1693,7 @@
                             el.value = '';
                           }
                         }}
-                        className="px-4 h-10 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold"
+                        className="px-4 h-10 bg-emeraldLaw-800 hover:bg-emeraldLaw-900 text-white rounded-xl text-xs font-bold"
                       >
                         إضافة
                       </button>
@@ -1709,8 +1702,8 @@
 
                 </div>
               ) : (
-                <div className="bg-white rounded-3xl p-12 card-shadow border border-slate-200 text-center text-xs text-slate-500">
-                  <span className="text-4xl block mb-2"><Icons.User /></span>
+                <div className="bg-white rounded-[28px] p-12 lux-card-shadow border border-[#EAE4DC] text-center text-xs text-luxMuted">
+                  <span className="text-4xl block mb-2"><Icon.User className="w-10 h-10 mx-auto text-luxMuted/50" /></span>
                   <span>اختر مرشحاً من القائمة الجانبية لعرض كافة بياناته وصورته وسيرته الذاتية</span>
                 </div>
               )}
@@ -1721,38 +1714,38 @@
           {/* SCHEDULE MODAL */}
           {scheduleModalOpen && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-up">
-              <div className="bg-white rounded-3xl p-6 max-w-md w-full card-shadow border border-slate-200 space-y-4">
-                <h3 className="font-extrabold text-base text-slate-900">
+              <div className="bg-white rounded-3xl p-6 max-w-md w-full lux-card-shadow border border-[#EAE4DC] space-y-4">
+                <h3 className="font-extrabold text-base text-neutralDark">
                   جدولة مقابلة لـ: {selectedApplicant?.fullName}
                 </h3>
                 
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1">تاريخ المقابلة</label>
+                  <label className="block text-xs font-bold text-neutralDark mb-1">تاريخ المقابلة</label>
                   <input 
                     type="date" 
                     value={interviewDate}
                     onChange={e => setInterviewDate(e.target.value)}
-                    className="w-full h-11 px-3 rounded-xl border border-slate-200 text-xs"
+                    className="w-full h-11 px-3 rounded-xl border border-[#EAE4DC] text-xs"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1">وقت المقابلة</label>
+                  <label className="block text-xs font-bold text-neutralDark mb-1">وقت المقابلة</label>
                   <input 
                     type="time" 
                     value={interviewTime}
                     onChange={e => setInterviewTime(e.target.value)}
-                    className="w-full h-11 px-3 rounded-xl border border-slate-200 text-xs"
+                    className="w-full h-11 px-3 rounded-xl border border-[#EAE4DC] text-xs"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1">رابط Google Meet</label>
+                  <label className="block text-xs font-bold text-neutralDark mb-1">رابط Google Meet</label>
                   <input 
                     type="text" 
                     value={meetLink}
                     onChange={e => setMeetLink(e.target.value)}
-                    className="w-full h-11 px-3 rounded-xl border border-slate-200 text-xs"
+                    className="w-full h-11 px-3 rounded-xl border border-[#EAE4DC] text-xs"
                   />
                 </div>
 
@@ -1767,13 +1760,13 @@
                       setScheduleModalOpen(false);
                       alert('تم حفظ موعد المقابلة بنجاح وسيظهر للمتقدم في صفحة الاستعلام!');
                     }}
-                    className="flex-1 h-11 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold rounded-xl text-xs shadow-md"
+                    className="flex-1 h-11 bg-emeraldLaw-800 hover:bg-emeraldLaw-900 text-white font-bold rounded-xl text-xs shadow-md"
                   >
                     حفظ وإرسال الموعد
                   </button>
                   <button
                     onClick={() => setScheduleModalOpen(false)}
-                    className="px-4 h-11 border border-slate-200 text-slate-700 font-bold rounded-xl text-xs"
+                    className="px-4 h-11 border border-[#EAE4DC] text-neutralDark font-bold rounded-xl text-xs"
                   >
                     إلغاء
                   </button>
