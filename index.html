@@ -75,36 +75,38 @@
       -webkit-tap-highlight-color: transparent;
     }
     body { 
-      background-color: #FAF8F5; 
+      background: linear-gradient(180deg, rgba(250, 248, 245, 0.88) 0%, rgba(243, 238, 230, 0.94) 100%), 
+                  url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80') center/cover fixed no-repeat;
       color: #0A1413; 
+      min-height: 100vh;
       overflow-x: hidden;
     }
     .lux-hero-bg {
-      background: linear-gradient(135deg, rgba(7, 38, 35, 0.93) 0%, rgba(4, 22, 20, 0.88) 100%), 
+      background: linear-gradient(135deg, rgba(7, 38, 35, 0.94) 0%, rgba(4, 22, 20, 0.90) 100%), 
                   url('https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
     }
     .lux-card-shadow {
-      box-shadow: 0 10px 30px -4px rgba(11, 59, 54, 0.05), 0 0 0 1px rgba(11, 59, 54, 0.08);
+      box-shadow: 0 12px 32px -4px rgba(11, 59, 54, 0.06), 0 0 0 1px rgba(11, 59, 54, 0.08);
     }
     .lux-card-hover {
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .lux-card-hover:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 20px 40px -8px rgba(11, 59, 54, 0.12), 0 0 0 1.5px #0E4943;
+      transform: translateY(-4px);
+      box-shadow: 0 22px 45px -8px rgba(11, 59, 54, 0.14), 0 0 0 1.5px #0E4943;
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-[#FAF8F5] min-h-screen text-[#0A1413]">
+<body class="min-h-screen text-[#0A1413]">
 
   <div id="root"></div>
 
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // --- UNIFIED CRISP VECTOR ICON SYSTEM (Lucide-Style 1.75px Consistent Stroke) ---
+    // --- UNIFIED CRISP VECTOR ICON SYSTEM ---
     const Icon = {
       Scale: ({ className = "w-5 h-5" }) => (
         <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
@@ -234,7 +236,7 @@
     const SEQ_KEY = 'hireflow_seq_v5';
 
     function App() {
-      const [view, setView] = useState('welcome'); // welcome, form, success, track, adminLogin, admin
+      const [view, setView] = useState('welcome');
       const [applicants, setApplicants] = useState([]);
       const [lastSubmittedCode, setLastSubmittedCode] = useState('');
       const [selectedApplicant, setSelectedApplicant] = useState(null);
@@ -344,8 +346,8 @@
       return (
         <div className="min-h-screen flex flex-col pb-20 md:pb-8">
           
-          {/* TOP NAVBAR */}
-          <header className="bg-white border-b border-[#EAE4DC] sticky top-0 z-40 px-4 py-3.5">
+          {/* TOP NAVBAR (Frosted Glass) */}
+          <header className="bg-white/85 backdrop-blur-md border-b border-[#EAE4DC] sticky top-0 z-40 px-4 py-3.5 shadow-sm">
             <div className="max-w-4xl mx-auto flex items-center justify-between">
               
               <div 
@@ -480,14 +482,13 @@
       );
     }
 
-    /* ---------------- 0. LUXURY WELCOME GATEWAY (With Corporate Accounting Office Photo) ---------------- */
+    /* ---------------- 0. LUXURY WELCOME GATEWAY ---------------- */
     function WelcomeGateway({ onSelectApply, onSelectTrack }) {
       return (
         <div className="max-w-3xl mx-auto space-y-6 md:space-y-8 animate-fade-up">
           
-          {/* HERO LUXURY CARD WITH CORPORATE OFFICE IMAGE BACKGROUND */}
+          {/* HERO LUXURY CARD */}
           <div className="lux-hero-bg rounded-[32px] p-7 md:p-12 text-white relative overflow-hidden shadow-2xl border border-emeraldLaw-900/40">
-            {/* Ambient soft glow overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-emeraldLaw-950/90 via-transparent to-black/30 pointer-events-none"></div>
 
             <div className="relative z-10 space-y-4 max-w-xl text-right">
@@ -507,13 +508,13 @@
             </div>
           </div>
 
-          {/* TWO PRIMARY INTERACTIVE CHOICE CARDS */}
+          {/* TWO PRIMARY INTERACTIVE CHOICE CARDS (Warm White / Frosted) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
             
             {/* OPTION 1: APPLY */}
             <div 
               onClick={onSelectApply}
-              className="bg-white rounded-[28px] p-7 lux-card-shadow lux-card-hover cursor-pointer border border-[#EAE4DC] flex flex-col justify-between text-right group"
+              className="bg-white/95 backdrop-blur-sm rounded-[28px] p-7 lux-card-shadow lux-card-hover cursor-pointer border border-[#EAE4DC] flex flex-col justify-between text-right group"
             >
               <div>
                 <div className="w-14 h-14 rounded-2xl bg-emeraldLaw-50 text-emeraldLaw-800 border border-emeraldLaw-100 flex items-center justify-center mb-5 group-hover:scale-105 group-hover:bg-emeraldLaw-800 group-hover:text-white transition-all shadow-sm">
@@ -545,7 +546,7 @@
             {/* OPTION 2: TRACK */}
             <div 
               onClick={onSelectTrack}
-              className="bg-white rounded-[28px] p-7 lux-card-shadow lux-card-hover cursor-pointer border border-[#EAE4DC] flex flex-col justify-between text-right group"
+              className="bg-white/95 backdrop-blur-sm rounded-[28px] p-7 lux-card-shadow lux-card-hover cursor-pointer border border-[#EAE4DC] flex flex-col justify-between text-right group"
             >
               <div>
                 <div className="w-14 h-14 rounded-2xl bg-[#FAF6EE] text-sandGold-700 border border-sandGold-200 flex items-center justify-center mb-5 group-hover:scale-105 group-hover:bg-sandGold-600 group-hover:text-white transition-all shadow-sm">
@@ -578,15 +579,15 @@
 
           {/* Quick Badges Footer */}
           <div className="pt-3 flex flex-wrap justify-center gap-3 text-xs font-semibold text-luxMuted">
-            <span className="flex items-center gap-1.5 bg-white px-4 py-2 rounded-2xl border border-[#EAE4DC] shadow-sm">
+            <span className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-2xl border border-[#EAE4DC] shadow-sm">
               <Icon.Shield className="w-4 h-4 text-emeraldLaw-700" />
               <span>خصوصية تامة لبياناتك</span>
             </span>
-            <span className="flex items-center gap-1.5 bg-white px-4 py-2 rounded-2xl border border-[#EAE4DC] shadow-sm">
+            <span className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-2xl border border-[#EAE4DC] shadow-sm">
               <Icon.Video className="w-4 h-4 text-emeraldLaw-700" />
               <span>مقابلات مرئية عبر Google Meet</span>
             </span>
-            <span className="flex items-center gap-1.5 bg-white px-4 py-2 rounded-2xl border border-[#EAE4DC] shadow-sm">
+            <span className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-2xl border border-[#EAE4DC] shadow-sm">
               <Icon.Building className="w-4 h-4 text-emeraldLaw-700" />
               <span>مقر العمل: الرياض</span>
             </span>
@@ -596,7 +597,7 @@
       );
     }
 
-    /* ---------------- 1. APPLICANT FORM (Google Form Style with Vector SVGs) ---------------- */
+    /* ---------------- 1. APPLICANT FORM ---------------- */
     function ApplicantForm({ onSubmit, onBack }) {
       const [formData, setFormData] = useState({
         fullName: '',
@@ -694,7 +695,6 @@
       return (
         <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6 animate-fade-up">
           
-          {/* Back button */}
           <button 
             type="button" 
             onClick={onBack}
