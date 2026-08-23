@@ -79,8 +79,9 @@
       color: #0A1413; 
       overflow-x: hidden;
     }
-    .lux-hero {
-      background: linear-gradient(145deg, #09322E 0%, #062320 60%, #031412 100%);
+    .lux-hero-bg {
+      background: linear-gradient(135deg, rgba(7, 38, 35, 0.93) 0%, rgba(4, 22, 20, 0.88) 100%), 
+                  url('https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
     }
     .lux-card-shadow {
       box-shadow: 0 10px 30px -4px rgba(11, 59, 54, 0.05), 0 0 0 1px rgba(11, 59, 54, 0.08);
@@ -227,11 +228,6 @@
           <path d="M16 14h.01"/>
         </svg>
       ),
-      ChevronLeft: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m15 18-6-6 6-6"/>
-        </svg>
-      )
     };
 
     const STORAGE_KEY = 'hireflow_applicants_v5';
@@ -348,7 +344,7 @@
       return (
         <div className="min-h-screen flex flex-col pb-20 md:pb-8">
           
-          {/* TOP NAVBAR (Prestigious Law Firm Header) */}
+          {/* TOP NAVBAR */}
           <header className="bg-white border-b border-[#EAE4DC] sticky top-0 z-40 px-4 py-3.5">
             <div className="max-w-4xl mx-auto flex items-center justify-between">
               
@@ -484,35 +480,34 @@
       );
     }
 
-    /* ---------------- 0. LUXURY WELCOME GATEWAY ---------------- */
+    /* ---------------- 0. LUXURY WELCOME GATEWAY (With Corporate Accounting Office Photo) ---------------- */
     function WelcomeGateway({ onSelectApply, onSelectTrack }) {
       return (
         <div className="max-w-3xl mx-auto space-y-6 md:space-y-8 animate-fade-up">
           
-          {/* HERO LUXURY CARD (Dark Emerald Luxury Header inspired by Nature Leaf design) */}
-          <div className="lux-hero rounded-[32px] p-7 md:p-12 text-white relative overflow-hidden shadow-2xl">
-            {/* Subtle background ring */}
-            <div className="absolute -top-12 -left-12 w-64 h-64 rounded-full border border-white/10 pointer-events-none"></div>
-            <div className="absolute -bottom-16 -right-16 w-80 h-80 rounded-full border border-white/5 pointer-events-none"></div>
+          {/* HERO LUXURY CARD WITH CORPORATE OFFICE IMAGE BACKGROUND */}
+          <div className="lux-hero-bg rounded-[32px] p-7 md:p-12 text-white relative overflow-hidden shadow-2xl border border-emeraldLaw-900/40">
+            {/* Ambient soft glow overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-emeraldLaw-950/90 via-transparent to-black/30 pointer-events-none"></div>
 
             <div className="relative z-10 space-y-4 max-w-xl text-right">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[#EBD9BA] text-xs font-bold">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#EBD9BA] text-xs font-bold shadow-sm">
                 <Icon.Scale className="w-3.5 h-3.5 text-[#EBD9BA]" />
                 <span>مكتب المستشار للمحاماة والاستشارات القانونية</span>
               </div>
 
-              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight drop-shadow-md">
                 بوابة التوظيف <br className="hidden sm:block" />
-                <span className="text-[#EBD9BA]">واستقطاب الكفاءات</span>
+                <span className="text-[#EBD9BA]">واستقطاب الكفاءات المالية</span>
               </h2>
 
-              <p className="text-xs md:text-sm text-white/80 leading-relaxed font-normal pt-1">
+              <p className="text-xs md:text-sm text-white/90 leading-relaxed font-normal pt-1 drop-shadow">
                 نرحب بالكفاءات المحاسبية المتميزة للانضمام إلى فريق عملنا في مدينة الرياض. اختر الإجراء المناسب للمتابعة:
               </p>
             </div>
           </div>
 
-          {/* TWO PRIMARY INTERACTIVE CHOICE CARDS (Clean White Cards) */}
+          {/* TWO PRIMARY INTERACTIVE CHOICE CARDS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
             
             {/* OPTION 1: APPLY */}
