@@ -188,6 +188,13 @@
           <path d="m16 16-4-4-4 4"/>
         </svg>
       ),
+      Download: ({ className = "w-4 h-4" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" x2="12" y1="15" y2="3"/>
+        </svg>
+      ),
       Trash: ({ className = "w-4 h-4" }) => (
         <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 6h18"/>
@@ -225,49 +232,68 @@
       notes: [{ text: 'مرشح متميز للمقابلة الفنية', date: '23 أغسطس 2026' }]
     };
 
-    // Safe normalized search helper
+    // ULTRA RESILIENT PHONE & CODE MATCHER
     function matchApplicant(applicant, queryStr) {
       if (!queryStr || !applicant) return false;
       
-      const norm = (str) => {
+      // Convert Arabic digits to English and strip spaces/punctuation
+      const toEngDigits = (str) => {
         return (str || '')
           .toString()
-          .replace(/[٠١٢٣٤٥٦٧٨٩]/g, d => "0123456789"["٠١٢٣٤٥٦٧٨٩".indexOf(d)])
-          .toLowerCase()
-          .replace(/[\s\-_#]/g, '');
+          .replace(/[٠١٢٣٤٥٦٧٨٩]/g, d => "0123456789"["٠١٢٣٤٥٦٧٨٩".indexOf(d)]);
       };
 
-      const q = norm(queryStr);
-      const appCodeNorm = norm(applicant.code);
-      const appPhoneNorm = norm(applicant.phone);
-      const appNameNorm = norm(applicant.fullName);
-      const appEmailNorm = norm(applicant.email);
+      const rawQ = toEngDigits(queryStr).toLowerCase().trim();
+      const cleanQ = rawQ.replace(/[\s\-_#+()]/g, '');
 
-      if (appCodeNorm === q || appCodeNorm.includes(q)) return true;
-      if (q === '1' || q === '0001' || q === '001') {
+      // Clean digits only
+      const qDigits = rawQ.replace(/\D/g, '');
+      const appPhoneDigits = toEngDigits(applicant.phone).replace(/\D/g, '');
+
+      // 1. MATCH BY CODE (APP-0001, 0001, 1, app0001)
+      const appCodeClean = toEngDigits(applicant.code).toLowerCase().replace(/[\s\-_#]/g, '');
+      if (appCodeClean === cleanQ || appCodeClean.includes(cleanQ)) return true;
+      if (cleanQ === '1' || cleanQ === '0001' || cleanQ === '001') {
         if (applicant.code === 'APP-0001') return true;
       }
-      
-      if (appPhoneNorm && (appPhoneNorm.includes(q) || q.includes(appPhoneNorm))) return true;
-      if (appNameNorm && appNameNorm.includes(q)) return true;
-      if (appEmailNorm && appEmailNorm.includes(q)) return true;
+
+      // 2. MATCH BY PHONE (Supports: 05XXXXXXXX, +9665XXXXXXXX, 9665XXXXXXXX, 5XXXXXXXX, partial)
+      if (qDigits && appPhoneDigits) {
+        // Direct equals or contains
+        if (appPhoneDigits.includes(qDigits) || qDigits.includes(appPhoneDigits)) return true;
+        
+        // Match core phone digits (last 9 digits e.g. 501234567)
+        const qCore = qDigits.length >= 9 ? qDigits.slice(-9) : qDigits;
+        const appCore = appPhoneDigits.length >= 9 ? appPhoneDigits.slice(-9) : appPhoneDigits;
+        if (qCore.length >= 7 && (appCore.includes(qCore) || qCore.includes(appCore))) return true;
+      }
+
+      // 3. MATCH BY NAME (Supports partial name)
+      const rawName = (applicant.fullName || '').toLowerCase();
+      if (rawName && rawName.includes(rawQ)) return true;
+
+      // 4. MATCH BY EMAIL
+      const rawEmail = (applicant.email || '').toLowerCase();
+      if (rawEmail && rawEmail.includes(rawQ)) return true;
 
       return false;
     }
 
+    // Helper to read fresh applicants from localStorage anytime
+    function getFreshApplicants() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch(e) {}
+      return [DEFAULT_APPLICANT];
+    }
+
     function App() {
       const [view, setView] = useState('welcome');
-      const [applicants, setApplicants] = useState(() => {
-        try {
-          const saved = localStorage.getItem(STORAGE_KEY);
-          if (saved) {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-          }
-        } catch(e) {}
-        return [DEFAULT_APPLICANT];
-      });
-
+      const [applicants, setApplicants] = useState(getFreshApplicants);
       const [lastSubmittedCode, setLastSubmittedCode] = useState('');
       const [selectedApplicant, setSelectedApplicant] = useState(null);
       const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
@@ -303,7 +329,8 @@
           ...formData
         };
 
-        const updated = [newApplicant, ...applicants];
+        const currentList = getFreshApplicants();
+        const updated = [newApplicant, ...currentList.filter(a => a.id !== newApplicant.id)];
         saveApplicants(updated);
         setLastSubmittedCode(codeStr);
         setView('success');
@@ -564,7 +591,7 @@
                 </h3>
 
                 <p className="text-xs text-slateText-muted mt-1.5 leading-relaxed">
-                  الاستعلام برقم الطلب (مثل APP-0001) لمعرفة مستجدات المراجعة وموعد ورابط المقابلة.
+                  الاستعلام برقم الطلب (مثل APP-0001) أو رقم الجوال لمعرفة موعد المقابلة وحالة الطلب.
                 </p>
               </div>
 
@@ -927,13 +954,14 @@
       );
     }
 
-    /* ---------------- 3. TRACK VIEW (Clean & Empty on Initial Load) ---------------- */
+    /* ---------------- 3. TRACK VIEW (Ultra-Flexible Phone & Code Search) ---------------- */
     function TrackView({ applicants, initialQuery, onBack }) {
       const [query, setQuery] = useState(initialQuery || '');
       const [hasSearched, setHasSearched] = useState(Boolean(initialQuery));
       const [found, setFound] = useState(() => {
         if (initialQuery) {
-          return applicants.find(a => matchApplicant(a, initialQuery)) || null;
+          const fresh = getFreshApplicants();
+          return fresh.find(a => matchApplicant(a, initialQuery)) || null;
         }
         return null;
       });
@@ -943,7 +971,9 @@
         const trimmed = query.trim();
         if (!trimmed) return;
         setHasSearched(true);
-        const res = applicants.find(a => matchApplicant(a, trimmed));
+        // Always search across fresh storage
+        const allApplicants = getFreshApplicants();
+        const res = allApplicants.find(a => matchApplicant(a, trimmed));
         setFound(res || null);
       };
 
@@ -973,15 +1003,15 @@
 
           <div className="clean-card p-5">
             <h2 className="font-bold text-sm text-slateText-title mb-1">متابعة حالة طلب التوظيف</h2>
-            <p className="text-xs text-slateText-muted mb-3">أدخل رقم الطلب (#APP-0001) أو رقم هاتفك للاستعلام</p>
+            <p className="text-xs text-slateText-muted mb-3">أدخل رقم هاتفك (05XXXXXXXX) أو رقم الطلب (APP-0001)</p>
 
             <form onSubmit={handleSearch} className="flex gap-2">
               <input 
                 type="text" 
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                placeholder="مثال: APP-0001 أو 05XXXXXXXX"
-                className="flex-1 h-11 px-3.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-700 bg-slate-50/50"
+                placeholder="رقم الهاتف أو رقم الطلب..."
+                className="flex-1 h-11 px-3.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-700 bg-slate-50/50 text-right"
               />
               <button type="submit" className="px-5 h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm">
                 استعلام
@@ -1002,9 +1032,12 @@
                     )}
                     <div>
                       <h3 className="font-bold text-sm text-slateText-title">{found.fullName}</h3>
-                      <span className="font-mono text-[11px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded border border-brand-100 inline-block mt-0.5">
-                        {found.code}
-                      </span>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="font-mono text-[11px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded border border-brand-100 inline-block">
+                          {found.code}
+                        </span>
+                        <span className="text-[11px] text-slateText-muted font-medium" dir="ltr">{found.phone}</span>
+                      </div>
                     </div>
                   </div>
 
@@ -1070,7 +1103,7 @@
               </div>
             ) : (
               <div className="clean-card p-6 text-center text-xs text-slateText-muted">
-                لم يتم العثور على طلب مطابق للرمز المدخل. يرجى التأكد من كتابة الرقم مثل (APP-0001) أو رقم هاتفك.
+                لم يتم العثور على طلب مطابق للبيانات المدخلة. تأكد من كتابة رقم الهاتف أو رقم الطلب بشكل صحيح.
               </div>
             )
           ) : null}
@@ -1168,7 +1201,9 @@
       const [interviewTime, setInterviewTime] = useState('19:00');
       const [meetLink, setMeetLink] = useState('https://meet.google.com/xyz-lawfirm-hr');
 
-      const filtered = applicants.filter(app => {
+      const allApplicants = getFreshApplicants();
+
+      const filtered = allApplicants.filter(app => {
         const matchesStatus = filterStatus === 'ALL' || app.status === filterStatus;
         const matchesSearch = !searchQuery || matchApplicant(app, searchQuery);
         return matchesStatus && matchesSearch;
@@ -1198,24 +1233,24 @@
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="clean-card p-4">
               <span className="text-[11px] font-semibold text-slateText-muted block">إجمالي المتقدمين</span>
-              <strong className="text-2xl font-black text-slateText-title">{applicants.length}</strong>
+              <strong className="text-2xl font-black text-slateText-title">{allApplicants.length}</strong>
             </div>
             <div className="clean-card p-4">
               <span className="text-[11px] font-semibold text-slateText-muted block">في المراجعة</span>
               <strong className="text-2xl font-black text-amber-600">
-                {applicants.filter(a => a.status === 'SUBMITTED' || a.status === 'CV_VIEWED').length}
+                {allApplicants.filter(a => a.status === 'SUBMITTED' || a.status === 'CV_VIEWED').length}
               </strong>
             </div>
             <div className="clean-card p-4">
               <span className="text-[11px] font-semibold text-slateText-muted block">مقابلات مجدولة</span>
               <strong className="text-2xl font-black text-purple-600">
-                {applicants.filter(a => a.status === 'SHORTLISTED' || a.status === 'INTERVIEW_SCHEDULED').length}
+                {allApplicants.filter(a => a.status === 'SHORTLISTED' || a.status === 'INTERVIEW_SCHEDULED').length}
               </strong>
             </div>
             <div className="clean-card p-4">
               <span className="text-[11px] font-semibold text-slateText-muted block">مقبولين</span>
               <strong className="text-2xl font-black text-green-600">
-                {applicants.filter(a => a.status === 'ACCEPTED').length}
+                {allApplicants.filter(a => a.status === 'ACCEPTED').length}
               </strong>
             </div>
           </div>
