@@ -188,13 +188,6 @@
           <path d="m16 16-4-4-4 4"/>
         </svg>
       ),
-      Download: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" x2="12" y1="15" y2="3"/>
-        </svg>
-      ),
       Trash: ({ className = "w-4 h-4" }) => (
         <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 6h18"/>
@@ -207,7 +200,7 @@
     const STORAGE_KEY = 'almustashar_applicants_master_v1';
     const SEQ_KEY = 'almustashar_seq_master_v1';
 
-    // Default master applicant so APP-0001 is ALWAYS found on every phone and device!
+    // Default applicant record
     const DEFAULT_APPLICANT = {
       id: 'app-0001-init',
       code: 'APP-0001',
@@ -232,11 +225,10 @@
       notes: [{ text: 'مرشح متميز للمقابلة الفنية', date: '23 أغسطس 2026' }]
     };
 
-    // Safe normalized search helper (matches APP-0001, 0001, 1, phone, name, etc.)
+    // Safe normalized search helper
     function matchApplicant(applicant, queryStr) {
       if (!queryStr || !applicant) return false;
       
-      // Normalize arabic numbers & english
       const norm = (str) => {
         return (str || '')
           .toString()
@@ -251,19 +243,13 @@
       const appNameNorm = norm(applicant.fullName);
       const appEmailNorm = norm(applicant.email);
 
-      // Direct match code (e.g. APP-0001 or 0001 or 1)
       if (appCodeNorm === q || appCodeNorm.includes(q)) return true;
       if (q === '1' || q === '0001' || q === '001') {
         if (applicant.code === 'APP-0001') return true;
       }
       
-      // Match phone
       if (appPhoneNorm && (appPhoneNorm.includes(q) || q.includes(appPhoneNorm))) return true;
-
-      // Match name
       if (appNameNorm && appNameNorm.includes(q)) return true;
-
-      // Match email
       if (appEmailNorm && appEmailNorm.includes(q)) return true;
 
       return false;
@@ -287,13 +273,12 @@
       const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
       const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
-      // Persist applicants
       const saveApplicants = (newList) => {
         setApplicants(newList);
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(newList));
         } catch(e) {
-          console.warn('LocalStorage quota or access warning:', e);
+          console.warn('LocalStorage warning:', e);
         }
       };
 
@@ -377,7 +362,7 @@
               
               <div 
                 className="flex items-center gap-3 cursor-pointer group"
-                onClick={() => setView('welcome')}
+                onClick={() => { setLastSubmittedCode(''); setView('welcome'); }}
               >
                 <div className="w-9 h-9 rounded-xl bg-brand-800 text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
                   <Icon.Scale className="w-5 h-5 text-[#E1EFEA]" />
@@ -390,7 +375,7 @@
 
               <div className="flex items-center gap-1.5">
                 <button
-                  onClick={() => setView('welcome')}
+                  onClick={() => { setLastSubmittedCode(''); setView('welcome'); }}
                   className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${view === 'welcome' ? 'bg-brand-50 text-brand-800' : 'text-slateText-muted hover:bg-slate-100'}`}
                 >
                   الرئيسية
@@ -402,7 +387,7 @@
                   تقديم طلب
                 </button>
                 <button
-                  onClick={() => setView('track')}
+                  onClick={() => { setLastSubmittedCode(''); setView('track'); }}
                   className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${view === 'track' ? 'bg-brand-50 text-brand-800' : 'text-slateText-muted hover:bg-slate-100'}`}
                 >
                   متابعة الطلب
@@ -424,7 +409,7 @@
             {view === 'welcome' && (
               <WelcomeGateway 
                 onSelectApply={() => setView('form')}
-                onSelectTrack={() => setView('track')}
+                onSelectTrack={() => { setLastSubmittedCode(''); setView('track'); }}
               />
             )}
 
@@ -439,15 +424,15 @@
               <SuccessCard 
                 code={lastSubmittedCode} 
                 onGoTrack={() => setView('track')} 
-                onGoHome={() => setView('welcome')}
+                onGoHome={() => { setLastSubmittedCode(''); setView('welcome'); }}
               />
             )}
 
             {view === 'track' && (
               <TrackView 
                 applicants={applicants} 
-                defaultCode={lastSubmittedCode}
-                onBack={() => setView('welcome')}
+                initialQuery={lastSubmittedCode}
+                onBack={() => { setLastSubmittedCode(''); setView('welcome'); }}
               />
             )}
 
@@ -474,9 +459,9 @@
                 </div>
 
                 <div className="flex gap-4 text-xs font-semibold text-slateText-muted">
-                  <button onClick={() => setView('welcome')} className="hover:text-brand-800">الرئيسية</button>
+                  <button onClick={() => { setLastSubmittedCode(''); setView('welcome'); }} className="hover:text-brand-800">الرئيسية</button>
                   <button onClick={() => setView('form')} className="hover:text-brand-800">تقديم على وظيفة</button>
-                  <button onClick={() => setView('track')} className="hover:text-brand-800">استعلام عن طلب</button>
+                  <button onClick={() => { setLastSubmittedCode(''); setView('track'); }} className="hover:text-brand-800">استعلام عن طلب</button>
                 </div>
               </div>
 
@@ -606,7 +591,7 @@
       );
     }
 
-    /* ---------------- 1. APPLICANT FORM (Optimized for Mobile) ---------------- */
+    /* ---------------- 1. APPLICANT FORM ---------------- */
     function ApplicantForm({ onSubmit, onBack }) {
       const [formData, setFormData] = useState({
         fullName: '', phone: '', email: '', age: '', nationality: '', maritalStatus: '',
@@ -617,7 +602,6 @@
       const [errors, setErrors] = useState({});
       const [isSubmitting, setIsSubmitting] = useState(false);
 
-      // Safe image compressor for mobile (avoids localStorage overflow)
       const handlePhotoUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -656,7 +640,6 @@
       const handleCvUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        // On mobile, just save file name and small preview to avoid storage quota crash
         setFormData(prev => ({
           ...prev,
           cvName: file.name,
@@ -944,22 +927,23 @@
       );
     }
 
-    /* ---------------- 3. TRACK VIEW (Smart Fuzzy Search) ---------------- */
-    function TrackView({ applicants, defaultCode, onBack }) {
-      const [query, setQuery] = useState(defaultCode || 'APP-0001');
-      const [searched, setSearched] = useState(true);
+    /* ---------------- 3. TRACK VIEW (Clean & Empty on Initial Load) ---------------- */
+    function TrackView({ applicants, initialQuery, onBack }) {
+      const [query, setQuery] = useState(initialQuery || '');
+      const [hasSearched, setHasSearched] = useState(Boolean(initialQuery));
       const [found, setFound] = useState(() => {
-        if (defaultCode) {
-          const res = applicants.find(a => matchApplicant(a, defaultCode));
-          if (res) return res;
+        if (initialQuery) {
+          return applicants.find(a => matchApplicant(a, initialQuery)) || null;
         }
-        return applicants.find(a => matchApplicant(a, 'APP-0001')) || applicants[0] || null;
+        return null;
       });
 
       const handleSearch = (e) => {
         if (e) e.preventDefault();
-        setSearched(true);
-        const res = applicants.find(a => matchApplicant(a, query));
+        const trimmed = query.trim();
+        if (!trimmed) return;
+        setHasSearched(true);
+        const res = applicants.find(a => matchApplicant(a, trimmed));
         setFound(res || null);
       };
 
@@ -989,7 +973,7 @@
 
           <div className="clean-card p-5">
             <h2 className="font-bold text-sm text-slateText-title mb-1">متابعة حالة طلب التوظيف</h2>
-            <p className="text-xs text-slateText-muted mb-3">أدخل رقم الطلب (#APP-0001) أو رقم هاتفك أو اسمك</p>
+            <p className="text-xs text-slateText-muted mb-3">أدخل رقم الطلب (#APP-0001) أو رقم هاتفك للاستعلام</p>
 
             <form onSubmit={handleSearch} className="flex gap-2">
               <input 
@@ -1005,89 +989,91 @@
             </form>
           </div>
 
-          {found ? (
-            <div className="clean-card p-6 space-y-5">
-              
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-3">
-                  {found.photoBase64 ? (
-                    <img src={found.photoBase64} alt="" className="w-12 h-12 rounded-xl object-cover border border-slate-200" />
-                  ) : (
-                    <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slateText-muted"><Icon.User className="w-5 h-5" /></div>
-                  )}
-                  <div>
-                    <h3 className="font-bold text-sm text-slateText-title">{found.fullName}</h3>
-                    <span className="font-mono text-[11px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded border border-brand-100 inline-block mt-0.5">
-                      {found.code}
-                    </span>
+          {hasSearched ? (
+            found ? (
+              <div className="clean-card p-6 space-y-5">
+                
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div className="flex items-center gap-3">
+                    {found.photoBase64 ? (
+                      <img src={found.photoBase64} alt="" className="w-12 h-12 rounded-xl object-cover border border-slate-200" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slateText-muted"><Icon.User className="w-5 h-5" /></div>
+                    )}
+                    <div>
+                      <h3 className="font-bold text-sm text-slateText-title">{found.fullName}</h3>
+                      <span className="font-mono text-[11px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded border border-brand-100 inline-block mt-0.5">
+                        {found.code}
+                      </span>
+                    </div>
                   </div>
+
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                    found.status === 'ACCEPTED' ? 'bg-green-50 text-green-800 border border-green-200' :
+                    found.status === 'INTERVIEW_SCHEDULED' ? 'bg-purple-50 text-purple-800 border border-purple-200' :
+                    'bg-brand-50 text-brand-800 border border-brand-200'
+                  }`}>
+                    {found.status}
+                  </span>
                 </div>
 
-                <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                  found.status === 'ACCEPTED' ? 'bg-green-50 text-green-800 border border-green-200' :
-                  found.status === 'INTERVIEW_SCHEDULED' ? 'bg-purple-50 text-purple-800 border border-purple-200' :
-                  'bg-brand-50 text-brand-800 border border-brand-200'
-                }`}>
-                  {found.status}
-                </span>
-              </div>
-
-              {/* TIMELINE */}
-              <div>
-                <h4 className="text-xs font-bold text-slateText-muted mb-3">مسار الطلب:</h4>
-                <div className="flex justify-between relative">
-                  <div className="absolute top-3.5 right-2 left-2 h-0.5 bg-slate-200 z-0"></div>
-                  {stages.map((st, i) => {
-                    const currentIdx = getStageIdx(found.status);
-                    const isDone = i <= currentIdx;
-                    return (
-                      <div key={st.key} className="flex flex-col items-center relative z-10 text-center">
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                          isDone ? 'bg-brand-800 text-white shadow-sm' : 'bg-white border border-slate-300 text-slateText-muted'
-                        }`}>
-                          {isDone ? <Icon.Check className="w-3.5 h-3.5" /> : i + 1}
+                {/* TIMELINE */}
+                <div>
+                  <h4 className="text-xs font-bold text-slateText-muted mb-3">مسار الطلب:</h4>
+                  <div className="flex justify-between relative">
+                    <div className="absolute top-3.5 right-2 left-2 h-0.5 bg-slate-200 z-0"></div>
+                    {stages.map((st, i) => {
+                      const currentIdx = getStageIdx(found.status);
+                      const isDone = i <= currentIdx;
+                      return (
+                        <div key={st.key} className="flex flex-col items-center relative z-10 text-center">
+                          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                            isDone ? 'bg-brand-800 text-white shadow-sm' : 'bg-white border border-slate-300 text-slateText-muted'
+                          }`}>
+                            {isDone ? <Icon.Check className="w-3.5 h-3.5" /> : i + 1}
+                          </div>
+                          <span className="text-[10px] font-medium text-slateText-body mt-1">{st.label}</span>
                         </div>
-                        <span className="text-[10px] font-medium text-slateText-body mt-1">{st.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* INTERVIEW CARD */}
-              {found.interview && (
-                <div className="p-4 bg-purple-50/80 border border-purple-200 rounded-2xl space-y-2 text-xs text-purple-950">
-                  <div className="flex items-center justify-between">
-                    <strong className="block font-bold">📅 موعد المقابلة الشخصية (Google Meet):</strong>
-                    <span className="bg-white px-2 py-0.5 rounded text-[10px] font-bold text-purple-800 border border-purple-200">Online</span>
+                      );
+                    })}
                   </div>
-                  <p>التاريخ: <strong>{found.interview.date}</strong> | الوقت: <strong>{found.interview.time}</strong></p>
-                  {found.interview.meetLink && (
-                    <a 
-                      href={found.interview.meetLink} 
-                      target="_blank" 
-                      className="block text-center py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl mt-2 text-xs shadow-sm"
-                    >
-                      الانضمام إلى المقابلة عبر Google Meet ➔
-                    </a>
-                  )}
                 </div>
-              )}
 
-              {/* CV Status */}
-              {found.cvViewed && (
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slateText-body flex items-center gap-2">
-                  <Icon.FileText className="w-4 h-4 text-brand-700" />
-                  <span>تم فحص السيرة الذاتية ومراجعتها من قبل مسؤول التوظيف.</span>
-                </div>
-              )}
+                {/* INTERVIEW CARD */}
+                {found.interview && (
+                  <div className="p-4 bg-purple-50/80 border border-purple-200 rounded-2xl space-y-2 text-xs text-purple-950">
+                    <div className="flex items-center justify-between">
+                      <strong className="block font-bold">📅 موعد المقابلة الشخصية (Google Meet):</strong>
+                      <span className="bg-white px-2 py-0.5 rounded text-[10px] font-bold text-purple-800 border border-purple-200">Online</span>
+                    </div>
+                    <p>التاريخ: <strong>{found.interview.date}</strong> | الوقت: <strong>{found.interview.time}</strong></p>
+                    {found.interview.meetLink && (
+                      <a 
+                        href={found.interview.meetLink} 
+                        target="_blank" 
+                        className="block text-center py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl mt-2 text-xs shadow-sm"
+                      >
+                        الانضمام إلى المقابلة عبر Google Meet ➔
+                      </a>
+                    )}
+                  </div>
+                )}
 
-            </div>
-          ) : (
-            <div className="clean-card p-6 text-center text-xs text-slateText-muted">
-              لم يتم العثور على طلب مطابق للرمز المدخل. يرجى التأكد من كتابة الرقم مثل (APP-0001).
-            </div>
-          )}
+                {/* CV Status */}
+                {found.cvViewed && (
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slateText-body flex items-center gap-2">
+                    <Icon.FileText className="w-4 h-4 text-brand-700" />
+                    <span>تم فحص السيرة الذاتية ومراجعتها من قبل مسؤول التوظيف.</span>
+                  </div>
+                )}
+
+              </div>
+            ) : (
+              <div className="clean-card p-6 text-center text-xs text-slateText-muted">
+                لم يتم العثور على طلب مطابق للرمز المدخل. يرجى التأكد من كتابة الرقم مثل (APP-0001) أو رقم هاتفك.
+              </div>
+            )
+          ) : null}
         </div>
       );
     }
