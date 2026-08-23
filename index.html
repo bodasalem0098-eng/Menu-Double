@@ -188,13 +188,6 @@
           <path d="m16 16-4-4-4 4"/>
         </svg>
       ),
-      Download: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" x2="12" y1="15" y2="3"/>
-        </svg>
-      ),
       Trash: ({ className = "w-4 h-4" }) => (
         <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 6h18"/>
@@ -204,40 +197,20 @@
       ),
     };
 
-    const STORAGE_KEY = 'almustashar_applicants_v3';
+    // FRESH STORAGE KEYS (Clean zero state)
+    const STORAGE_KEY = 'almustashar_fresh_clean_v1';
+    const SEQ_KEY = 'almustashar_fresh_seq_v1';
 
-    // Reliable Local & Cloud Helper
+    // Clear initial state
     function getStoredApplicants() {
       try {
         const data = localStorage.getItem(STORAGE_KEY);
         if (data) {
           const parsed = JSON.parse(data);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          if (Array.isArray(parsed)) return parsed;
         }
       } catch(e) {}
-      
-      // Default initial applicant for APP-0001
-      return [{
-        id: '1',
-        code: 'APP-0001',
-        fullName: 'طلب تجريبي (محاسب مالي)',
-        phone: '0500000000',
-        email: 'applicant@example.com',
-        age: '28',
-        nationality: 'سعودي',
-        city: 'الرياض',
-        qualification: 'بكالوريوس محاسبة',
-        yearsExperience: '3',
-        expectedSalary: '8,500 ريال',
-        status: 'INTERVIEW_SCHEDULED',
-        submittedAt: 'اليوم',
-        cvViewed: true,
-        interview: {
-          date: '2026-08-25',
-          time: '19:00',
-          meetLink: 'https://meet.google.com/xyz-lawfirm-hr'
-        }
-      }];
+      return [];
     }
 
     // Flexible search matching
@@ -285,9 +258,15 @@
         } catch(e) {}
       };
 
-      // Form submission
+      // Form submission (assigns APP-0001 for 1st applicant, APP-0002 for 2nd, etc.)
       const handleFormSubmit = (formData) => {
-        const newCode = 'APP-' + String(applicants.length + 1).padStart(4, '0');
+        let currentSeq = parseInt(localStorage.getItem(SEQ_KEY) || '0', 10);
+        currentSeq += 1;
+        try {
+          localStorage.setItem(SEQ_KEY, currentSeq.toString());
+        } catch(e) {}
+
+        const newCode = 'APP-' + String(currentSeq).padStart(4, '0');
         const newApp = {
           id: String(Date.now()),
           code: newCode,
@@ -298,7 +277,6 @@
           ...formData
         };
 
-        // Put the newly submitted application at the top
         const updated = [newApp, ...applicants.filter(a => a.phone !== newApp.phone)];
         saveApplicants(updated);
         setActiveApplicant(newApp);
@@ -318,6 +296,16 @@
         saveApplicants(updated);
         if (activeApplicant && activeApplicant.code === code) {
           setActiveApplicant({ ...activeApplicant, status: 'INTERVIEW_SCHEDULED', interview: interviewData });
+        }
+      };
+
+      // Total Reset
+      const handleResetAll = () => {
+        if (confirm('هل تريد تصفير جميع البيانات والبدء من الصفر تماماً؟')) {
+          localStorage.clear();
+          setApplicants([]);
+          setActiveApplicant(null);
+          alert('تم تصفير كافة البيانات بنجاح.');
         }
       };
 
@@ -400,6 +388,7 @@
               <TrackView 
                 applicants={applicants} 
                 initialApplicant={activeApplicant}
+                onGoApply={() => setView('form')}
                 onBack={() => setView('welcome')}
               />
             )}
@@ -411,6 +400,7 @@
                 setSelectedApplicant={setActiveApplicant}
                 onUpdateStatus={updateApplicantStatus}
                 onScheduleInterview={handleScheduleInterview}
+                onResetAll={handleResetAll}
               />
             )}
           </main>
@@ -432,7 +422,7 @@
                 </div>
               </div>
 
-              {/* Secret Admin Trigger */}
+              {/* Secret Admin Trigger (Clicking copyright text) */}
               <div className="text-center sm:text-right pt-2 border-t border-slate-100 text-[11px]">
                 <span 
                   onClick={() => setIsAdminAuthModalOpen(true)}
@@ -478,7 +468,7 @@
               </h2>
 
               <p className="text-xs md:text-sm text-white/80 leading-relaxed font-normal">
-                يسر مكتب المستشار للمحاماة استقبال طلبات الانضمام لوظيفة محاسب مالي. يرجى اختيار الإجراء للبدء:
+                يسر مكتب المستشار للمحاماة استقبال طلبات التوظيف لوظيفة محاسب مالي. يرجى اختيار الإجراء للبدء:
               </p>
             </div>
           </div>
@@ -772,7 +762,7 @@
 
           <div className="space-y-2 pt-2">
             <button onClick={onGoTrack} className="w-full h-11 bg-brand-800 text-white rounded-xl font-bold text-xs shadow-sm hover:bg-brand-900">
-              عرض تفاصيل ومتابعة الطلب الآن ➔
+              عرض ومتابعة حالة الطلب ➔
             </button>
             <button onClick={onGoHome} className="w-full h-10 border border-slate-200 text-slateText-body rounded-xl font-bold text-xs hover:bg-slate-50">
               العودة للرئيسية
@@ -783,13 +773,13 @@
     }
 
     /* ---------------- 3. TRACK VIEW ---------------- */
-    function TrackView({ applicants, initialApplicant, onBack }) {
+    function TrackView({ applicants, initialApplicant, onGoApply, onBack }) {
       const [query, setQuery] = useState(initialApplicant ? initialApplicant.code : '');
       const [found, setFound] = useState(() => {
         if (initialApplicant) return initialApplicant;
-        return applicants[0] || null;
+        return applicants.length > 0 ? applicants[0] : null;
       });
-      const [hasSearched, setHasSearched] = useState(true);
+      const [hasSearched, setHasSearched] = useState(Boolean(initialApplicant || applicants.length > 0));
 
       const handleSearch = (e) => {
         if (e) e.preventDefault();
@@ -837,7 +827,7 @@
                 type="text" 
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                placeholder="رقم الهاتف أو رقم الطلب (مثال: APP-0001)..."
+                placeholder="رقم الهاتف أو رقم الطلب..."
                 className="flex-1 h-11 px-3.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-700 bg-slate-50/50 text-right"
               />
               <button type="submit" className="px-5 h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm">
@@ -848,7 +838,7 @@
             {/* Quick selector of submitted applications */}
             {applicants.length > 0 && (
               <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-2 flex-wrap text-xs">
-                <span className="text-slateText-muted text-[11px]">الطلبات المسجلة:</span>
+                <span className="text-slateText-muted text-[11px]">الطلبات الحالية:</span>
                 {applicants.map(a => (
                   <button
                     key={a.code}
@@ -864,8 +854,27 @@
             )}
           </div>
 
+          {/* Empty database helper */}
+          {applicants.length === 0 && (
+            <div className="clean-card p-8 text-center space-y-3">
+              <div className="w-12 h-12 rounded-xl bg-brand-50 text-brand-800 flex items-center justify-center mx-auto">
+                <Icon.Briefcase className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-sm text-slateText-title">قاعدة البيانات تم تصفيرها بنجاح (جاهزة للبدء)</h3>
+              <p className="text-xs text-slateText-muted max-w-sm mx-auto">
+                لا توجد أي طلبات مسجلة حالياً. يمكنك الآن بدء تقديم أول طلب توظيف ببياناتك الحقيقية.
+              </p>
+              <button
+                onClick={onGoApply}
+                className="px-6 py-2.5 bg-brand-800 text-white text-xs font-bold rounded-xl shadow-sm hover:bg-brand-900"
+              >
+                تقديم أول طلب الآن ➔
+              </button>
+            </div>
+          )}
+
           {/* Result Card */}
-          {found ? (
+          {found && (
             <div className="clean-card p-6 space-y-5">
               
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -943,10 +952,6 @@
                 </div>
               )}
 
-            </div>
-          ) : (
-            <div className="clean-card p-6 text-center text-xs text-slateText-muted">
-              لم يتم العثور على طلب مطابق للبيانات المدخلة. تأكد من كتابة رقم هاتفك أو رقم الطلب بشكل صحيح.
             </div>
           )}
         </div>
@@ -1034,7 +1039,7 @@
     /* ---------------- 5. ADMIN DASHBOARD ---------------- */
     function AdminDashboard({ 
       applicants, selectedApplicant, setSelectedApplicant,
-      onUpdateStatus, onScheduleInterview
+      onUpdateStatus, onScheduleInterview, onResetAll
     }) {
       const [filterStatus, setFilterStatus] = useState('ALL');
       const [searchQuery, setSearchQuery] = useState('');
@@ -1060,6 +1065,14 @@
               </h2>
               <p className="text-[11px] text-slateText-muted mt-0.5">مكتب المستشار للمحاماة والاستشارات القانونية</p>
             </div>
+
+            <button
+              onClick={onResetAll}
+              className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 flex items-center gap-1"
+            >
+              <Icon.Trash className="w-3.5 h-3.5" />
+              <span>تصفير شامل للبيانات</span>
+            </button>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -1125,30 +1138,36 @@
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             
             <div className="md:col-span-1 space-y-2">
-              {filtered.map(app => (
-                <div
-                  key={app.code}
-                  onClick={() => {
-                    setSelectedApplicant(app);
-                    onUpdateStatus(app.code, 'CV_VIEWED');
-                  }}
-                  className={`clean-card p-3.5 cursor-pointer transition-all ${
-                    selectedApplicant?.code === app.code ? 'border-brand-800 ring-2 ring-brand-100' : 'hover:border-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-slateText-muted"><Icon.User className="w-4 h-4" /></div>
+              {filtered.length === 0 ? (
+                <div className="clean-card p-6 text-center text-xs text-slateText-muted">
+                  لا توجد طلبات مسجلة حالياً.
+                </div>
+              ) : (
+                filtered.map(app => (
+                  <div
+                    key={app.code}
+                    onClick={() => {
+                      setSelectedApplicant(app);
+                      onUpdateStatus(app.code, 'CV_VIEWED');
+                    }}
+                    className={`clean-card p-3.5 cursor-pointer transition-all ${
+                      selectedApplicant?.code === app.code ? 'border-brand-800 ring-2 ring-brand-100' : 'hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-slateText-muted"><Icon.User className="w-4 h-4" /></div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center">
-                        <strong className="text-xs font-bold text-slateText-title truncate">{app.fullName}</strong>
-                        <span className="font-mono text-[10px] font-bold text-brand-700 bg-brand-50 px-1 rounded">{app.code}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center">
+                          <strong className="text-xs font-bold text-slateText-title truncate">{app.fullName}</strong>
+                          <span className="font-mono text-[10px] font-bold text-brand-700 bg-brand-50 px-1 rounded">{app.code}</span>
+                        </div>
+                        <p className="text-[11px] text-slateText-muted">{app.qualification} · {app.yearsExperience} سنوات خبرة</p>
                       </div>
-                      <p className="text-[11px] text-slateText-muted">{app.qualification} · {app.yearsExperience} سنوات خبرة</p>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
 
             <div className="md:col-span-2">
