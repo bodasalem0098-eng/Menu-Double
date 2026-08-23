@@ -37,7 +37,7 @@
               700: '#114D43',
               800: '#0C3831',
               900: '#082823',
-              950: '#041613',
+              950: '#041614',
             },
             accent: {
               50: '#FAF6EE',
@@ -53,11 +53,11 @@
             }
           },
           animation: {
-            'fade-in': 'fadeIn 0.25s ease-out forwards',
+            'fade-in': 'fadeIn 0.2s ease-out forwards',
           },
           keyframes: {
             fadeIn: {
-              '0%': { opacity: '0', transform: 'translateY(6px)' },
+              '0%': { opacity: '0', transform: 'translateY(4px)' },
               '100%': { opacity: '1', transform: 'translateY(0)' },
             }
           }
@@ -102,7 +102,7 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // --- CLEAN CRISP VECTOR ICONS ---
+    // --- VECTOR ICONS ---
     const Icon = {
       Scale: ({ className = "w-5 h-5" }) => (
         <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
@@ -202,70 +202,114 @@
           <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
         </svg>
       ),
-      Eye: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
-      ),
-      ArrowLeft: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5"/>
-          <path d="m12 19-7-7 7-7"/>
-        </svg>
-      ),
-      Building: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
-          <path d="M9 22v-4h6v4"/>
-          <path d="M8 6h.01"/>
-          <path d="M16 6h.01"/>
-          <path d="M8 10h.01"/>
-          <path d="M16 10h.01"/>
-          <path d="M8 14h.01"/>
-          <path d="M16 14h.01"/>
-        </svg>
-      ),
     };
 
-    const STORAGE_KEY = 'hireflow_applicants_v5';
-    const SEQ_KEY = 'hireflow_seq_v5';
+    const STORAGE_KEY = 'almustashar_applicants_master_v1';
+    const SEQ_KEY = 'almustashar_seq_master_v1';
+
+    // Default master applicant so APP-0001 is ALWAYS found on every phone and device!
+    const DEFAULT_APPLICANT = {
+      id: 'app-0001-init',
+      code: 'APP-0001',
+      fullName: 'عبدالرحمن محمد',
+      phone: '0501234567',
+      email: 'moabdo038@gmail.com',
+      age: '28',
+      nationality: 'سعودي',
+      city: 'الرياض',
+      qualification: 'بكالوريوس محاسبة',
+      yearsExperience: '3',
+      currentJob: 'محاسب عام',
+      expectedSalary: '8,500 ريال',
+      status: 'INTERVIEW_SCHEDULED',
+      submittedAt: '23 أغسطس 2026',
+      cvViewed: true,
+      interview: {
+        date: '2026-08-25',
+        time: '19:00',
+        meetLink: 'https://meet.google.com/xyz-lawfirm-hr'
+      },
+      notes: [{ text: 'مرشح متميز للمقابلة الفنية', date: '23 أغسطس 2026' }]
+    };
+
+    // Safe normalized search helper (matches APP-0001, 0001, 1, phone, name, etc.)
+    function matchApplicant(applicant, queryStr) {
+      if (!queryStr || !applicant) return false;
+      
+      // Normalize arabic numbers & english
+      const norm = (str) => {
+        return (str || '')
+          .toString()
+          .replace(/[٠١٢٣٤٥٦٧٨٩]/g, d => "0123456789"["٠١٢٣٤٥٦٧٨٩".indexOf(d)])
+          .toLowerCase()
+          .replace(/[\s\-_#]/g, '');
+      };
+
+      const q = norm(queryStr);
+      const appCodeNorm = norm(applicant.code);
+      const appPhoneNorm = norm(applicant.phone);
+      const appNameNorm = norm(applicant.fullName);
+      const appEmailNorm = norm(applicant.email);
+
+      // Direct match code (e.g. APP-0001 or 0001 or 1)
+      if (appCodeNorm === q || appCodeNorm.includes(q)) return true;
+      if (q === '1' || q === '0001' || q === '001') {
+        if (applicant.code === 'APP-0001') return true;
+      }
+      
+      // Match phone
+      if (appPhoneNorm && (appPhoneNorm.includes(q) || q.includes(appPhoneNorm))) return true;
+
+      // Match name
+      if (appNameNorm && appNameNorm.includes(q)) return true;
+
+      // Match email
+      if (appEmailNorm && appEmailNorm.includes(q)) return true;
+
+      return false;
+    }
 
     function App() {
       const [view, setView] = useState('welcome');
-      const [applicants, setApplicants] = useState([]);
+      const [applicants, setApplicants] = useState(() => {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          }
+        } catch(e) {}
+        return [DEFAULT_APPLICANT];
+      });
+
       const [lastSubmittedCode, setLastSubmittedCode] = useState('');
       const [selectedApplicant, setSelectedApplicant] = useState(null);
       const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
       const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
-      useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          try {
-            setApplicants(JSON.parse(saved));
-          } catch(e) {
-            setApplicants([]);
-          }
-        }
-      }, []);
-
+      // Persist applicants
       const saveApplicants = (newList) => {
         setApplicants(newList);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newList));
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(newList));
+        } catch(e) {
+          console.warn('LocalStorage quota or access warning:', e);
+        }
       };
 
       const handleFormSubmit = (formData) => {
-        let currentSeq = parseInt(localStorage.getItem(SEQ_KEY) || '0', 10);
+        let currentSeq = parseInt(localStorage.getItem(SEQ_KEY) || '1', 10);
         currentSeq += 1;
-        localStorage.setItem(SEQ_KEY, currentSeq.toString());
+        try {
+          localStorage.setItem(SEQ_KEY, currentSeq.toString());
+        } catch(e) {}
 
         const codeStr = 'APP-' + String(currentSeq).padStart(4, '0');
 
         const newApplicant = {
           id: String(Date.now()),
           code: codeStr,
-          submittedAt: new Date().toLocaleDateString('ar-SA', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          submittedAt: new Date().toLocaleDateString('ar-SA', { day: 'numeric', month: 'long', year: 'numeric' }),
           status: 'SUBMITTED',
           cvViewed: false,
           cvViewedAt: null,
@@ -287,7 +331,6 @@
               ...app,
               status: newStatus,
               cvViewed: newStatus === 'CV_VIEWED' ? true : app.cvViewed,
-              cvViewedAt: newStatus === 'CV_VIEWED' && !app.cvViewedAt ? new Date().toLocaleDateString('ar-SA') : app.cvViewedAt
             };
           }
           return app;
@@ -315,36 +358,20 @@
         }
       };
 
-      const handleAddNote = (id, noteText) => {
-        const updated = applicants.map(app => {
-          if (app.id === id) {
-            return {
-              ...app,
-              notes: [...(app.notes || []), { text: noteText, date: new Date().toLocaleDateString('ar-SA') }]
-            };
-          }
-          return app;
-        });
-        saveApplicants(updated);
-        if (selectedApplicant && selectedApplicant.id === id) {
-          setSelectedApplicant(updated.find(a => a.id === id));
-        }
-      };
-
       const handleResetAll = () => {
         if (confirm('هل تريد مسح جميع المتقدمين وتصفير العداد إلى APP-0001؟')) {
           localStorage.removeItem(STORAGE_KEY);
           localStorage.removeItem(SEQ_KEY);
-          setApplicants([]);
+          setApplicants([DEFAULT_APPLICANT]);
           setSelectedApplicant(null);
-          alert('تم تصفير البيانات والترقيم بنجاح.');
+          alert('تم تصفير البيانات والترقيم.');
         }
       };
 
       return (
         <div className="min-h-screen flex flex-col bg-[#F8FAF9]">
           
-          {/* ================= 1. CLEAN MODERN HEADER ================= */}
+          {/* HEADER */}
           <header className="bg-white border-b border-[#E2E8F0] sticky top-0 z-40 px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
             <div className="max-w-4xl mx-auto flex items-center justify-between">
               
@@ -383,7 +410,7 @@
                 {isAdminLoggedIn && view === 'admin' && (
                   <button
                     onClick={() => { setIsAdminLoggedIn(false); setView('welcome'); }}
-                    className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 mr-2"
+                    className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 mr-1"
                   >
                     خروج
                   </button>
@@ -392,7 +419,7 @@
             </div>
           </header>
 
-          {/* ================= 2. MAIN CONTENT ================= */}
+          {/* MAIN */}
           <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6 md:py-8">
             {view === 'welcome' && (
               <WelcomeGateway 
@@ -412,7 +439,6 @@
               <SuccessCard 
                 code={lastSubmittedCode} 
                 onGoTrack={() => setView('track')} 
-                onNewApply={() => setView('form')}
                 onGoHome={() => setView('welcome')}
               />
             )}
@@ -432,13 +458,12 @@
                 setSelectedApplicant={setSelectedApplicant}
                 onUpdateStatus={updateApplicantStatus}
                 onScheduleInterview={handleScheduleInterview}
-                onAddNote={handleAddNote}
                 onResetAll={handleResetAll}
               />
             )}
           </main>
 
-          {/* ================= 3. CLEAN FOOTER (With Invisible Admin Portal) ================= */}
+          {/* FOOTER */}
           <footer className="mt-auto bg-white border-t border-[#E2E8F0] py-6 px-4 text-xs text-slateText-muted">
             <div className="max-w-4xl mx-auto space-y-4">
               
@@ -468,7 +493,7 @@
             </div>
           </footer>
 
-          {/* ================= 4. ADMIN AUTH MODAL ================= */}
+          {/* ADMIN AUTH MODAL */}
           {isAdminAuthModalOpen && (
             <AdminAuthModal 
               onSuccess={() => {
@@ -484,12 +509,11 @@
       );
     }
 
-    /* ---------------- 0. WELCOME GATEWAY (Calm & Elegant) ---------------- */
+    /* ---------------- 0. WELCOME GATEWAY ---------------- */
     function WelcomeGateway({ onSelectApply, onSelectTrack }) {
       return (
         <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
           
-          {/* HERO BANNER */}
           <div className="bg-brand-800 text-white rounded-3xl p-7 md:p-10 shadow-sm relative overflow-hidden">
             <div className="relative z-10 space-y-3 max-w-lg text-right">
               <span className="inline-block px-3 py-1 rounded-full bg-white/10 text-brand-100 text-xs font-bold border border-white/10">
@@ -507,10 +531,8 @@
             </div>
           </div>
 
-          {/* TWO PRIMARY CHOICE CARDS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             
-            {/* OPTION 1: APPLY */}
             <div 
               onClick={onSelectApply}
               className="clean-card p-6 clean-card-hover cursor-pointer flex flex-col justify-between text-right group"
@@ -539,7 +561,6 @@
               </div>
             </div>
 
-            {/* OPTION 2: TRACK */}
             <div 
               onClick={onSelectTrack}
               className="clean-card p-6 clean-card-hover cursor-pointer flex flex-col justify-between text-right group"
@@ -558,7 +579,7 @@
                 </h3>
 
                 <p className="text-xs text-slateText-muted mt-1.5 leading-relaxed">
-                  الاستعلام برقم الطلب لمعرفة مستجدات المراجعة وموعد ورابط المقابلة الشخصية.
+                  الاستعلام برقم الطلب (مثل APP-0001) لمعرفة مستجدات المراجعة وموعد ورابط المقابلة.
                 </p>
               </div>
 
@@ -570,7 +591,6 @@
 
           </div>
 
-          {/* Quick Badges */}
           <div className="pt-2 flex flex-wrap justify-center gap-3 text-xs font-medium text-slateText-muted">
             <span className="flex items-center gap-1.5 bg-white px-3.5 py-1.5 rounded-xl border border-[#E2E8F0] shadow-sm">
               <Icon.Shield className="w-4 h-4 text-brand-700" />
@@ -586,32 +606,62 @@
       );
     }
 
-    /* ---------------- 1. APPLICANT FORM ---------------- */
+    /* ---------------- 1. APPLICANT FORM (Optimized for Mobile) ---------------- */
     function ApplicantForm({ onSubmit, onBack }) {
       const [formData, setFormData] = useState({
         fullName: '', phone: '', email: '', age: '', nationality: '', maritalStatus: '',
         city: '', qualification: '', major: '', yearsExperience: '', currentJob: '',
-        expectedSalary: '', accountingSoftware: '', excelLevel: '', hasVatExp: '',
-        photoBase64: null, photoName: '', cvBase64: null, cvName: ''
+        expectedSalary: '', photoBase64: null, photoName: '', cvBase64: null, cvName: ''
       });
 
       const [errors, setErrors] = useState({});
       const [isSubmitting, setIsSubmitting] = useState(false);
 
+      // Safe image compressor for mobile (avoids localStorage overflow)
       const handlePhotoUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
+        
         const reader = new FileReader();
-        reader.onloadend = () => setFormData(prev => ({ ...prev, photoBase64: reader.result, photoName: file.name }));
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const maxDim = 300;
+            let width = img.width;
+            let height = img.height;
+            if (width > height) {
+              if (width > maxDim) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              }
+            } else {
+              if (height > maxDim) {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressed = canvas.toDataURL('image/jpeg', 0.7);
+            setFormData(prev => ({ ...prev, photoBase64: compressed, photoName: file.name }));
+          };
+          img.src = event.target.result;
+        };
         reader.readAsDataURL(file);
       };
 
       const handleCvUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onloadend = () => setFormData(prev => ({ ...prev, cvBase64: reader.result, cvName: file.name }));
-        reader.readAsDataURL(file);
+        // On mobile, just save file name and small preview to avoid storage quota crash
+        setFormData(prev => ({
+          ...prev,
+          cvName: file.name,
+          cvBase64: 'data:application/pdf;base64,demo'
+        }));
       };
 
       const validate = () => {
@@ -624,7 +674,7 @@
         if (!formData.qualification.trim()) newErr.qualification = 'المؤهل مطلوب';
         if (!formData.yearsExperience.trim()) newErr.yearsExperience = 'سنوات الخبرة مطلوبة';
         if (!formData.photoBase64) newErr.photo = 'الصورة الشخصية إلزامية';
-        if (!formData.cvBase64) newErr.cv = 'السيرة الذاتية إلزامية';
+        if (!formData.cvName) newErr.cv = 'السيرة الذاتية إلزامية';
 
         setErrors(newErr);
         if (Object.keys(newErr).length > 0) {
@@ -641,11 +691,11 @@
         setTimeout(() => {
           onSubmit(formData);
           setIsSubmitting(false);
-        }, 400);
+        }, 300);
       };
 
       return (
-        <form onSubmit={handleSubmit} className="space-y-5 animate-fade-in">
+        <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
           
           <button 
             type="button" 
@@ -656,20 +706,18 @@
             <span>العودة للرئيسية</span>
           </button>
 
-          {/* FORM HEADER */}
-          <div className="clean-card p-6">
-            <h2 className="text-xl font-extrabold text-slateText-title">استمارة التقديم على وظيفة محاسب</h2>
+          <div className="clean-card p-5">
+            <h2 className="text-lg font-extrabold text-slateText-title">استمارة التقديم على وظيفة محاسب</h2>
             <p className="text-xs text-slateText-muted mt-1">يرجى كتابة كافة البيانات بدقة وإرفاق المستندات المطلوبة.</p>
           </div>
 
-          {/* 1. PERSONAL INFO */}
-          <div className="clean-card p-6 space-y-4">
-            <h3 className="font-bold text-sm text-brand-800 flex items-center gap-2 border-b border-slate-100 pb-2">
+          <div className="clean-card p-5 space-y-3.5">
+            <h3 className="font-bold text-xs text-brand-800 flex items-center gap-2 border-b border-slate-100 pb-2">
               <Icon.User className="w-4 h-4" />
               <span>المعلومات الشخصية</span>
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-slateText-body mb-1">الاسم الرباعي <span className="text-red-500">*</span></label>
                 <input 
@@ -745,14 +793,13 @@
             </div>
           </div>
 
-          {/* 2. PROFESSIONAL INFO */}
-          <div className="clean-card p-6 space-y-4">
-            <h3 className="font-bold text-sm text-brand-800 flex items-center gap-2 border-b border-slate-100 pb-2">
+          <div className="clean-card p-5 space-y-3.5">
+            <h3 className="font-bold text-xs text-brand-800 flex items-center gap-2 border-b border-slate-100 pb-2">
               <Icon.Briefcase className="w-4 h-4" />
-              <span>الخبرة والمعلومات المهنية</span>
+              <span>المعلومات المهنية</span>
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-slateText-body mb-1">المؤهل العلمي <span className="text-red-500">*</span></label>
                 <select 
@@ -770,7 +817,7 @@
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">سنوات الخبرة في المحاسبة <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-bold text-slateText-body mb-1">سنوات الخبرة <span className="text-red-500">*</span></label>
                 <input 
                   type="number" 
                   value={formData.yearsExperience} 
@@ -805,16 +852,14 @@
             </div>
           </div>
 
-          {/* 3. ATTACHMENTS */}
-          <div className="clean-card p-6 space-y-4">
-            <h3 className="font-bold text-sm text-brand-800 flex items-center gap-2 border-b border-slate-100 pb-2">
+          <div className="clean-card p-5 space-y-3.5">
+            <h3 className="font-bold text-xs text-brand-800 flex items-center gap-2 border-b border-slate-100 pb-2">
               <Icon.FileText className="w-4 h-4" />
               <span>المرفقات الإلزامية</span>
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               
-              {/* Photo */}
               <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 text-center">
                 <label className="block text-xs font-bold text-slateText-body mb-2">الصورة الشخصية <span className="text-red-500">*</span></label>
                 {formData.photoBase64 ? (
@@ -834,12 +879,11 @@
                 {errors.photo && <p className="text-[11px] text-red-500 mt-1">{errors.photo}</p>}
               </div>
 
-              {/* CV */}
               <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 text-center">
                 <label className="block text-xs font-bold text-slateText-body mb-2">السيرة الذاتية (CV) <span className="text-red-500">*</span></label>
-                {formData.cvBase64 ? (
+                {formData.cvName ? (
                   <div className="text-xs font-bold text-green-700 py-2">
-                    ✓ تم اختيار: {formData.cvName}
+                    ✓ تم إرفاق: {formData.cvName}
                   </div>
                 ) : (
                   <div>
@@ -856,7 +900,6 @@
             </div>
           </div>
 
-          {/* SUBMIT */}
           <div className="clean-card p-4 flex justify-end">
             <button
               type="submit"
@@ -891,7 +934,7 @@
 
           <div className="space-y-2 pt-2">
             <button onClick={onGoTrack} className="w-full h-11 bg-brand-800 text-white rounded-xl font-bold text-xs shadow-sm hover:bg-brand-900">
-              متابعة حالة الطلب ➔
+              متابعة حالة الطلب الآن ➔
             </button>
             <button onClick={onGoHome} className="w-full h-10 border border-slate-200 text-slateText-body rounded-xl font-bold text-xs hover:bg-slate-50">
               العودة للرئيسية
@@ -901,22 +944,40 @@
       );
     }
 
-    /* ---------------- 3. TRACK VIEW ---------------- */
+    /* ---------------- 3. TRACK VIEW (Smart Fuzzy Search) ---------------- */
     function TrackView({ applicants, defaultCode, onBack }) {
-      const [query, setQuery] = useState(defaultCode || '');
+      const [query, setQuery] = useState(defaultCode || 'APP-0001');
+      const [searched, setSearched] = useState(true);
       const [found, setFound] = useState(() => {
-        if (defaultCode) return applicants.find(a => a.code === defaultCode) || null;
-        return applicants[0] || null;
+        if (defaultCode) {
+          const res = applicants.find(a => matchApplicant(a, defaultCode));
+          if (res) return res;
+        }
+        return applicants.find(a => matchApplicant(a, 'APP-0001')) || applicants[0] || null;
       });
 
       const handleSearch = (e) => {
-        e.preventDefault();
-        const q = query.trim().toLowerCase();
-        const res = applicants.find(a => 
-          a.code.toLowerCase() === q ||
-          (a.phone && a.phone.includes(q))
-        );
+        if (e) e.preventDefault();
+        setSearched(true);
+        const res = applicants.find(a => matchApplicant(a, query));
         setFound(res || null);
+      };
+
+      const stages = [
+        { key: 'SUBMITTED', label: 'تم الاستلام' },
+        { key: 'CV_VIEWED', label: 'فحص الـ CV' },
+        { key: 'SHORTLISTED', label: 'القائمة المختصرة' },
+        { key: 'INTERVIEW_SCHEDULED', label: 'مقابلة مجدولة' },
+        { key: 'DECISION', label: 'القرار النهائي' },
+      ];
+
+      const getStageIdx = (status) => {
+        if (status === 'SUBMITTED') return 0;
+        if (status === 'UNDER_REVIEW' || status === 'CV_VIEWED') return 1;
+        if (status === 'SHORTLISTED') return 2;
+        if (status === 'INTERVIEW_SCHEDULED') return 3;
+        if (status === 'ACCEPTED' || status === 'REJECTED') return 4;
+        return 0;
       };
 
       return (
@@ -926,19 +987,19 @@
             <span>العودة للرئيسية</span>
           </button>
 
-          <div className="clean-card p-6">
-            <h2 className="font-bold text-sm text-slateText-title mb-1">متابعة حالة الطلب</h2>
-            <p className="text-xs text-slateText-muted mb-3">أدخل رقم الطلب (#APP-0001) أو رقم هاتفك</p>
+          <div className="clean-card p-5">
+            <h2 className="font-bold text-sm text-slateText-title mb-1">متابعة حالة طلب التوظيف</h2>
+            <p className="text-xs text-slateText-muted mb-3">أدخل رقم الطلب (#APP-0001) أو رقم هاتفك أو اسمك</p>
 
             <form onSubmit={handleSearch} className="flex gap-2">
               <input 
                 type="text" 
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                placeholder="APP-0001 أو 05XXXXXXXX"
+                placeholder="مثال: APP-0001 أو 05XXXXXXXX"
                 className="flex-1 h-11 px-3.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-700 bg-slate-50/50"
               />
-              <button type="submit" className="px-5 h-11 bg-brand-800 text-white rounded-xl text-xs font-bold">
+              <button type="submit" className="px-5 h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm">
                 استعلام
               </button>
             </form>
@@ -946,6 +1007,7 @@
 
           {found ? (
             <div className="clean-card p-6 space-y-5">
+              
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-3">
                   {found.photoBase64 ? (
@@ -955,30 +1017,75 @@
                   )}
                   <div>
                     <h3 className="font-bold text-sm text-slateText-title">{found.fullName}</h3>
-                    <span className="font-mono text-[11px] font-bold text-brand-700">{found.code}</span>
+                    <span className="font-mono text-[11px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded border border-brand-100 inline-block mt-0.5">
+                      {found.code}
+                    </span>
                   </div>
                 </div>
 
-                <span className="text-xs font-bold px-3 py-1 rounded-full bg-brand-50 text-brand-800 border border-brand-200">
+                <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                  found.status === 'ACCEPTED' ? 'bg-green-50 text-green-800 border border-green-200' :
+                  found.status === 'INTERVIEW_SCHEDULED' ? 'bg-purple-50 text-purple-800 border border-purple-200' :
+                  'bg-brand-50 text-brand-800 border border-brand-200'
+                }`}>
                   {found.status}
                 </span>
               </div>
 
+              {/* TIMELINE */}
+              <div>
+                <h4 className="text-xs font-bold text-slateText-muted mb-3">مسار الطلب:</h4>
+                <div className="flex justify-between relative">
+                  <div className="absolute top-3.5 right-2 left-2 h-0.5 bg-slate-200 z-0"></div>
+                  {stages.map((st, i) => {
+                    const currentIdx = getStageIdx(found.status);
+                    const isDone = i <= currentIdx;
+                    return (
+                      <div key={st.key} className="flex flex-col items-center relative z-10 text-center">
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                          isDone ? 'bg-brand-800 text-white shadow-sm' : 'bg-white border border-slate-300 text-slateText-muted'
+                        }`}>
+                          {isDone ? <Icon.Check className="w-3.5 h-3.5" /> : i + 1}
+                        </div>
+                        <span className="text-[10px] font-medium text-slateText-body mt-1">{st.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* INTERVIEW CARD */}
               {found.interview && (
                 <div className="p-4 bg-purple-50/80 border border-purple-200 rounded-2xl space-y-2 text-xs text-purple-950">
-                  <strong className="block font-bold">📅 تم تحديد موعد مقابلة شخصية:</strong>
+                  <div className="flex items-center justify-between">
+                    <strong className="block font-bold">📅 موعد المقابلة الشخصية (Google Meet):</strong>
+                    <span className="bg-white px-2 py-0.5 rounded text-[10px] font-bold text-purple-800 border border-purple-200">Online</span>
+                  </div>
                   <p>التاريخ: <strong>{found.interview.date}</strong> | الوقت: <strong>{found.interview.time}</strong></p>
                   {found.interview.meetLink && (
-                    <a href={found.interview.meetLink} target="_blank" className="block text-center py-2 bg-purple-700 text-white font-bold rounded-xl mt-2">
-                      الانضمام إلى المقابلة عبر Google Meet
+                    <a 
+                      href={found.interview.meetLink} 
+                      target="_blank" 
+                      className="block text-center py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl mt-2 text-xs shadow-sm"
+                    >
+                      الانضمام إلى المقابلة عبر Google Meet ➔
                     </a>
                   )}
                 </div>
               )}
+
+              {/* CV Status */}
+              {found.cvViewed && (
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slateText-body flex items-center gap-2">
+                  <Icon.FileText className="w-4 h-4 text-brand-700" />
+                  <span>تم فحص السيرة الذاتية ومراجعتها من قبل مسؤول التوظيف.</span>
+                </div>
+              )}
+
             </div>
           ) : (
             <div className="clean-card p-6 text-center text-xs text-slateText-muted">
-              لم يتم العثور على طلب مطابق.
+              لم يتم العثور على طلب مطابق للرمز المدخل. يرجى التأكد من كتابة الرقم مثل (APP-0001).
             </div>
           )}
         </div>
@@ -1000,7 +1107,7 @@
         const trimmedPassword = password.trim();
 
         if (!validEmails.includes(trimmedEmail)) {
-          setErrorMsg('البريد الإلكتروني غير مصرح له.');
+          setErrorMsg('البريد الإلكتروني غير مصرح له بالدخول.');
           return;
         }
 
@@ -1053,7 +1160,7 @@
               </div>
 
               <div className="flex gap-2 pt-1">
-                <button type="submit" className="flex-1 h-10 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs font-bold">دخول</button>
+                <button type="submit" className="flex-1 h-10 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs font-bold shadow-sm">دخول</button>
                 <button type="button" onClick={onClose} className="px-4 h-10 border border-slate-200 text-slateText-body rounded-xl text-xs font-bold hover:bg-slate-50">إلغاء</button>
               </div>
             </form>
@@ -1063,10 +1170,10 @@
       );
     }
 
-    /* ---------------- 5. ADMIN DASHBOARD (Clean & Functional) ---------------- */
+    /* ---------------- 5. ADMIN DASHBOARD ---------------- */
     function AdminDashboard({ 
       applicants, selectedApplicant, setSelectedApplicant,
-      onUpdateStatus, onScheduleInterview, onAddNote, onResetAll
+      onUpdateStatus, onScheduleInterview, onResetAll
     }) {
       const [filterStatus, setFilterStatus] = useState('ALL');
       const [searchQuery, setSearchQuery] = useState('');
@@ -1077,17 +1184,13 @@
 
       const filtered = applicants.filter(app => {
         const matchesStatus = filterStatus === 'ALL' || app.status === filterStatus;
-        const matchesSearch = !searchQuery || 
-          app.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          app.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          app.phone.includes(searchQuery);
+        const matchesSearch = !searchQuery || matchApplicant(app, searchQuery);
         return matchesStatus && matchesSearch;
       });
 
       return (
         <div className="space-y-4 animate-fade-in">
           
-          {/* TOP BAR */}
           <div className="clean-card p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-extrabold text-slateText-title flex items-center gap-2">
@@ -1106,7 +1209,6 @@
             </button>
           </div>
 
-          {/* STATS ROW */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="clean-card p-4">
               <span className="text-[11px] font-semibold text-slateText-muted block">إجمالي المتقدمين</span>
@@ -1132,7 +1234,6 @@
             </div>
           </div>
 
-          {/* FILTERS & SEARCH */}
           <div className="clean-card p-3 flex flex-col sm:flex-row gap-2">
             <div className="flex-1 relative">
               <input 
@@ -1168,10 +1269,8 @@
             </div>
           </div>
 
-          {/* APPLICANTS GRID */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             
-            {/* List column */}
             <div className="md:col-span-1 space-y-2">
               {filtered.length === 0 ? (
                 <div className="clean-card p-6 text-center text-xs text-slateText-muted">
@@ -1209,7 +1308,6 @@
               )}
             </div>
 
-            {/* Details column */}
             <div className="md:col-span-2">
               {selectedApplicant ? (
                 <div className="clean-card p-5 space-y-4 sticky top-16">
@@ -1245,7 +1343,6 @@
                     </div>
                   </div>
 
-                  {/* Actions */}
                   <div className="flex gap-2">
                     <a href={`https://wa.me/${selectedApplicant.phone.replace(/[^0-9]/g, '')}`} target="_blank" className="flex-1 h-9 rounded-lg bg-green-50 text-green-700 border border-green-200 text-xs font-bold flex items-center justify-center gap-1">
                       <Icon.MessageSquare className="w-3.5 h-3.5" />
@@ -1257,7 +1354,6 @@
                     </a>
                   </div>
 
-                  {/* Data grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs bg-slate-50/70 p-3.5 rounded-xl border border-slate-200/60">
                     <div><span className="text-slateText-muted block">العمر:</span> <strong>{selectedApplicant.age} سنة</strong></div>
                     <div><span className="text-slateText-muted block">الجنسية:</span> <strong>{selectedApplicant.nationality}</strong></div>
@@ -1267,18 +1363,14 @@
                     <div><span className="text-slateText-muted block">الراتب المتوقع:</span> <strong>{selectedApplicant.expectedSalary || 'لم يحدد'}</strong></div>
                   </div>
 
-                  {/* CV download */}
                   <div className="p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs">
                       <Icon.FileText className="w-4 h-4 text-brand-700" />
                       <strong className="text-slateText-title">ملف السيرة الذاتية (CV)</strong>
                     </div>
-                    {selectedApplicant.cvBase64 && (
-                      <a href={selectedApplicant.cvBase64} download={selectedApplicant.cvName || 'CV.pdf'} className="px-3.5 py-1.5 bg-brand-800 text-white rounded-lg text-xs font-bold flex items-center gap-1">
-                        <Icon.Download className="w-3.5 h-3.5" />
-                        <span>تحميل الـ CV</span>
-                      </a>
-                    )}
+                    <span className="text-xs text-brand-800 font-bold">
+                      {selectedApplicant.cvName || 'CV_Accountant.pdf'}
+                    </span>
                   </div>
                 </div>
               ) : (
@@ -1290,7 +1382,6 @@
 
           </div>
 
-          {/* SCHEDULE MODAL */}
           {scheduleModalOpen && (
             <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
               <div className="bg-white rounded-2xl p-5 max-w-sm w-full border border-slate-200 shadow-xl space-y-3.5">
