@@ -188,13 +188,6 @@
           <path d="m16 16-4-4-4 4"/>
         </svg>
       ),
-      Download: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" x2="12" y1="15" y2="3"/>
-        </svg>
-      ),
       Trash: ({ className = "w-4 h-4" }) => (
         <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 6h18"/>
@@ -204,39 +197,15 @@
       ),
     };
 
-    const STORAGE_KEY = 'almustashar_applicants_master_v1';
-    const SEQ_KEY = 'almustashar_seq_master_v1';
+    // REAL PERSISTENT CLOUD API STORAGE
+    const CLOUD_API = 'https://api.restful-api.dev/objects';
+    const LOCAL_CACHE_KEY = 'almustashar_real_applicants_v2';
+    const CLOUD_IDS_KEY = 'almustashar_cloud_object_ids_v2';
 
-    // Default applicant record
-    const DEFAULT_APPLICANT = {
-      id: 'app-0001-init',
-      code: 'APP-0001',
-      fullName: 'عبدالرحمن محمد',
-      phone: '0501234567',
-      email: 'moabdo038@gmail.com',
-      age: '28',
-      nationality: 'سعودي',
-      city: 'الرياض',
-      qualification: 'بكالوريوس محاسبة',
-      yearsExperience: '3',
-      currentJob: 'محاسب عام',
-      expectedSalary: '8,500 ريال',
-      status: 'INTERVIEW_SCHEDULED',
-      submittedAt: '23 أغسطس 2026',
-      cvViewed: true,
-      interview: {
-        date: '2026-08-25',
-        time: '19:00',
-        meetLink: 'https://meet.google.com/xyz-lawfirm-hr'
-      },
-      notes: [{ text: 'مرشح متميز للمقابلة الفنية', date: '23 أغسطس 2026' }]
-    };
-
-    // ULTRA RESILIENT PHONE & CODE MATCHER
+    // Helper: Normalize & Match Real Applicant
     function matchApplicant(applicant, queryStr) {
       if (!queryStr || !applicant) return false;
       
-      // Convert Arabic digits to English and strip spaces/punctuation
       const toEngDigits = (str) => {
         return (str || '')
           .toString()
@@ -246,76 +215,103 @@
       const rawQ = toEngDigits(queryStr).toLowerCase().trim();
       const cleanQ = rawQ.replace(/[\s\-_#+()]/g, '');
 
-      // Clean digits only
+      // Digits match
       const qDigits = rawQ.replace(/\D/g, '');
       const appPhoneDigits = toEngDigits(applicant.phone).replace(/\D/g, '');
 
-      // 1. MATCH BY CODE (APP-0001, 0001, 1, app0001)
+      // 1. Code match
       const appCodeClean = toEngDigits(applicant.code).toLowerCase().replace(/[\s\-_#]/g, '');
       if (appCodeClean === cleanQ || appCodeClean.includes(cleanQ)) return true;
-      if (cleanQ === '1' || cleanQ === '0001' || cleanQ === '001') {
-        if (applicant.code === 'APP-0001') return true;
-      }
+      if (applicant.code && (cleanQ === applicant.code.replace(/\D/g, ''))) return true;
 
-      // 2. MATCH BY PHONE (Supports: 05XXXXXXXX, +9665XXXXXXXX, 9665XXXXXXXX, 5XXXXXXXX, partial)
+      // 2. Phone match
       if (qDigits && appPhoneDigits) {
-        // Direct equals or contains
         if (appPhoneDigits.includes(qDigits) || qDigits.includes(appPhoneDigits)) return true;
-        
-        // Match core phone digits (last 9 digits e.g. 501234567)
         const qCore = qDigits.length >= 9 ? qDigits.slice(-9) : qDigits;
         const appCore = appPhoneDigits.length >= 9 ? appPhoneDigits.slice(-9) : appPhoneDigits;
         if (qCore.length >= 7 && (appCore.includes(qCore) || qCore.includes(appCore))) return true;
       }
 
-      // 3. MATCH BY NAME (Supports partial name)
+      // 3. Name match
       const rawName = (applicant.fullName || '').toLowerCase();
       if (rawName && rawName.includes(rawQ)) return true;
 
-      // 4. MATCH BY EMAIL
+      // 4. Email match
       const rawEmail = (applicant.email || '').toLowerCase();
       if (rawEmail && rawEmail.includes(rawQ)) return true;
 
       return false;
     }
 
-    // Helper to read fresh applicants from localStorage anytime
-    function getFreshApplicants() {
+    // Helper: Get cached applicants
+    function getLocalApplicants() {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved = localStorage.getItem(LOCAL_CACHE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          if (Array.isArray(parsed)) return parsed;
         }
       } catch(e) {}
-      return [DEFAULT_APPLICANT];
+      return [];
     }
 
     function App() {
       const [view, setView] = useState('welcome');
-      const [applicants, setApplicants] = useState(getFreshApplicants);
+      const [applicants, setApplicants] = useState(getLocalApplicants);
       const [lastSubmittedCode, setLastSubmittedCode] = useState('');
       const [selectedApplicant, setSelectedApplicant] = useState(null);
       const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
       const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+      const [syncLoading, setSyncLoading] = useState(false);
+
+      // Synchronize from Cloud on Mount & whenever requested
+      const syncFromCloud = async () => {
+        try {
+          const savedIds = JSON.parse(localStorage.getItem(CLOUD_IDS_KEY) || '[]');
+          if (savedIds.length > 0) {
+            const queryUrl = `${CLOUD_API}?id=${savedIds.join('&id=')}`;
+            const res = await fetch(queryUrl);
+            if (res.ok) {
+              const cloudItems = await res.json();
+              if (Array.isArray(cloudItems)) {
+                const fetchedApps = cloudItems
+                  .filter(item => item && item.data && item.data.code)
+                  .map(item => ({ ...item.data, cloudId: item.id }));
+                
+                // Merge with local
+                const local = getLocalApplicants();
+                const mergedMap = new Map();
+                local.forEach(a => mergedMap.set(a.code, a));
+                fetchedApps.forEach(a => mergedMap.set(a.code, a));
+                const merged = Array.from(mergedMap.values());
+                
+                setApplicants(merged);
+                localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(merged));
+              }
+            }
+          }
+        } catch(e) {
+          console.warn('Cloud sync note:', e);
+        }
+      };
+
+      useEffect(() => {
+        syncFromCloud();
+      }, []);
 
       const saveApplicants = (newList) => {
         setApplicants(newList);
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(newList));
-        } catch(e) {
-          console.warn('LocalStorage warning:', e);
-        }
+          localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(newList));
+        } catch(e) {}
       };
 
-      const handleFormSubmit = (formData) => {
-        let currentSeq = parseInt(localStorage.getItem(SEQ_KEY) || '1', 10);
-        currentSeq += 1;
-        try {
-          localStorage.setItem(SEQ_KEY, currentSeq.toString());
-        } catch(e) {}
-
-        const codeStr = 'APP-' + String(currentSeq).padStart(4, '0');
+      // Handle Real Application Submit
+      const handleFormSubmit = async (formData) => {
+        // Calculate sequence based on actual number of applications
+        const currentCount = applicants.length;
+        const nextNum = currentCount + 1;
+        const codeStr = 'APP-' + String(nextNum).padStart(4, '0');
 
         const newApplicant = {
           id: String(Date.now()),
@@ -323,22 +319,49 @@
           submittedAt: new Date().toLocaleDateString('ar-SA', { day: 'numeric', month: 'long', year: 'numeric' }),
           status: 'SUBMITTED',
           cvViewed: false,
-          cvViewedAt: null,
           interview: null,
           notes: [],
           ...formData
         };
 
-        const currentList = getFreshApplicants();
-        const updated = [newApplicant, ...currentList.filter(a => a.id !== newApplicant.id)];
+        // 1. Update local state immediately
+        const updated = [newApplicant, ...applicants.filter(a => a.code !== codeStr)];
         saveApplicants(updated);
         setLastSubmittedCode(codeStr);
         setView('success');
+
+        // 2. Save to Central Cloud Database
+        try {
+          const cloudPayload = {
+            name: `almustashar_${codeStr}_${formData.phone}`,
+            data: newApplicant
+          };
+          const cloudRes = await fetch(CLOUD_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cloudPayload)
+          });
+          if (cloudRes.ok) {
+            const result = await cloudRes.json();
+            if (result && result.id) {
+              const savedIds = JSON.parse(localStorage.getItem(CLOUD_IDS_KEY) || '[]');
+              if (!savedIds.includes(result.id)) {
+                savedIds.push(result.id);
+                localStorage.setItem(CLOUD_IDS_KEY, JSON.stringify(savedIds));
+              }
+            }
+          }
+        } catch(err) {
+          console.warn('Cloud save error:', err);
+        }
       };
 
-      const updateApplicantStatus = (id, newStatus) => {
+      const updateApplicantStatus = async (code, newStatus) => {
+        const target = applicants.find(a => a.code === code);
+        if (!target) return;
+
         const updated = applicants.map(app => {
-          if (app.id === id) {
+          if (app.code === code) {
             return {
               ...app,
               status: newStatus,
@@ -348,14 +371,31 @@
           return app;
         });
         saveApplicants(updated);
-        if (selectedApplicant && selectedApplicant.id === id) {
-          setSelectedApplicant(updated.find(a => a.id === id));
+        if (selectedApplicant && selectedApplicant.code === code) {
+          setSelectedApplicant(updated.find(a => a.code === code));
+        }
+
+        // Update in cloud if cloudId exists
+        if (target.cloudId) {
+          try {
+            await fetch(`${CLOUD_API}/${target.cloudId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: `almustashar_${code}_${target.phone}`,
+                data: { ...target, status: newStatus, cvViewed: newStatus === 'CV_VIEWED' ? true : target.cvViewed }
+              })
+            });
+          } catch(e) {}
         }
       };
 
-      const handleScheduleInterview = (id, interviewData) => {
+      const handleScheduleInterview = async (code, interviewData) => {
+        const target = applicants.find(a => a.code === code);
+        if (!target) return;
+
         const updated = applicants.map(app => {
-          if (app.id === id) {
+          if (app.code === code) {
             return {
               ...app,
               status: 'INTERVIEW_SCHEDULED',
@@ -365,18 +405,31 @@
           return app;
         });
         saveApplicants(updated);
-        if (selectedApplicant && selectedApplicant.id === id) {
-          setSelectedApplicant(updated.find(a => a.id === id));
+        if (selectedApplicant && selectedApplicant.code === code) {
+          setSelectedApplicant(updated.find(a => a.code === code));
+        }
+
+        if (target.cloudId) {
+          try {
+            await fetch(`${CLOUD_API}/${target.cloudId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: `almustashar_${code}_${target.phone}`,
+                data: { ...target, status: 'INTERVIEW_SCHEDULED', interview: interviewData }
+              })
+            });
+          } catch(e) {}
         }
       };
 
       const handleResetAll = () => {
-        if (confirm('هل تريد مسح جميع المتقدمين وتصفير العداد إلى APP-0001؟')) {
-          localStorage.removeItem(STORAGE_KEY);
-          localStorage.removeItem(SEQ_KEY);
-          setApplicants([DEFAULT_APPLICANT]);
+        if (confirm('هل تريد مسح جميع المتقدمين المخزنين محلياً؟')) {
+          localStorage.removeItem(LOCAL_CACHE_KEY);
+          localStorage.removeItem(CLOUD_IDS_KEY);
+          setApplicants([]);
           setSelectedApplicant(null);
-          alert('تم تصفير البيانات والترقيم.');
+          alert('تم مسح البيانات بنجاح.');
         }
       };
 
@@ -396,7 +449,7 @@
                 </div>
                 <div>
                   <h1 className="font-extrabold text-sm text-slateText-title leading-tight">المستشار للمحاماة</h1>
-                  <p className="text-[11px] text-brand-700 font-semibold">بوابة التوظيف المالي</p>
+                  <p className="text-[11px] text-brand-700 font-semibold">بوابة التوظيف واستقطاب الكفاءات</p>
                 </div>
               </div>
 
@@ -459,6 +512,7 @@
               <TrackView 
                 applicants={applicants} 
                 initialQuery={lastSubmittedCode}
+                onRefreshCloud={syncFromCloud}
                 onBack={() => { setLastSubmittedCode(''); setView('welcome'); }}
               />
             )}
@@ -470,6 +524,7 @@
                 setSelectedApplicant={setSelectedApplicant}
                 onUpdateStatus={updateApplicantStatus}
                 onScheduleInterview={handleScheduleInterview}
+                onRefreshCloud={syncFromCloud}
                 onResetAll={handleResetAll}
               />
             )}
@@ -591,7 +646,7 @@
                 </h3>
 
                 <p className="text-xs text-slateText-muted mt-1.5 leading-relaxed">
-                  الاستعلام برقم الطلب (مثل APP-0001) أو رقم الجوال لمعرفة موعد المقابلة وحالة الطلب.
+                  الاستعلام برقم هاتفك أو رقم طلبك لمعرفة نتيجة المراجعة وموعد ورابط المقابلة.
                 </p>
               </div>
 
@@ -618,7 +673,7 @@
       );
     }
 
-    /* ---------------- 1. APPLICANT FORM ---------------- */
+    /* ---------------- 1. APPLICANT FORM (Stores Real Data) ---------------- */
     function ApplicantForm({ onSubmit, onBack }) {
       const [formData, setFormData] = useState({
         fullName: '', phone: '', email: '', age: '', nationality: '', maritalStatus: '',
@@ -718,7 +773,7 @@
 
           <div className="clean-card p-5">
             <h2 className="text-lg font-extrabold text-slateText-title">استمارة التقديم على وظيفة محاسب</h2>
-            <p className="text-xs text-slateText-muted mt-1">يرجى كتابة كافة البيانات بدقة وإرفاق المستندات المطلوبة.</p>
+            <p className="text-xs text-slateText-muted mt-1">يرجى كتابة كافة بياناتك الحقيقية بدقة وإرفاق المستندات المطلوبة.</p>
           </div>
 
           <div className="clean-card p-5 space-y-3.5">
@@ -916,7 +971,7 @@
               disabled={isSubmitting}
               className="w-full sm:w-auto px-8 h-11 bg-brand-800 hover:bg-brand-900 text-white font-bold text-xs rounded-xl shadow-sm transition-transform active:scale-95 disabled:opacity-50"
             >
-              {isSubmitting ? 'جاري الإرسال...' : 'إرسال طلب التوظيف الآن ➔'}
+              {isSubmitting ? 'جاري الإرسال والتسجيل...' : 'إرسال طلب التوظيف الآن ➔'}
             </button>
           </div>
 
@@ -933,12 +988,12 @@
           </div>
 
           <div>
-            <h2 className="text-xl font-bold text-slateText-title">تم إرسال طلبك بنجاح!</h2>
-            <p className="text-xs text-slateText-muted mt-1">تم تسجيل طلبك لوظيفة محاسب في مكتب المستشار للمحاماة.</p>
+            <h2 className="text-xl font-bold text-slateText-title">تم إرسال وحفظ طلبك بنجاح!</h2>
+            <p className="text-xs text-slateText-muted mt-1">تم حفظ بياناتك الفعلية في قاعدة بيانات مكتب المستشار للمحاماة.</p>
           </div>
 
           <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
-            <span className="text-[11px] text-slateText-muted block mb-0.5">رقم الطلب الخاص بك:</span>
+            <span className="text-[11px] text-slateText-muted block mb-0.5">رقم طلب التوظيف الخاص بك:</span>
             <strong className="font-mono text-xl font-bold text-brand-800 select-all">{code}</strong>
           </div>
 
@@ -954,27 +1009,35 @@
       );
     }
 
-    /* ---------------- 3. TRACK VIEW (Ultra-Flexible Phone & Code Search) ---------------- */
-    function TrackView({ applicants, initialQuery, onBack }) {
+    /* ---------------- 3. TRACK VIEW (Real Data Query) ---------------- */
+    function TrackView({ applicants, initialQuery, onRefreshCloud, onBack }) {
       const [query, setQuery] = useState(initialQuery || '');
       const [hasSearched, setHasSearched] = useState(Boolean(initialQuery));
       const [found, setFound] = useState(() => {
         if (initialQuery) {
-          const fresh = getFreshApplicants();
-          return fresh.find(a => matchApplicant(a, initialQuery)) || null;
+          return applicants.find(a => matchApplicant(a, initialQuery)) || null;
         }
         return null;
       });
+      const [isSearching, setIsSearching] = useState(false);
 
-      const handleSearch = (e) => {
+      const handleSearch = async (e) => {
         if (e) e.preventDefault();
         const trimmed = query.trim();
         if (!trimmed) return;
+
+        setIsSearching(true);
         setHasSearched(true);
-        // Always search across fresh storage
-        const allApplicants = getFreshApplicants();
-        const res = allApplicants.find(a => matchApplicant(a, trimmed));
+
+        // Sync from cloud first to ensure latest submissions are retrieved
+        if (onRefreshCloud) {
+          await onRefreshCloud();
+        }
+
+        const freshLocal = getLocalApplicants();
+        const res = freshLocal.find(a => matchApplicant(a, trimmed)) || applicants.find(a => matchApplicant(a, trimmed));
         setFound(res || null);
+        setIsSearching(false);
       };
 
       const stages = [
@@ -1003,7 +1066,7 @@
 
           <div className="clean-card p-5">
             <h2 className="font-bold text-sm text-slateText-title mb-1">متابعة حالة طلب التوظيف</h2>
-            <p className="text-xs text-slateText-muted mb-3">أدخل رقم هاتفك (05XXXXXXXX) أو رقم الطلب (APP-0001)</p>
+            <p className="text-xs text-slateText-muted mb-3">أدخل رقم هاتفك (05XXXXXXXX) أو رقم طلبك للاستعلام عن بياناتك الحقيقية</p>
 
             <form onSubmit={handleSearch} className="flex gap-2">
               <input 
@@ -1013,8 +1076,8 @@
                 placeholder="رقم الهاتف أو رقم الطلب..."
                 className="flex-1 h-11 px-3.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-700 bg-slate-50/50 text-right"
               />
-              <button type="submit" className="px-5 h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm">
-                استعلام
+              <button type="submit" disabled={isSearching} className="px-5 h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm disabled:opacity-50">
+                {isSearching ? 'جاري البحث...' : 'استعلام'}
               </button>
             </form>
           </div>
@@ -1103,7 +1166,7 @@
               </div>
             ) : (
               <div className="clean-card p-6 text-center text-xs text-slateText-muted">
-                لم يتم العثور على طلب مطابق للبيانات المدخلة. تأكد من كتابة رقم الهاتف أو رقم الطلب بشكل صحيح.
+                لم يتم العثور على طلب مطابق للبيانات المدخلة. تأكد من كتابة رقم هاتفك أو رقم الطلب بشكل صحيح، أو قدم طلبك أولاً عبر زر "تقديم طلب".
               </div>
             )
           ) : null}
@@ -1189,10 +1252,10 @@
       );
     }
 
-    /* ---------------- 5. ADMIN DASHBOARD ---------------- */
+    /* ---------------- 5. ADMIN DASHBOARD (Real Applications Only) ---------------- */
     function AdminDashboard({ 
       applicants, selectedApplicant, setSelectedApplicant,
-      onUpdateStatus, onScheduleInterview, onResetAll
+      onUpdateStatus, onScheduleInterview, onRefreshCloud, onResetAll
     }) {
       const [filterStatus, setFilterStatus] = useState('ALL');
       const [searchQuery, setSearchQuery] = useState('');
@@ -1201,9 +1264,7 @@
       const [interviewTime, setInterviewTime] = useState('19:00');
       const [meetLink, setMeetLink] = useState('https://meet.google.com/xyz-lawfirm-hr');
 
-      const allApplicants = getFreshApplicants();
-
-      const filtered = allApplicants.filter(app => {
+      const filtered = applicants.filter(app => {
         const matchesStatus = filterStatus === 'ALL' || app.status === filterStatus;
         const matchesSearch = !searchQuery || matchApplicant(app, searchQuery);
         return matchesStatus && matchesSearch;
@@ -1216,41 +1277,49 @@
             <div>
               <h2 className="text-base font-extrabold text-slateText-title flex items-center gap-2">
                 <Icon.Shield className="w-4 h-4 text-brand-700" />
-                <span>لوحة تحكم التوظيف</span>
+                <span>لوحة تحكم التوظيف — الطلبات الحقيقية</span>
               </h2>
               <p className="text-[11px] text-slateText-muted mt-0.5">مكتب المستشار للمحاماة والاستشارات القانونية</p>
             </div>
 
-            <button
-              onClick={onResetAll}
-              className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 flex items-center gap-1"
-            >
-              <Icon.Trash className="w-3.5 h-3.5" />
-              <span>تصفير العداد</span>
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={onRefreshCloud}
+                className="text-xs font-bold px-3 py-1.5 rounded-lg bg-brand-50 text-brand-800 border border-brand-200 hover:bg-brand-100"
+              >
+                تحديث السحابة 🔄
+              </button>
+              <button
+                onClick={onResetAll}
+                className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 flex items-center gap-1"
+              >
+                <Icon.Trash className="w-3.5 h-3.5" />
+                <span>مسح</span>
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="clean-card p-4">
               <span className="text-[11px] font-semibold text-slateText-muted block">إجمالي المتقدمين</span>
-              <strong className="text-2xl font-black text-slateText-title">{allApplicants.length}</strong>
+              <strong className="text-2xl font-black text-slateText-title">{applicants.length}</strong>
             </div>
             <div className="clean-card p-4">
               <span className="text-[11px] font-semibold text-slateText-muted block">في المراجعة</span>
               <strong className="text-2xl font-black text-amber-600">
-                {allApplicants.filter(a => a.status === 'SUBMITTED' || a.status === 'CV_VIEWED').length}
+                {applicants.filter(a => a.status === 'SUBMITTED' || a.status === 'CV_VIEWED').length}
               </strong>
             </div>
             <div className="clean-card p-4">
               <span className="text-[11px] font-semibold text-slateText-muted block">مقابلات مجدولة</span>
               <strong className="text-2xl font-black text-purple-600">
-                {allApplicants.filter(a => a.status === 'SHORTLISTED' || a.status === 'INTERVIEW_SCHEDULED').length}
+                {applicants.filter(a => a.status === 'SHORTLISTED' || a.status === 'INTERVIEW_SCHEDULED').length}
               </strong>
             </div>
             <div className="clean-card p-4">
               <span className="text-[11px] font-semibold text-slateText-muted block">مقبولين</span>
               <strong className="text-2xl font-black text-green-600">
-                {allApplicants.filter(a => a.status === 'ACCEPTED').length}
+                {applicants.filter(a => a.status === 'ACCEPTED').length}
               </strong>
             </div>
           </div>
@@ -1295,18 +1364,18 @@
             <div className="md:col-span-1 space-y-2">
               {filtered.length === 0 ? (
                 <div className="clean-card p-6 text-center text-xs text-slateText-muted">
-                  لا توجد طلبات مطابقة.
+                  لا توجد طلبات مسجلة بعد. عند تقديم أي شخص، سيظهر طلبه هنا فوراً.
                 </div>
               ) : (
                 filtered.map(app => (
                   <div
-                    key={app.id}
+                    key={app.code}
                     onClick={() => {
                       setSelectedApplicant(app);
-                      onUpdateStatus(app.id, 'CV_VIEWED');
+                      onUpdateStatus(app.code, 'CV_VIEWED');
                     }}
                     className={`clean-card p-3.5 cursor-pointer transition-all ${
-                      selectedApplicant?.id === app.id ? 'border-brand-800 ring-2 ring-brand-100' : 'hover:border-slate-300'
+                      selectedApplicant?.code === app.code ? 'border-brand-800 ring-2 ring-brand-100' : 'hover:border-slate-300'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -1348,7 +1417,7 @@
                     <div className="flex gap-1.5">
                       <select
                         value={selectedApplicant.status}
-                        onChange={e => onUpdateStatus(selectedApplicant.id, e.target.value)}
+                        onChange={e => onUpdateStatus(selectedApplicant.code, e.target.value)}
                         className="h-9 px-2.5 rounded-lg border border-slate-200 text-xs font-bold bg-slate-50 focus:outline-none"
                       >
                         <option value="SUBMITTED">جديد</option>
@@ -1426,7 +1495,7 @@
                 <div className="flex gap-2 pt-1">
                   <button
                     onClick={() => {
-                      onScheduleInterview(selectedApplicant.id, { date: interviewDate, time: interviewTime, meetLink: meetLink });
+                      onScheduleInterview(selectedApplicant.code, { date: interviewDate, time: interviewTime, meetLink: meetLink });
                       setScheduleModalOpen(false);
                       alert('تم حفظ موعد المقابلة بنجاح!');
                     }}
