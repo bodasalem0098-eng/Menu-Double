@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>المستشار للمحاماة | استمارة التقديم على وظيفة محاسب</title>
-  
+  <title>المستشار للمحاماة والاستشارات القانونية | بوابة التوظيف</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>" />
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -248,7 +248,7 @@
               </div>
               <div>
                 <h1 className="font-extrabold text-xs md:text-sm text-slateText-title leading-tight">المستشار للمحاماة</h1>
-                <p className="text-[10px] text-brand-700 font-semibold">بوابة التوظيف (Neon Postgres)</p>
+                <p className="text-[10px] text-brand-700 font-semibold">والاستشارات القانونية</p>
               </div>
             </button>
 
@@ -574,8 +574,9 @@
     /* ---------------- Query Dashboard ---------------- */
     function ApplicantDashboard({ applicants, activeApplicant, onRefresh, onGoApply }) {
       const [searchQuery, setSearchQuery] = useState(activeApplicant ? activeApplicant.code : '');
-      const [selectedApplicant, setSelectedApplicant] = useState(activeApplicant || (applicants.length > 0 ? applicants[0] : null));
+      const [selectedApplicant, setSelectedApplicant] = useState(activeApplicant || null);
       const [loading, setLoading] = useState(false);
+      const [hasSearched, setHasSearched] = useState(Boolean(activeApplicant));
 
       const normalizedQ = normalizeStr(searchQuery);
       const filteredApplicants = normalizedQ ? applicants.filter(a => {
@@ -587,7 +588,9 @@
 
       const handleManualSearch = async (e) => {
         if (e) e.preventDefault();
+        if (!searchQuery.trim()) return;
         setLoading(true);
+        setHasSearched(true);
         const fresh = await onRefresh();
         setLoading(false);
         const normQ = normalizeStr(searchQuery);
@@ -597,7 +600,7 @@
           normalizeStr(a.phone).includes(normQ) ||
           normalizeStr(a.fullName).includes(normQ)
         );
-        if (found) setSelectedApplicant(found);
+        setSelectedApplicant(found || null);
       };
 
       const getStageIdx = (status) => {
@@ -620,14 +623,14 @@
                 <Icon.RefreshCw size={12} className={loading ? "animate-spin" : ""} /> <span>تحديث</span>
               </button>
             </div>
-            <p className="text-xs text-slateText-muted">ابحث برقم الهاتف أو الاسم أو اختر اسمك مباشرة:</p>
+            <p className="text-xs text-slateText-muted">أدخل رقم الطلب المرجعي أو رقم هاتفك للاستعلام عن حالة طلبك:</p>
 
             <form onSubmit={handleManualSearch} className="flex gap-2">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="رقم الهاتف (05xxxxxxxx) أو الاسم أو رقم الطلب..."
+                placeholder="رقم الطلب (APP-0001) أو رقم الهاتف..."
                 className="flex-1 h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50 outline-none text-right focus:border-brand-800 focus:bg-white"
               />
               <button
@@ -638,25 +641,6 @@
                 بحث
               </button>
             </form>
-
-            {applicants.length > 0 && (
-              <div className="pt-2 border-t border-slate-100">
-                <span className="text-[11px] font-bold text-slateText-muted block mb-1.5">الطلبات المسجلة في النظام:</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {filteredApplicants.map(a => (
-                    <button
-                      key={a.code}
-                      onClick={() => { setSelectedApplicant(a); setSearchQuery(a.code); }}
-                      className={`text-xs px-3 py-1.5 rounded-lg border font-bold transition-all ${
-                        selectedApplicant?.code === a.code ? 'bg-brand-800 text-white border-brand-800 shadow-sm' : 'bg-slate-50 text-slateText-body border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      {a.fullName} ({a.code})
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {selectedApplicant ? (
@@ -727,12 +711,20 @@
                 <div><span className="text-slateText-muted block">الراتب المحدد:</span> <strong>{selectedApplicant.expectedSalary || '2,500 ريال'}</strong></div>
               </div>
             </div>
-          ) : (
+          ) : hasSearched ? (
             <div className="g-card p-6 text-center space-y-3">
-              <p className="text-xs text-slateText-muted">لا توجد طلبات مسجلة حالياً، قدّم أول طلب الآن:</p>
+              <p className="text-xs text-slateText-muted">لم يتم العثور على طلب بهذا الرقم. تأكد من صحة رقم الطلب أو رقم الهاتف.</p>
               <button onClick={onGoApply} className="px-5 py-2 bg-brand-800 text-white text-xs font-bold rounded-xl shadow-sm">
-                تعبئة استمارة التقديم ➔
+                تقديم طلب جديد ➔
               </button>
+            </div>
+          ) : (
+            <div className="g-card p-8 text-center space-y-2">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              </div>
+              <p className="text-xs font-bold text-slateText-body">أدخل رقم الطلب أو رقم هاتفك</p>
+              <p className="text-[11px] text-slateText-muted">ستجد رقم الطلب المرجعي في رسالة التأكيد بعد تقديم طلبك</p>
             </div>
           )}
 
