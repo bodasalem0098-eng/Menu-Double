@@ -789,107 +789,329 @@
       const [intDate, setIntDate] = useState('2026-08-25');
       const [intTime, setIntTime] = useState('19:00');
       const [meetLink, setMeetLink] = useState('https://meet.google.com/xyz-lawfirm-hr');
+      const [filter, setFilter] = useState('ALL');
 
       useEffect(() => {
         if (!selected && applicants.length > 0) setSelected(applicants[0]);
+        if (selected) {
+          const fresh = applicants.find(a => a.code === selected.code);
+          if (fresh) setSelected(fresh);
+        }
       }, [applicants]);
 
+      const statusLabel = (s) => {
+        const map = { SUBMITTED:'جديد', CV_VIEWED:'تم فحص CV', SHORTLISTED:'مرشح', INTERVIEW_SCHEDULED:'مقابلة محددة', ACCEPTED:'مقبول ✓', REJECTED:'مرفوض ✕' };
+        return map[s] || s;
+      };
+      const statusColor = (s) => {
+        if (s === 'ACCEPTED') return 'bg-green-100 text-green-800 border-green-300';
+        if (s === 'REJECTED') return 'bg-red-100 text-red-800 border-red-300';
+        if (s === 'INTERVIEW_SCHEDULED') return 'bg-purple-100 text-purple-800 border-purple-300';
+        if (s === 'SHORTLISTED') return 'bg-blue-100 text-blue-800 border-blue-300';
+        if (s === 'CV_VIEWED') return 'bg-amber-100 text-amber-800 border-amber-300';
+        return 'bg-slate-100 text-slate-700 border-slate-300';
+      };
+
+      const filtered = filter === 'ALL' ? applicants : applicants.filter(a => a.status === filter);
+
       return (
-        <div className="max-w-4xl mx-auto px-3 md:px-4 py-5 md:py-8 space-y-4 animate-fade-in text-right">
-          <div className="g-card p-4 flex items-center justify-between">
-            <h2 className="text-xs md:text-sm font-extrabold text-slateText-title">لوحة المشرفين ({applicants.length} متقدم)</h2>
+        <div className="max-w-5xl mx-auto px-3 md:px-4 py-5 md:py-8 space-y-4 animate-fade-in text-right">
+          
+          {/* Header Bar */}
+          <div className="g-card p-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm md:text-base font-extrabold text-slateText-title">لوحة إدارة التوظيف</h2>
+              <p className="text-[11px] text-slateText-muted">{applicants.length} متقدم مسجل في النظام</p>
+            </div>
             <button onClick={onResetAll} className="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100 flex items-center gap-1">
               <Icon.Trash size={13} /> <span>تصفير الكل</span>
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-1 space-y-2">
-              {applicants.length === 0 ? (
+          {/* Filter Tabs */}
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { key: 'ALL', label: 'الكل', count: applicants.length },
+              { key: 'SUBMITTED', label: 'جدد', count: applicants.filter(a=>a.status==='SUBMITTED').length },
+              { key: 'CV_VIEWED', label: 'تم فحص CV', count: applicants.filter(a=>a.status==='CV_VIEWED').length },
+              { key: 'SHORTLISTED', label: 'مرشحين', count: applicants.filter(a=>a.status==='SHORTLISTED').length },
+              { key: 'INTERVIEW_SCHEDULED', label: 'مقابلات', count: applicants.filter(a=>a.status==='INTERVIEW_SCHEDULED').length },
+              { key: 'ACCEPTED', label: 'مقبولين', count: applicants.filter(a=>a.status==='ACCEPTED').length },
+              { key: 'REJECTED', label: 'مرفوضين', count: applicants.filter(a=>a.status==='REJECTED').length },
+            ].filter(t => t.key === 'ALL' || t.count > 0).map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setFilter(tab.key)}
+                className={`text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-colors ${
+                  filter === tab.key ? 'bg-brand-800 text-white border-brand-800' : 'bg-white text-slateText-body border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                {tab.label} ({tab.count})
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            
+            {/* Applicant List - Sidebar */}
+            <div className="lg:col-span-2 space-y-2 max-h-[75vh] overflow-y-auto no-scrollbar">
+              {filtered.length === 0 ? (
                 <div className="g-card p-6 text-center text-xs text-slateText-muted">
-                  لا توجد طلبات مسجلة حالياً.
+                  لا توجد طلبات في هذا التصنيف.
                 </div>
               ) : (
-                applicants.map(app => (
+                filtered.map(app => (
                   <div
                     key={app.code}
                     onClick={() => setSelected(app)}
-                    className={`g-card p-3 cursor-pointer ${selected?.code === app.code ? 'border-brand-800 ring-2 ring-brand-100' : ''}`}
+                    className={`g-card p-3.5 cursor-pointer transition-all hover:shadow-md ${selected?.code === app.code ? 'border-brand-800 ring-2 ring-brand-100 shadow-md' : ''}`}
                   >
-                    <div className="flex justify-between items-center">
-                      <strong className="text-xs font-bold text-slateText-title">{app.fullName}</strong>
-                      <span className="font-mono text-[10px] font-bold text-brand-800 bg-brand-50 px-1 rounded">{app.code}</span>
+                    <div className="flex items-center gap-3">
+                      {/* Photo */}
+                      {app.photoBase64 ? (
+                        <img src={app.photoBase64} alt="" className="w-10 h-10 rounded-lg object-cover border border-slate-200 flex-shrink-0" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-brand-50 text-brand-800 flex items-center justify-center flex-shrink-0 text-sm font-bold">
+                          {(app.fullName || '?')[0]}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <strong className="text-xs font-bold text-slateText-title truncate">{app.fullName}</strong>
+                          <span className="font-mono text-[9px] font-bold text-brand-800 bg-brand-50 px-1.5 py-0.5 rounded flex-shrink-0">{app.code}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-1 mt-0.5">
+                          <span className="text-[10px] text-slateText-muted truncate">{app.phone} · {app.education}</span>
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border flex-shrink-0 ${statusColor(app.status)}`}>
+                            {statusLabel(app.status)}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-[11px] text-slateText-muted mt-0.5">{app.phone} · {app.education}</p>
                   </div>
                 ))
               )}
             </div>
 
-            <div className="md:col-span-2">
+            {/* Selected Applicant Detail Panel */}
+            <div className="lg:col-span-3">
               {selected ? (
-                <div className="g-card p-5 space-y-4">
-                  <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                    <div>
-                      <h3 className="font-bold text-sm md:text-base text-slateText-title">{selected.fullName}</h3>
-                      <p className="text-xs text-slateText-muted">{selected.phone} · {selected.education}</p>
+                <div className="space-y-4">
+                  
+                  {/* Profile Header */}
+                  <div className="g-card p-5 space-y-4">
+                    <div className="flex items-start gap-4">
+                      {/* Photo */}
+                      {selected.photoBase64 ? (
+                        <img src={selected.photoBase64} alt="" className="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover border-2 border-slate-200 flex-shrink-0" />
+                      ) : (
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-brand-50 text-brand-800 flex items-center justify-center flex-shrink-0 text-2xl font-bold border-2 border-brand-100">
+                          {(selected.fullName || '?')[0]}
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-mono text-xs font-bold text-brand-800 bg-brand-50 px-2 py-0.5 rounded border border-brand-100">{selected.code}</span>
+                          <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${statusColor(selected.status)}`}>
+                            {statusLabel(selected.status)}
+                          </span>
+                        </div>
+                        <h3 className="text-base md:text-lg font-extrabold text-slateText-title">{selected.fullName}</h3>
+                        <p className="text-xs text-slateText-muted" dir="ltr">{selected.phone}</p>
+                        {selected.email && <p className="text-xs text-slateText-muted" dir="ltr">{selected.email}</p>}
+                        <p className="text-[10px] text-slateText-light mt-1">تاريخ التقديم: {selected.submittedAt || 'غير محدد'}</p>
+                      </div>
                     </div>
-                    <div className="flex gap-1.5">
-                      <select
-                        value={selected.status}
-                        onChange={e => onUpdateStatus(selected.code, e.target.value)}
-                        className="h-9 px-2 rounded-lg border border-slate-200 text-xs font-bold bg-slate-50"
+
+                    {/* Quick Action Buttons */}
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+                      <button
+                        onClick={() => onUpdateStatus(selected.code, 'ACCEPTED')}
+                        className={`flex-1 h-10 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-colors ${
+                          selected.status === 'ACCEPTED' ? 'bg-green-600 text-white' : 'bg-green-50 text-green-700 border border-green-300 hover:bg-green-100'
+                        }`}
                       >
-                        <option value="SUBMITTED">جديد</option>
-                        <option value="CV_VIEWED">فحص الـ CV</option>
-                        <option value="SHORTLISTED">مختصر</option>
-                        <option value="INTERVIEW_SCHEDULED">مقابلة</option>
-                        <option value="ACCEPTED">مقبول ✓</option>
-                        <option value="REJECTED">مرفوض ✕</option>
-                      </select>
-                      <button onClick={() => setScheduleOpen(true)} className="px-3 h-9 bg-brand-800 text-white rounded-lg text-xs font-bold">
-                        مقابلة
+                        ✓ قبول المتقدم
                       </button>
                       <button
-                        onClick={() => onDeleteApplicant(selected.code)}
-                        title="حذف هذا المتقدم"
-                        className="w-9 h-9 flex items-center justify-center rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
+                        onClick={() => onUpdateStatus(selected.code, 'REJECTED')}
+                        className={`flex-1 h-10 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-colors ${
+                          selected.status === 'REJECTED' ? 'bg-red-600 text-white' : 'bg-red-50 text-red-700 border border-red-300 hover:bg-red-100'
+                        }`}
                       >
-                        <Icon.Trash size={14} />
+                        ✕ رفض المتقدم
                       </button>
+                      <button
+                        onClick={() => setScheduleOpen(true)}
+                        className="flex-1 h-10 rounded-xl text-xs font-bold flex items-center justify-center gap-1 bg-purple-50 text-purple-700 border border-purple-300 hover:bg-purple-100"
+                      >
+                        📅 جدولة مقابلة
+                      </button>
+                    </div>
+
+                    {/* More Status Options */}
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="text-[11px] text-slateText-muted font-bold ml-1">تغيير الحالة:</span>
+                      {['SUBMITTED','CV_VIEWED','SHORTLISTED','INTERVIEW_SCHEDULED','ACCEPTED','REJECTED'].map(s => (
+                        <button
+                          key={s}
+                          onClick={() => onUpdateStatus(selected.code, s)}
+                          className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors ${
+                            selected.status === s ? statusColor(s) + ' ring-1 ring-offset-1' : 'bg-white text-slateText-body border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          {statusLabel(s)}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <div><span className="text-slateText-muted block">سنوات الخبرة:</span> <strong>{selected.yearsExperience}</strong></div>
-                    <div><span className="text-slateText-muted block">الراتب المحدد:</span> <strong>{selected.expectedSalary || '2,500 ريال'}</strong></div>
-                    <div><span className="text-slateText-muted block">المدينة:</span> <strong>{selected.city || 'الرياض'}</strong></div>
-                    <div><span className="text-slateText-muted block">البرامج:</span> <strong>{selected.skills || 'لم تسجل'}</strong></div>
+                  {/* Full Details */}
+                  <div className="g-card p-5 space-y-3">
+                    <h4 className="text-xs font-bold text-brand-800 uppercase tracking-wide border-b border-slate-100 pb-2">البيانات الكاملة</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                      <div className="bg-slate-50 p-3 rounded-xl">
+                        <span className="text-slateText-muted block text-[10px]">الاسم الكامل</span>
+                        <strong>{selected.fullName}</strong>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded-xl">
+                        <span className="text-slateText-muted block text-[10px]">رقم الهاتف</span>
+                        <strong dir="ltr">{selected.phone}</strong>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded-xl">
+                        <span className="text-slateText-muted block text-[10px]">البريد الإلكتروني</span>
+                        <strong dir="ltr">{selected.email || 'لم يسجل'}</strong>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded-xl">
+                        <span className="text-slateText-muted block text-[10px]">الجنسية</span>
+                        <strong>{selected.nationality || 'لم يحدد'}</strong>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded-xl">
+                        <span className="text-slateText-muted block text-[10px]">المدينة</span>
+                        <strong>{selected.city || 'لم يحدد'}</strong>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded-xl">
+                        <span className="text-slateText-muted block text-[10px]">العمر</span>
+                        <strong>{selected.age || 'لم يحدد'}</strong>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded-xl">
+                        <span className="text-slateText-muted block text-[10px]">المؤهل العلمي</span>
+                        <strong>{selected.education || 'لم يحدد'}</strong>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded-xl">
+                        <span className="text-slateText-muted block text-[10px]">الوظيفة الحالية</span>
+                        <strong>{selected.currentJob || 'لم يحدد'}</strong>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded-xl">
+                        <span className="text-slateText-muted block text-[10px]">سنوات الخبرة</span>
+                        <strong>{selected.yearsExperience || 'لم يحدد'}</strong>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded-xl">
+                        <span className="text-slateText-muted block text-[10px]">الراتب المحدد</span>
+                        <strong>{selected.expectedSalary || '2,500 ريال'}</strong>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded-xl md:col-span-2">
+                        <span className="text-slateText-muted block text-[10px]">البرامج والمهارات</span>
+                        <strong>{selected.skills || 'لم يسجل'}</strong>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded-xl">
+                        <span className="text-slateText-muted block text-[10px]">خبرة ضريبة القيمة المضافة</span>
+                        <strong>{selected.vatExperience || 'لم يحدد'}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Attachments: Photo & CV */}
+                  <div className="g-card p-5 space-y-3">
+                    <h4 className="text-xs font-bold text-brand-800 uppercase tracking-wide border-b border-slate-100 pb-2">المرفقات</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                        <span className="text-[10px] text-slateText-muted font-bold block mb-2">الصورة الشخصية</span>
+                        {selected.photoBase64 ? (
+                          <img src={selected.photoBase64} alt="صورة المتقدم" className="w-24 h-24 rounded-xl object-cover mx-auto border border-slate-200" />
+                        ) : (
+                          <div className="w-24 h-24 rounded-xl bg-slate-200 flex items-center justify-center mx-auto text-xs text-slateText-muted">لم ترفق صورة</div>
+                        )}
+                      </div>
+                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                        <span className="text-[10px] text-slateText-muted font-bold block mb-2">السيرة الذاتية (CV)</span>
+                        {selected.cvFile ? (
+                          <div className="space-y-1">
+                            <div className="w-16 h-16 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center mx-auto text-red-600 text-lg font-bold">PDF</div>
+                            <p className="text-xs font-bold text-green-600">✓ {selected.cvFile.name}</p>
+                            <p className="text-[10px] text-slateText-muted">{selected.cvFile.size}</p>
+                          </div>
+                        ) : (
+                          <div className="w-24 h-24 rounded-xl bg-slate-200 flex items-center justify-center mx-auto text-xs text-slateText-muted">لم يرفق CV</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Interview Info if scheduled */}
+                  {selected.interview && (
+                    <div className="g-card p-5 space-y-3 bg-purple-50/50 border-purple-200">
+                      <h4 className="text-xs font-bold text-purple-900 uppercase tracking-wide">📅 المقابلة المجدولة</h4>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="bg-white p-2.5 rounded-lg text-center">
+                          <span className="text-[10px] text-slateText-muted block">التاريخ</span>
+                          <strong>{selected.interview.date}</strong>
+                        </div>
+                        <div className="bg-white p-2.5 rounded-lg text-center">
+                          <span className="text-[10px] text-slateText-muted block">الوقت</span>
+                          <strong>{selected.interview.time}</strong>
+                        </div>
+                        <div className="bg-white p-2.5 rounded-lg text-center">
+                          <span className="text-[10px] text-slateText-muted block">المنصة</span>
+                          <strong>Google Meet</strong>
+                        </div>
+                      </div>
+                      {selected.interview.meetLink && (
+                        <a href={selected.interview.meetLink} target="_blank" className="block text-center py-2 bg-purple-700 text-white font-bold rounded-xl text-xs hover:bg-purple-800">
+                          فتح رابط المقابلة ➔
+                        </a>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Delete */}
+                  <div className="flex justify-end pt-2">
+                    <button
+                      onClick={() => onDeleteApplicant(selected.code)}
+                      className="px-4 py-2 rounded-lg bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100 flex items-center gap-1"
+                    >
+                      <Icon.Trash size={13} /> حذف هذا المتقدم نهائياً
+                    </button>
                   </div>
                 </div>
               ) : (
-                <div className="g-card p-8 text-center text-xs text-slateText-muted">
-                  اختر مرشحاً لعرض بياناته.
+                <div className="g-card p-10 text-center space-y-2">
+                  <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slateText-light">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  </div>
+                  <p className="text-xs font-bold text-slateText-body">اختر متقدماً من القائمة لعرض ملفه الكامل</p>
+                  <p className="text-[11px] text-slateText-muted">يمكنك قبول أو رفض أو جدولة مقابلة لأي متقدم</p>
                 </div>
               )}
             </div>
           </div>
 
+          {/* Schedule Interview Modal */}
           {scheduleOpen && selected && (
             <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in text-right">
-              <div className="bg-white rounded-2xl p-5 max-w-sm w-full space-y-3">
-                <h3 className="font-bold text-xs md:text-sm text-slateText-title">جدولة مقابلة لـ: {selected.fullName}</h3>
+              <div className="bg-white rounded-2xl p-5 max-w-sm w-full space-y-3.5 border border-slate-200 shadow-xl">
+                <h3 className="font-bold text-sm text-slateText-title">📅 جدولة مقابلة لـ: {selected.fullName}</h3>
                 <div>
-                  <label className="block text-xs font-bold mb-1">التاريخ</label>
-                  <input type="date" value={intDate} onChange={e => setIntDate(e.target.value)} className="w-full h-9 px-3 border rounded-lg text-xs" />
+                  <label className="block text-xs font-bold mb-1">تاريخ المقابلة</label>
+                  <input type="date" value={intDate} onChange={e => setIntDate(e.target.value)} className="w-full h-10 px-3 border border-slate-200 rounded-xl text-xs bg-slate-50" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold mb-1">الوقت</label>
-                  <input type="time" value={intTime} onChange={e => setIntTime(e.target.value)} className="w-full h-9 px-3 border rounded-lg text-xs" />
+                  <label className="block text-xs font-bold mb-1">وقت المقابلة</label>
+                  <input type="time" value={intTime} onChange={e => setIntTime(e.target.value)} className="w-full h-10 px-3 border border-slate-200 rounded-xl text-xs bg-slate-50" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold mb-1">رابط Google Meet</label>
-                  <input type="text" value={meetLink} onChange={e => setMeetLink(e.target.value)} className="w-full h-9 px-3 border rounded-lg text-xs" />
+                  <input type="text" value={meetLink} onChange={e => setMeetLink(e.target.value)} className="w-full h-10 px-3 border border-slate-200 rounded-xl text-xs bg-slate-50" dir="ltr" />
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button
@@ -897,11 +1119,11 @@
                       onScheduleInterview(selected.code, { date: intDate, time: intTime, meetLink });
                       setScheduleOpen(false);
                     }}
-                    className="flex-1 h-9 bg-brand-800 text-white text-xs font-bold rounded-lg"
+                    className="flex-1 h-10 bg-purple-700 text-white text-xs font-bold rounded-xl hover:bg-purple-800"
                   >
-                    تأكيد الموعد
+                    تأكيد وحفظ الموعد ✓
                   </button>
-                  <button onClick={() => setScheduleOpen(false)} className="px-3 h-9 border rounded-lg text-xs">إلغاء</button>
+                  <button onClick={() => setScheduleOpen(false)} className="px-4 h-10 border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-50">إلغاء</button>
                 </div>
               </div>
             </div>
