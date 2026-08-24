@@ -1255,11 +1255,16 @@
       const [previewCv, setPreviewCv] = useState(null);
       const [isRefreshing, setIsRefreshing] = useState(false);
 
-      // Auto-refresh when entering admin view
+      // Auto-refresh when entering admin view + periodic background sync every 12s
       useEffect(() => {
         if (onRefresh) {
           setIsRefreshing(true);
           onRefresh().finally(() => setIsRefreshing(false));
+
+          const interval = setInterval(() => {
+            onRefresh().catch(() => {});
+          }, 12000);
+          return () => clearInterval(interval);
         }
       }, []);
 
