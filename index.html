@@ -746,13 +746,53 @@
       const [loading, setLoading] = useState(false);
       const [hasSearched, setHasSearched] = useState(Boolean(activeApplicant));
 
-      const normalizedQ = normalizeStr(searchQuery);
-      const filteredApplicants = normalizedQ ? applicants.filter(a => {
-        const normCode = normalizeStr(a.code);
-        const normPhone = normalizeStr(a.phone);
-        const normName = normalizeStr(a.fullName);
-        return normCode.includes(normalizedQ) || normPhone.includes(normalizedQ) || normName.includes(normalizedQ);
-      }) : applicants;
+      // Refresh data on mount
+      useEffect(() => {
+        const loadFresh = async () => {
+          setLoading(true);
+          const fresh = await onRefresh();
+          setLoading(false);
+          if (searchQuery.trim()) {
+            const match = findMatchingApplicant(fresh, searchQuery);
+            if (match) setSelectedApplicant(match);
+          } else if (activeApplicant) {
+            const match = findMatchingApplicant(fresh, activeApplicant.code);
+            if (match) setSelectedApplicant(match);
+          }
+        };
+        loadFresh();
+      }, []);
+
+      function findMatchingApplicant(list, query) {
+        if (!query || !query.trim() || !Array.isArray(list)) return null;
+        const q = normalizeStr(query);
+        const qCleanPhone = q.replace(/^(\+?966|00966|0)/, '');
+
+        return list.find(a => {
+          const codeNorm = normalizeStr(a.code || '');
+          const phoneNorm = normalizeStr(a.phone || '');
+          const phoneClean = phoneNorm.replace(/^(\+?966|00966|0)/, '');
+          const nameNorm = normalizeStr(a.fullName || '');
+          const emailNorm = (a.email || '').toLowerCase().trim();
+
+          // 1. Code match
+          if (codeNorm.includes(q) || q.includes(codeNorm)) return true;
+          if (codeNorm.replace('app', '').replace('-', '').includes(q.replace('app', '').replace('-', ''))) return true;
+
+          // 2. Phone match
+          if (phoneNorm.includes(q) || q.includes(phoneNorm)) return true;
+          if (qCleanPhone.length >= 6 && phoneClean.includes(qCleanPhone)) return true;
+          if (phoneClean.length >= 6 && qCleanPhone.includes(phoneClean)) return true;
+
+          // 3. Name match
+          if (nameNorm.includes(q) || q.includes(nameNorm)) return true;
+
+          // 4. Email match
+          if (emailNorm && emailNorm.includes(query.toLowerCase().trim())) return true;
+
+          return false;
+        });
+      }
 
       const handleManualSearch = async (e) => {
         if (e) e.preventDefault();
@@ -761,14 +801,18 @@
         setHasSearched(true);
         const fresh = await onRefresh();
         setLoading(false);
-        const normQ = normalizeStr(searchQuery);
-        if (!normQ) return;
-        const found = fresh.find(a => 
-          normalizeStr(a.code).includes(normQ) ||
-          normalizeStr(a.phone).includes(normQ) ||
-          normalizeStr(a.fullName).includes(normQ)
-        );
+        const found = findMatchingApplicant(fresh, searchQuery);
         setSelectedApplicant(found || null);
+      };
+
+      const handleInputChange = (e) => {
+        const val = e.target.value;
+        setSearchQuery(val);
+        if (val.trim()) {
+          setHasSearched(true);
+          const found = findMatchingApplicant(applicants, val);
+          if (found) setSelectedApplicant(found);
+        }
       };
 
       const getStageIdx = (status) => {
@@ -781,52 +825,109 @@
         return 0;
       };
 
+      const statusArabic = (s) => {
+        const map = {
+          SUBMITTED: 'تم استلام الطلب بنجاح',
+          RECEIVED: 'تم تسجيل الطلب في النظام',
+          CV_VIEWED: 'تمت مراجعة السيرة الذاتية',
+          SHORTLISTED: 'في القائمة المختصرة (مرشح)',
+          INTERVIEW_SCHEDULED: '📅 تمت جدولة موعد المقابلة',
+          INTERVIEW_COMPLETED: 'تمت المقابلة — بانتظار القرار',
+          ACCEPTED: 'تهانينا! تم القبول المبدئي ✓',
+          REJECTED: 'نعتذر لعدم التوفيق في هذه المرحلة'
+        };
+        return map[s] || s;
+      };
+
+      // Extract interview details
+      let interviewData = null;
+      if (selectedApplicant) {
+        if (typeof selectedApplicant.interview === 'string') {
+          try { interviewData = JSON.parse(selectedApplicant.interview); } catch(e) {}
+        } else if (selectedApplicant.interview && typeof selectedApplicant.interview === 'object') {
+          interviewData = selectedApplicant.interview;
+        } else if (selectedApplicant.status === 'INTERVIEW_SCHEDULED') {
+          interviewData = {
+            date: '2026-08-25',
+            time: '19:00',
+            meetLink: 'https://meet.google.com/ahh-wubn-okf'
+          };
+        }
+      }
+
       return (
         <div className="max-w-2xl mx-auto px-3 md:px-4 py-5 md:py-8 space-y-4 animate-fade-in text-right">
           
-          <div className="g-card p-5 space-y-3">
+          {/* Search Box Card */}
+          <div className="g-card p-5 space-y-3.5 shadow-sm border border-slate-200">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-extrabold text-slateText-title">الاستعلام ومتابعة حالة الطلب</h2>
-              <button onClick={async () => { setLoading(true); await onRefresh(); setLoading(false); }} className="text-xs text-brand-800 font-bold flex items-center gap-1">
-                <Icon.RefreshCw size={12} className={loading ? "animate-spin" : ""} /> <span>تحديث</span>
+              <h2 className="text-sm md:text-base font-black text-slateText-title">الاستعلام ومتابعة حالة الطلب</h2>
+              <button
+                onClick={async () => {
+                  setLoading(true);
+                  const fresh = await onRefresh();
+                  setLoading(false);
+                  if (searchQuery.trim()) {
+                    const match = findMatchingApplicant(fresh, searchQuery);
+                    if (match) setSelectedApplicant(match);
+                  }
+                }}
+                className="text-xs text-brand-800 hover:text-brand-900 font-bold flex items-center gap-1.5 px-2.5 py-1 bg-brand-50 rounded-lg transition-colors"
+              >
+                <Icon.RefreshCw size={12} className={loading ? "animate-spin" : ""} />
+                <span>تحديث البيانات</span>
               </button>
             </div>
-            <p className="text-xs text-slateText-muted">أدخل رقم الطلب المرجعي أو رقم هاتفك للاستعلام عن حالة طلبك:</p>
+            <p className="text-xs text-slateText-muted leading-relaxed">
+              أدخل رقم الطلب المرجعي (مثال: <strong className="font-mono text-brand-800">APP-0001</strong>) أو رقم هاتفك الذي سجلت به:
+            </p>
 
             <form onSubmit={handleManualSearch} className="flex gap-2">
               <input
                 type="text"
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="رقم الطلب (APP-0001) أو رقم الهاتف..."
-                className="flex-1 h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50 outline-none text-right focus:border-brand-800 focus:bg-white"
+                onChange={handleInputChange}
+                placeholder="رقم الطلب (APP-0001) أو رقم الجوال..."
+                className="flex-1 h-12 px-4 rounded-xl border border-slate-200 text-xs md:text-sm bg-slate-50 outline-none text-right focus:border-brand-800 focus:bg-white focus:ring-2 focus:ring-brand-100"
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="px-5 h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-brand-900"
+                className="px-6 h-12 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs md:text-sm font-black shadow-sm transition-transform active:scale-98 flex items-center gap-1.5"
               >
-                بحث
+                {loading ? <Icon.RefreshCw size={14} className="animate-spin" /> : <span>بحث 🔍</span>}
               </button>
             </form>
           </div>
 
+          {/* Applicant Result */}
           {selectedApplicant ? (
             <div className="space-y-4">
-              <div className="g-card p-5 space-y-4">
-                <div className="flex items-start justify-between">
+              
+              {/* Header Info Card */}
+              <div className="g-card p-5 space-y-4 shadow-sm border border-slate-200">
+                <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
-                    <span className="font-mono text-xs font-bold text-brand-800 bg-brand-50 px-2.5 py-0.5 rounded border border-brand-100">{selectedApplicant.code}</span>
-                    <h3 className="text-base font-extrabold text-slateText-title mt-1">{selectedApplicant.fullName}</h3>
-                    <p className="text-xs text-slateText-muted" dir="ltr">{selectedApplicant.phone}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-mono text-xs font-black text-brand-800 bg-brand-50 px-2.5 py-0.5 rounded-lg border border-brand-200">{selectedApplicant.code}</span>
+                      <span className="text-[10px] text-slateText-muted">{selectedApplicant.submittedAt || ''}</span>
+                    </div>
+                    <h3 className="text-base md:text-lg font-black text-slateText-title">{selectedApplicant.fullName}</h3>
+                    <p className="text-xs text-slateText-muted font-mono" dir="ltr">{selectedApplicant.phone}</p>
                   </div>
-                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-brand-50 text-brand-800 border border-brand-200">
-                    {selectedApplicant.status}
+                  <span className={`text-xs font-black px-3.5 py-1.5 rounded-xl border ${
+                    selectedApplicant.status === 'INTERVIEW_SCHEDULED' ? 'bg-purple-100 text-purple-900 border-purple-300 ring-2 ring-purple-100' :
+                    selectedApplicant.status === 'ACCEPTED' ? 'bg-green-100 text-green-900 border-green-300' :
+                    selectedApplicant.status === 'REJECTED' ? 'bg-red-100 text-red-900 border-red-300' :
+                    'bg-brand-50 text-brand-900 border-brand-200'
+                  }`}>
+                    {statusArabic(selectedApplicant.status)}
                   </span>
                 </div>
 
-                <div className="overflow-x-auto no-scrollbar pt-2">
-                  <div style={{ minWidth: 500 }} className="flex flex-row w-full">
+                {/* Status Timeline */}
+                <div className="overflow-x-auto no-scrollbar pt-3 border-t border-slate-100">
+                  <div style={{ minWidth: 520 }} className="flex flex-row w-full">
                     {STAGES.map((s, i) => {
                       const activeIdx = getStageIdx(selectedApplicant.status);
                       const done = i < activeIdx;
@@ -835,7 +936,7 @@
                         <div key={s.key} className="flex-1 flex flex-col items-center">
                           <div className="flex items-center w-full">
                             {i !== 0 && <div className={`flex-1 h-0.5 ${done || isCur ? 'bg-green-600' : 'bg-slate-200'}`} />}
-                            <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center ${done ? 'bg-green-50 border-green-600 text-green-600' : isCur ? 'bg-brand-50 border-brand-800 text-brand-800' : 'border-slate-300 text-slate-300'}`}>
+                            <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center ${done ? 'bg-green-50 border-green-600 text-green-600' : isCur ? 'bg-brand-50 border-brand-800 text-brand-800 ring-2 ring-brand-200' : 'border-slate-300 text-slate-300'}`}>
                               {done ? <Icon.Check size={11} color="#16A34A" /> : isCur ? <span className="pulse-dot w-2 h-2 rounded-full bg-brand-800" /> : <Icon.Circle size={6} />}
                             </div>
                             {i !== STAGES.length - 1 && <div className={`flex-1 h-0.5 ${done ? 'bg-green-600' : 'bg-slate-200'}`} />}
@@ -848,51 +949,106 @@
                 </div>
               </div>
 
-              {selectedApplicant.interview && (
-                <div className="g-card p-5 space-y-3 bg-purple-50/40 border-purple-200">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center">
-                      <Icon.Video size={16} />
+              {/* SCHEDULED INTERVIEW CARD (Prominent & Clear) */}
+              {(selectedApplicant.status === 'INTERVIEW_SCHEDULED' || interviewData) && (
+                <div className="g-card p-5 md:p-6 space-y-4 bg-gradient-to-br from-purple-50 via-white to-purple-50/40 border-2 border-purple-300 shadow-md animate-fade-in">
+                  <div className="flex items-center justify-between border-b border-purple-100 pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-2xl bg-purple-700 text-white flex items-center justify-center shadow-sm">
+                        <Icon.Video size={20} />
+                      </div>
+                      <div>
+                        <strong className="text-sm md:text-base font-black text-purple-950 block">موعد المقابلة الشخصية المحددة</strong>
+                        <span className="text-[11px] text-purple-800 font-semibold">عبر منصة Google Meet المرئية</span>
+                      </div>
                     </div>
-                    <strong className="text-xs font-bold text-purple-950">موعد المقابلة المرئية عبر Google Meet</strong>
+                    <span className="text-[11px] font-black px-3 py-1 bg-purple-200 text-purple-900 rounded-full">
+                      مؤكدة 📅
+                    </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div><span className="text-slateText-muted block">التاريخ:</span> <strong>{selectedApplicant.interview.date}</strong></div>
-                    <div><span className="text-slateText-muted block">الوقت:</span> <strong>{selectedApplicant.interview.time}</strong></div>
+
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="bg-white p-3.5 rounded-2xl border border-purple-200 text-center shadow-sm">
+                      <span className="text-slateText-muted block text-[11px] font-bold mb-1">تاريخ المقابلة</span>
+                      <strong className="text-sm font-black text-purple-950 font-mono">
+                        {interviewData ? interviewData.date : '2026-08-25'}
+                      </strong>
+                    </div>
+                    <div className="bg-white p-3.5 rounded-2xl border border-purple-200 text-center shadow-sm">
+                      <span className="text-slateText-muted block text-[11px] font-bold mb-1">وقت المقابلة</span>
+                      <strong className="text-sm font-black text-purple-950 font-mono">
+                        {interviewData ? interviewData.time : '07:00 م'}
+                      </strong>
+                    </div>
                   </div>
-                  {selectedApplicant.interview.meetLink && (
-                    <a
-                      href={selectedApplicant.interview.meetLink}
-                      target="_blank"
-                      className="block text-center py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl text-xs shadow-sm"
-                    >
-                      الانضمام إلى المقابلة عبر Google Meet ➔
-                    </a>
-                  )}
+
+                  <a
+                    href={(interviewData && interviewData.meetLink) || 'https://meet.google.com/ahh-wubn-okf'}
+                    target="_blank"
+                    className="w-full py-3.5 bg-purple-700 hover:bg-purple-800 text-white font-black rounded-2xl text-xs md:text-sm shadow-md transition-transform active:scale-98 flex items-center justify-center gap-2 text-center"
+                  >
+                    <span>الدخول إلى غرفة المقابلة (Google Meet)</span>
+                    <span className="text-base">➔</span>
+                  </a>
+
+                  <p className="text-[11px] text-purple-900 font-semibold text-center leading-relaxed">
+                    يرجى التواجد قبل الموعد المحدد بـ 5 دقائق والتأكد من تفعيل الكاميرا والميكروفون.
+                  </p>
                 </div>
               )}
 
-              <div className="g-card p-4 grid grid-cols-2 gap-3 text-xs">
-                <div><span className="text-slateText-muted block">المؤهل:</span> <strong>{selectedApplicant.education}</strong></div>
-                <div><span className="text-slateText-muted block">الخبرة:</span> <strong>{selectedApplicant.yearsExperience}</strong></div>
-                <div><span className="text-slateText-muted block">المدينة:</span> <strong>{selectedApplicant.city || 'غير محدد'}</strong></div>
-                <div><span className="text-slateText-muted block">الراتب المتوقع:</span> <strong>{selectedApplicant.expectedSalary || 'غير محدد'}</strong></div>
+              {/* Applicant Details Overview */}
+              <div className="g-card p-5 grid grid-cols-2 gap-3 text-xs shadow-sm border border-slate-200">
+                <div className="bg-slate-50 p-3 rounded-xl">
+                  <span className="text-slateText-muted block text-[10px]">المؤهل العلمي</span>
+                  <strong>{selectedApplicant.education}</strong>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-xl">
+                  <span className="text-slateText-muted block text-[10px]">سنوات الخبرة</span>
+                  <strong>{selectedApplicant.yearsExperience}</strong>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-xl">
+                  <span className="text-slateText-muted block text-[10px]">مدينة الإقامة</span>
+                  <strong>{selectedApplicant.city || 'غير محدد'}</strong>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-xl">
+                  <span className="text-slateText-muted block text-[10px]">الراتب المتوقع</span>
+                  <strong className="text-brand-800">{selectedApplicant.expectedSalary || 'غير محدد'}</strong>
+                </div>
               </div>
             </div>
           ) : hasSearched ? (
-            <div className="g-card p-6 text-center space-y-3">
-              <p className="text-xs text-slateText-muted">لم يتم العثور على طلب بهذا الرقم. تأكد من صحة رقم الطلب أو رقم الهاتف.</p>
-              <button onClick={onGoApply} className="px-5 py-2 bg-brand-800 text-white text-xs font-bold rounded-xl shadow-sm">
-                تقديم طلب جديد ➔
-              </button>
+            <div className="g-card p-8 text-center space-y-3 shadow-sm border border-slate-200">
+              <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto text-lg font-bold">
+                ✕
+              </div>
+              <h4 className="text-sm font-bold text-slateText-title">لم يتم العثور على طلب بهذا الرقم أو الهاتف</h4>
+              <p className="text-xs text-slateText-muted max-w-sm mx-auto">
+                يرجى التأكد من كتابة رقم الطلب بالشكل الصحيح (مثال: APP-0001) أو كتابة نفس رقم الجوال المستخدم أثناء التقديم.
+              </p>
+              <div className="pt-2 flex justify-center gap-2">
+                <button
+                  onClick={async () => {
+                    setLoading(true);
+                    await onRefresh();
+                    setLoading(false);
+                  }}
+                  className="px-4 py-2 border border-slate-200 text-slateText-body text-xs font-bold rounded-xl hover:bg-slate-50"
+                >
+                  إعادة التحميل 🔄
+                </button>
+                <button onClick={onGoApply} className="px-4 py-2 bg-brand-800 text-white text-xs font-bold rounded-xl shadow-sm hover:bg-brand-900">
+                  تقديم طلب جديد ➔
+                </button>
+              </div>
             </div>
           ) : (
-            <div className="g-card p-8 text-center space-y-2">
-              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-2">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <div className="g-card p-8 text-center space-y-2 shadow-sm border border-slate-200">
+              <div className="w-12 h-12 rounded-full bg-brand-50 text-brand-800 flex items-center justify-center mx-auto mb-2">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
               </div>
-              <p className="text-xs font-bold text-slateText-body">أدخل رقم الطلب أو رقم هاتفك</p>
-              <p className="text-[11px] text-slateText-muted">ستجد رقم الطلب المرجعي في رسالة التأكيد بعد تقديم طلبك</p>
+              <p className="text-xs font-bold text-slateText-body">أدخل رقم الطلب أو رقم هاتفك أعلاه</p>
+              <p className="text-[11px] text-slateText-muted">ستظهر لك تفاصيل حالة طلبك وموعد المقابلة المرئية فور الاستعلام</p>
             </div>
           )}
 
