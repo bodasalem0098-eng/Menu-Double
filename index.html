@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>المستشار للمحاماة والاستشارات القانونية | بوابة التوظيف</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>" />
+  <title>بوابة التوظيف الإلكترونية | استمارة التقديم على وظيفة</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💼</text></svg>" />
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -84,6 +84,35 @@
 
   <script type="text/babel">
     const { useState, useEffect } = React;
+
+    /* ---------------- Mobile Safe CV Blob Opener ---------------- */
+    function openCvInBrowser(cvFile) {
+      if (!cvFile) return;
+      if (cvFile.dataUrl) {
+        try {
+          const parts = cvFile.dataUrl.split(',');
+          const mime = parts[0].match(/:(.*?);/)[1] || 'application/pdf';
+          const byteString = atob(parts[1]);
+          const ab = new ArrayBuffer(byteString.length);
+          const ia = new Uint8Array(ab);
+          for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+          }
+          const blob = new Blob([ab], { type: mime });
+          const blobUrl = URL.createObjectURL(blob);
+          const win = window.open(blobUrl, '_blank');
+          if (!win) {
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.target = '_blank';
+            link.click();
+          }
+          return blobUrl;
+        } catch(e) {
+          window.open(cvFile.dataUrl, '_blank');
+        }
+      }
+    }
 
     /* ---------------- Normalize String Helper ---------------- */
     function normalizeStr(str) {
@@ -243,12 +272,12 @@
         <header className="bg-white border-b border-[#E2E8F0] sticky top-0 z-40 px-3 md:px-4 py-2.5">
           <div className="max-w-3xl mx-auto flex items-center justify-between">
             <button onClick={() => setView("form")} className="flex items-center gap-2.5 text-right">
-              <div className="w-8 h-8 rounded-lg bg-brand-800 text-white flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-brand-800 text-white flex items-center justify-center shadow-sm">
                 <Icon.Scale size={16} />
               </div>
               <div>
-                <h1 className="font-extrabold text-xs md:text-sm text-slateText-title leading-tight">المستشار للمحاماة</h1>
-                <p className="text-[10px] text-brand-700 font-semibold">والاستشارات القانونية</p>
+                <h1 className="font-extrabold text-xs md:text-sm text-slateText-title leading-tight">بوابة التوظيف الإلكترونية</h1>
+                <p className="text-[10px] text-brand-700 font-semibold">استمارة التقديم والتوظيف</p>
               </div>
             </button>
 
@@ -322,6 +351,8 @@
         if (!data.phone.trim()) { setError("يرجى كتابة رقم الهاتف (واتساب)."); return; }
         if (!data.education.trim()) { setError("يرجى تحديد أو كتابة المؤهل العلمي."); return; }
         if (!data.yearsExperience.trim()) { setError("يرجى تحديد سنوات الخبرة."); return; }
+        if (!data.photoBase64) { setError("يرجى إرفاق الصورة الشخصية لإتمام الطلب (مطلوبة *)."); return; }
+        if (!data.cvFile) { setError("يرجى إرفاق ملف السيرة الذاتية CV لإتمام الطلب (مطلوب *)."); return; }
         setError("");
         onSubmit(data);
       };
@@ -337,8 +368,8 @@
                   <Icon.Scale size={20} />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-xs md:text-sm text-slateText-title">المستشار للمحاماة والاستشارات القانونية</h3>
-                  <p className="text-[11px] text-brand-700 font-semibold">بوابة استقطاب الكفاءات المهنية</p>
+                  <h3 className="font-extrabold text-xs md:text-sm text-slateText-title">بوابة التوظيف واستقطاب الكفاءات</h3>
+                  <p className="text-[11px] text-brand-700 font-semibold">إدارة الموارد البشرية والتوظيف</p>
                 </div>
               </div>
               <span className="text-[11px] font-bold px-3 py-1 bg-brand-50 text-brand-800 rounded-full border border-brand-200/80">
@@ -351,14 +382,14 @@
                 استمارة التقديم على وظيفة محاسب مالي
               </h1>
               <p className="text-xs md:text-sm text-slateText-muted mt-2 leading-relaxed">
-                يسر مكتب المستشار للمحاماة بالرياض استقبال طلبات الانضمام لفريق العمل المالي. يرجى تعبئة الحقول أدناه وإرفاق سيرتك الذاتية وصورتك الشخصية.
+                يرجى تعبئة الحقول أدناه وإرفاق سيرتك الذاتية وصورتك الشخصية بدقة للانضمام إلى فريق العمل المالي.
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 pt-2">
               <span className="text-[11px] font-bold bg-slate-100 text-slateText-body px-3 py-1 rounded-lg">📍 مدينة الرياض</span>
               <span className="text-[11px] font-bold bg-slate-100 text-slateText-body px-3 py-1 rounded-lg">💼 دوام كامل</span>
-              <span className="text-[11px] font-bold bg-slate-100 text-slateText-body px-3 py-1 rounded-lg">⚖️ قسم الحسابات والإدارة المالية</span>
+              <span className="text-[11px] font-bold bg-slate-100 text-slateText-body px-3 py-1 rounded-lg">📊 الإدارة المالية والحسابات</span>
             </div>
 
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-slateText-muted">
@@ -576,21 +607,21 @@
             <div className="g-card p-5 md:p-7 space-y-4 shadow-sm">
               <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
                 <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-800 flex items-center justify-center text-xs font-bold">4</span>
-                <h2 className="text-sm font-extrabold text-slateText-title">المستندات والمرفقات</h2>
+                <h2 className="text-sm font-extrabold text-slateText-title">المستندات والمرفقات الرسمية</h2>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
                 {/* Photo Upload Box */}
-                <div className="p-4 bg-slate-50/70 rounded-2xl border-2 border-dashed border-slate-200 text-center space-y-3 hover:border-brand-300 transition-colors">
+                <div className={`p-4 rounded-2xl border-2 border-dashed text-center space-y-3 transition-colors ${data.photoBase64 ? 'bg-green-50/40 border-green-300' : 'bg-slate-50/70 border-slate-300 hover:border-brand-400'}`}>
                   <div className="flex items-center justify-center gap-1.5 text-slateText-title font-bold text-xs">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                    <span>الصورة الشخصية (اختياري)</span>
+                    <span>الصورة الشخصية <span className="text-red-500 font-bold">*</span></span>
                   </div>
 
                   {data.photoBase64 ? (
                     <div className="space-y-2">
-                      <img src={data.photoBase64} alt="المعاينة" className="w-20 h-20 rounded-xl object-cover mx-auto border-2 border-brand-200 shadow-sm" />
+                      <img src={data.photoBase64} alt="المعاينة" className="w-20 h-20 rounded-xl object-cover mx-auto border-2 border-green-400 shadow-sm" />
                       <div className="flex items-center justify-center gap-2">
                         <span className="text-[11px] font-bold text-green-700">✓ تم إرفاق الصورة</span>
                         <button
@@ -598,13 +629,13 @@
                           onClick={() => set("photoBase64", null)}
                           className="text-[10px] text-red-600 font-bold hover:underline"
                         >
-                          حذف
+                          حذف / تغيير
                         </button>
                       </div>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <p className="text-[11px] text-slateText-muted">صورة واضحة بخلفية مناسبة (JPG / PNG)</p>
+                      <p className="text-[11px] text-slateText-muted">صورة واضحة بخلفية مناسبة (JPG / PNG) <span className="text-red-500 font-bold">مطلوبة *</span></p>
                       <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-brand-800 rounded-xl text-xs font-extrabold cursor-pointer border border-slate-200 shadow-sm hover:bg-brand-50 transition-colors">
                         <Icon.Upload size={14} />
                         <span>اختيار صورة</span>
@@ -615,10 +646,10 @@
                 </div>
 
                 {/* CV Upload Box */}
-                <div className="p-4 bg-slate-50/70 rounded-2xl border-2 border-dashed border-slate-200 text-center space-y-3 hover:border-brand-300 transition-colors">
+                <div className={`p-4 rounded-2xl border-2 border-dashed text-center space-y-3 transition-colors ${data.cvFile ? 'bg-green-50/40 border-green-300' : 'bg-slate-50/70 border-slate-300 hover:border-red-400'}`}>
                   <div className="flex items-center justify-center gap-1.5 text-slateText-title font-bold text-xs">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
-                    <span>السيرة الذاتية (CV)</span>
+                    <span>السيرة الذاتية (CV) <span className="text-red-500 font-bold">*</span></span>
                   </div>
 
                   {data.cvFile ? (
@@ -634,13 +665,13 @@
                           onClick={() => set("cvFile", null)}
                           className="text-[10px] text-red-600 font-bold hover:underline"
                         >
-                          حذف
+                          حذف / تغيير
                         </button>
                       </div>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <p className="text-[11px] text-slateText-muted">ملف السيرة الذاتية بصيغة (PDF / Word)</p>
+                      <p className="text-[11px] text-slateText-muted">ملف السيرة الذاتية بصيغة (PDF / Word) <span className="text-red-500 font-bold">مطلوب *</span></p>
                       <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-red-700 rounded-xl text-xs font-extrabold cursor-pointer border border-slate-200 shadow-sm hover:bg-red-50 transition-colors">
                         <Icon.Upload size={14} />
                         <span>إرفاق ملف السيرة الذاتية</span>
@@ -922,6 +953,7 @@
 
     function AdminDashboardView({ applicants, onUpdateStatus, onScheduleInterview, onDeleteApplicant, onResetAll }) {
       const [selected, setSelected] = useState(applicants[0] || null);
+      const [searchQuery, setSearchQuery] = useState('');
       const [scheduleOpen, setScheduleOpen] = useState(false);
       const [intDate, setIntDate] = useState('2026-08-25');
       const [intTime, setIntTime] = useState('19:00');
@@ -951,66 +983,129 @@
         return 'bg-slate-100 text-slate-700 border-slate-300';
       };
 
-      const filtered = filter === 'ALL' ? applicants : applicants.filter(a => a.status === filter);
+      const filtered = applicants.filter(a => {
+        const matchFilter = filter === 'ALL' || a.status === filter;
+        if (!matchFilter) return false;
+        if (!searchQuery.trim()) return true;
+        const q = normalizeStr(searchQuery);
+        return normalizeStr(a.fullName).includes(q) ||
+               normalizeStr(a.code).includes(q) ||
+               normalizeStr(a.phone).includes(q) ||
+               normalizeStr(a.education).includes(q);
+      });
 
       return (
-        <div className="max-w-5xl mx-auto px-3 md:px-4 py-5 md:py-8 space-y-4 animate-fade-in text-right">
+        <div className="max-w-5xl mx-auto px-3 md:px-4 py-4 md:py-8 space-y-4 animate-fade-in text-right">
           
-          {/* Header Bar */}
-          <div className="g-card p-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="g-card p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
             <div>
-              <h2 className="text-sm md:text-base font-extrabold text-slateText-title">لوحة إدارة التوظيف</h2>
-              <p className="text-[11px] text-slateText-muted">{applicants.length} متقدم مسجل في النظام</p>
+              <h2 className="text-sm md:text-base font-black text-slateText-title">لوحة إدارة المتقدمين والتوظيف</h2>
+              <p className="text-[11px] text-slateText-muted">إجمالي المتقدمين في النظام: <strong className="text-brand-800">{applicants.length}</strong> متقدم</p>
             </div>
-            <button onClick={onResetAll} className="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100 flex items-center gap-1">
-              <Icon.Trash size={13} /> <span>تصفير الكل</span>
+            <button onClick={onResetAll} className="px-3 py-1.5 rounded-xl bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100 flex items-center gap-1.5 transition-colors">
+              <Icon.Trash size={13} /> <span>تصفير النظام</span>
             </button>
           </div>
 
-          {/* Filter Tabs */}
-          <div className="flex flex-wrap gap-1.5">
-            {[
-              { key: 'ALL', label: 'الكل', count: applicants.length },
-              { key: 'SUBMITTED', label: 'جدد', count: applicants.filter(a=>a.status==='SUBMITTED').length },
-              { key: 'CV_VIEWED', label: 'تم فحص CV', count: applicants.filter(a=>a.status==='CV_VIEWED').length },
-              { key: 'SHORTLISTED', label: 'مرشحين', count: applicants.filter(a=>a.status==='SHORTLISTED').length },
-              { key: 'INTERVIEW_SCHEDULED', label: 'مقابلات', count: applicants.filter(a=>a.status==='INTERVIEW_SCHEDULED').length },
-              { key: 'ACCEPTED', label: 'مقبولين', count: applicants.filter(a=>a.status==='ACCEPTED').length },
-              { key: 'REJECTED', label: 'مرفوضين', count: applicants.filter(a=>a.status==='REJECTED').length },
-            ].filter(t => t.key === 'ALL' || t.count > 0).map(tab => (
-              <button
-                key={tab.key}
-                onClick={() => setFilter(tab.key)}
-                className={`text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-colors ${
-                  filter === tab.key ? 'bg-brand-800 text-white border-brand-800' : 'bg-white text-slateText-body border-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                {tab.label} ({tab.count})
-              </button>
-            ))}
+          <div className="space-y-2.5">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="🔍 بحث سريع بالاسم، رقم الطلب، أو رقم الهاتف..."
+                className="w-full h-11 pr-4 pl-9 rounded-xl border border-slate-200 text-xs md:text-sm bg-white shadow-sm outline-none text-right focus:border-brand-800 focus:ring-2 focus:ring-brand-100"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute left-3 top-3 text-xs text-slateText-muted hover:text-slateText-title font-bold"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+              {[
+                { key: 'ALL', label: 'الكل', count: applicants.length },
+                { key: 'SUBMITTED', label: 'جدد', count: applicants.filter(a=>a.status==='SUBMITTED').length },
+                { key: 'INTERVIEW_SCHEDULED', label: 'مقابلات', count: applicants.filter(a=>a.status==='INTERVIEW_SCHEDULED').length },
+                { key: 'ACCEPTED', label: 'مقبولين', count: applicants.filter(a=>a.status==='ACCEPTED').length },
+                { key: 'REJECTED', label: 'مرفوضين', count: applicants.filter(a=>a.status==='REJECTED').length },
+                { key: 'CV_VIEWED', label: 'فحص CV', count: applicants.filter(a=>a.status==='CV_VIEWED').length },
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => setFilter(tab.key)}
+                  className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border whitespace-nowrap transition-all flex-shrink-0 ${
+                    filter === tab.key
+                      ? 'bg-brand-800 text-white border-brand-800 shadow-sm'
+                      : 'bg-white text-slateText-body border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  {tab.label} ({tab.count})
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="block lg:hidden">
+            <div className="flex items-center justify-between mb-1.5 px-1">
+              <span className="text-[11px] font-bold text-slateText-muted">اختر المتقدم ({filtered.length}):</span>
+              {selected && <span className="text-[11px] font-extrabold text-brand-800">الحالي: {selected.fullName}</span>}
+            </div>
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+              {filtered.map(app => {
+                const isCurrent = selected?.code === app.code;
+                return (
+                  <button
+                    key={app.code}
+                    onClick={() => setSelected(app)}
+                    className={`flex items-center gap-2 p-2.5 rounded-2xl border flex-shrink-0 transition-all text-right ${
+                      isCurrent
+                        ? 'bg-brand-800 text-white border-brand-800 shadow-md ring-2 ring-brand-200'
+                        : 'bg-white text-slateText-title border-slate-200 shadow-sm hover:bg-slate-50'
+                    }`}
+                  >
+                    {app.photoBase64 ? (
+                      <img src={app.photoBase64} alt="" className="w-9 h-9 rounded-xl object-cover border border-white/30 flex-shrink-0" />
+                    ) : (
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs flex-shrink-0 ${isCurrent ? 'bg-white/20 text-white' : 'bg-brand-50 text-brand-800'}`}>
+                        {(app.fullName || '?')[0]}
+                      </div>
+                    )}
+                    <div className="min-w-0 pr-1">
+                      <div className="text-xs font-bold truncate max-w-[110px]">{app.fullName}</div>
+                      <div className={`text-[9px] font-mono ${isCurrent ? 'text-white/80' : 'text-slateText-muted'}`}>{app.code}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             
-            {/* Applicant List - Sidebar */}
-            <div className="lg:col-span-2 space-y-2 max-h-[75vh] overflow-y-auto no-scrollbar">
+            <div className="hidden lg:block lg:col-span-2 space-y-2 max-h-[75vh] overflow-y-auto no-scrollbar">
               {filtered.length === 0 ? (
                 <div className="g-card p-6 text-center text-xs text-slateText-muted">
-                  لا توجد طلبات في هذا التصنيف.
+                  لا توجد طلبات مطابقة للبحث أو التصنيف.
                 </div>
               ) : (
                 filtered.map(app => (
                   <div
                     key={app.code}
                     onClick={() => setSelected(app)}
-                    className={`g-card p-3.5 cursor-pointer transition-all hover:shadow-md ${selected?.code === app.code ? 'border-brand-800 ring-2 ring-brand-100 shadow-md' : ''}`}
+                    className={`g-card p-3.5 cursor-pointer transition-all hover:shadow-md ${
+                      selected?.code === app.code ? 'border-brand-800 ring-2 ring-brand-100 shadow-md bg-brand-50/20' : ''
+                    }`}
                   >
                     <div className="flex items-center gap-3">
-                      {/* Photo Thumbnail */}
                       {app.photoBase64 ? (
-                        <img src={app.photoBase64} alt="" className="w-10 h-10 rounded-lg object-cover border border-slate-200 flex-shrink-0" />
+                        <img src={app.photoBase64} alt="" className="w-10 h-10 rounded-xl object-cover border border-slate-200 flex-shrink-0" />
                       ) : (
-                        <div className="w-10 h-10 rounded-lg bg-brand-50 text-brand-800 flex items-center justify-center flex-shrink-0 text-sm font-bold">
+                        <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-800 flex items-center justify-center flex-shrink-0 text-sm font-bold">
                           {(app.fullName || '?')[0]}
                         </div>
                       )}
@@ -1019,7 +1114,7 @@
                           <strong className="text-xs font-bold text-slateText-title truncate">{app.fullName}</strong>
                           <span className="font-mono text-[9px] font-bold text-brand-800 bg-brand-50 px-1.5 py-0.5 rounded flex-shrink-0">{app.code}</span>
                         </div>
-                        <div className="flex items-center justify-between gap-1 mt-0.5">
+                        <div className="flex items-center justify-between gap-1 mt-1">
                           <span className="text-[10px] text-slateText-muted truncate">{app.phone} · {app.education}</span>
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border flex-shrink-0 ${statusColor(app.status)}`}>
                             {statusLabel(app.status)}
@@ -1032,21 +1127,18 @@
               )}
             </div>
 
-            {/* Selected Applicant Detail Panel */}
             <div className="lg:col-span-3">
               {selected ? (
                 <div className="space-y-4">
                   
-                  {/* TOP ROW: Photo & CV Side-by-Side (Clickable with instant in-app preview) */}
-                  <div className="g-card p-4 bg-gradient-to-r from-brand-50/40 to-slate-50 border-brand-200/60 shadow-sm">
+                  <div className="g-card p-4 bg-gradient-to-r from-brand-50/40 via-white to-brand-50/30 border-brand-200/70 shadow-sm">
                     <div className="grid grid-cols-2 gap-3">
                       
-                      {/* Photo Card (Top Right in RTL) */}
                       <div
                         onClick={() => { if (selected.photoBase64) setPreviewPhoto(selected.photoBase64); }}
-                        className={`p-3 rounded-xl border bg-white text-center transition-all ${
+                        className={`p-3 rounded-2xl border bg-white text-center transition-all ${
                           selected.photoBase64
-                            ? 'cursor-pointer hover:border-brand-800 hover:shadow-md border-slate-200'
+                            ? 'cursor-pointer hover:border-brand-800 hover:shadow-md border-slate-200 active:scale-98'
                             : 'border-dashed border-slate-300 opacity-80'
                         }`}
                       >
@@ -1056,7 +1148,7 @@
                         </div>
                         {selected.photoBase64 ? (
                           <div className="relative group mx-auto w-20 h-20">
-                            <img src={selected.photoBase64} alt="الصورة الشخصية" className="w-20 h-20 rounded-xl object-cover border-2 border-brand-200 shadow-sm" />
+                            <img src={selected.photoBase64} alt="الصورة" className="w-20 h-20 rounded-xl object-cover border-2 border-brand-200 shadow-sm" />
                             <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center text-white text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
                               🔍 تكبير
                             </div>
@@ -1067,16 +1159,21 @@
                           </div>
                         )}
                         {selected.photoBase64 && (
-                          <span className="text-[10px] font-bold text-brand-700 block mt-1.5">اضغط لفتح الصورة ↗</span>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setPreviewPhoto(selected.photoBase64); }}
+                            className="w-full mt-2 py-1 bg-brand-50 text-brand-800 rounded-lg text-[10px] font-bold hover:bg-brand-100"
+                          >
+                            عرض الصورة 🔍
+                          </button>
                         )}
                       </div>
 
-                      {/* CV Card (Top Left in RTL) */}
                       <div
-                        onClick={() => { if (selected.cvFile) setPreviewCv(selected.cvFile); }}
-                        className={`p-3 rounded-xl border bg-white text-center transition-all ${
+                        onClick={() => { if (selected.cvFile) openCvInBrowser(selected.cvFile); }}
+                        className={`p-3 rounded-2xl border bg-white text-center transition-all ${
                           selected.cvFile
-                            ? 'cursor-pointer hover:border-brand-800 hover:shadow-md border-slate-200'
+                            ? 'cursor-pointer hover:border-red-500 hover:shadow-md border-slate-200 active:scale-98'
                             : 'border-dashed border-slate-300 opacity-80'
                         }`}
                       >
@@ -1085,10 +1182,9 @@
                           <span className="text-[11px] font-extrabold">السيرة الذاتية (CV)</span>
                         </div>
                         {selected.cvFile ? (
-                          <div className="mx-auto w-20 h-20 rounded-xl bg-red-50 border-2 border-red-200 flex flex-col items-center justify-center text-red-600 p-1 group hover:bg-red-100 transition-colors">
+                          <div className="mx-auto w-20 h-20 rounded-xl bg-red-50 border-2 border-red-200 flex flex-col items-center justify-center text-red-600 p-1">
                             <span className="text-base font-black">PDF</span>
-                            <span className="text-[9px] font-bold text-slateText-body truncate w-full px-1">{selected.cvFile.name || 'ملف CV'}</span>
-                            <span className="text-[8px] text-slateText-muted">{selected.cvFile.size || ''}</span>
+                            <span className="text-[9px] font-bold text-slateText-body truncate w-full px-1">CV</span>
                           </div>
                         ) : (
                           <div className="w-20 h-20 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto text-[11px] text-slateText-muted">
@@ -1096,75 +1192,113 @@
                           </div>
                         )}
                         {selected.cvFile && (
-                          <span className="text-[10px] font-bold text-red-600 block mt-1.5">اضغط لعرض الـ CV 👁️</span>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); openCvInBrowser(selected.cvFile); }}
+                            className="w-full mt-2 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold hover:bg-red-100"
+                          >
+                            فتح الـ CV مباشرة 👁️
+                          </button>
                         )}
                       </div>
 
                     </div>
                   </div>
 
-                  {/* Profile Summary & Decisions */}
-                  <div className="g-card p-5 space-y-4">
+                  <div className="g-card p-5 space-y-4 shadow-sm">
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-mono text-xs font-bold text-brand-800 bg-brand-50 px-2 py-0.5 rounded border border-brand-100">{selected.code}</span>
+                          <span className="font-mono text-xs font-bold text-brand-800 bg-brand-50 px-2 py-0.5 rounded-lg border border-brand-100">{selected.code}</span>
                           <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${statusColor(selected.status)}`}>
                             {statusLabel(selected.status)}
                           </span>
                         </div>
                         <h3 className="text-base md:text-lg font-extrabold text-slateText-title">{selected.fullName}</h3>
-                        <p className="text-xs text-slateText-muted" dir="ltr">{selected.phone}</p>
-                        {selected.email && <p className="text-xs text-slateText-muted" dir="ltr">{selected.email}</p>}
+                        <p className="text-xs text-slateText-muted font-mono" dir="ltr">{selected.phone}</p>
+                        {selected.email && <p className="text-xs text-slateText-muted font-mono" dir="ltr">{selected.email}</p>}
                         <p className="text-[10px] text-slateText-light mt-1">تاريخ التقديم: {selected.submittedAt || 'غير محدد'}</p>
                       </div>
                     </div>
 
-                    {/* Quick Action Buttons */}
-                    <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
-                      <button
-                        onClick={() => onUpdateStatus(selected.code, 'ACCEPTED')}
-                        className={`flex-1 h-10 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-colors ${
-                          selected.status === 'ACCEPTED' ? 'bg-green-600 text-white' : 'bg-green-50 text-green-700 border border-green-300 hover:bg-green-100'
-                        }`}
-                      >
-                        ✓ قبول المتقدم
-                      </button>
-                      <button
-                        onClick={() => onUpdateStatus(selected.code, 'REJECTED')}
-                        className={`flex-1 h-10 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-colors ${
-                          selected.status === 'REJECTED' ? 'bg-red-600 text-white' : 'bg-red-50 text-red-700 border border-red-300 hover:bg-red-100'
-                        }`}
-                      >
-                        ✕ رفض المتقدم
-                      </button>
+                    <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
+                      
                       <button
                         onClick={() => setScheduleOpen(true)}
-                        className="flex-1 h-10 rounded-xl text-xs font-bold flex items-center justify-center gap-1 bg-purple-50 text-purple-700 border border-purple-300 hover:bg-purple-100"
+                        className={`h-12 rounded-xl text-xs md:text-sm font-extrabold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-98 ${
+                          selected.status === 'INTERVIEW_SCHEDULED'
+                            ? 'bg-purple-800 text-white ring-2 ring-purple-300'
+                            : 'bg-purple-50 text-purple-800 border-2 border-purple-300 hover:bg-purple-100'
+                        }`}
                       >
-                        📅 جدولة مقابلة
+                        <span>📅 تحديد موعد مقابلة</span>
                       </button>
+
+                      <button
+                        onClick={() => onUpdateStatus(selected.code, 'REJECTED')}
+                        className={`h-12 rounded-xl text-xs md:text-sm font-extrabold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-98 ${
+                          selected.status === 'REJECTED'
+                            ? 'bg-red-700 text-white ring-2 ring-red-300'
+                            : 'bg-red-50 text-red-700 border-2 border-red-300 hover:bg-red-100'
+                        }`}
+                      >
+                        <span>✕ رفض المتقدم</span>
+                      </button>
+
                     </div>
 
-                    {/* More Status Options */}
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="text-[11px] text-slateText-muted font-bold ml-1">تغيير الحالة:</span>
-                      {['SUBMITTED','CV_VIEWED','SHORTLISTED','INTERVIEW_SCHEDULED','ACCEPTED','REJECTED'].map(s => (
+                    <div className="pt-2 flex flex-wrap items-center gap-1.5">
+                      <span className="text-[10px] text-slateText-muted font-bold ml-1">تغيير يدوي:</span>
+                      {[
+                        { key: 'ACCEPTED', label: '✓ قبول المتقدم' },
+                        { key: 'CV_VIEWED', label: 'فحص CV' },
+                        { key: 'SHORTLISTED', label: 'ترشيح' },
+                        { key: 'SUBMITTED', label: 'إعادة كجديد' },
+                      ].map(s => (
                         <button
-                          key={s}
-                          onClick={() => onUpdateStatus(selected.code, s)}
-                          className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-colors ${
-                            selected.status === s ? statusColor(s) + ' ring-1 ring-offset-1 font-extrabold' : 'bg-white text-slateText-body border-slate-200 hover:bg-slate-50'
+                          key={s.key}
+                          onClick={() => onUpdateStatus(selected.code, s.key)}
+                          className={`text-[10px] font-bold px-2 py-1 rounded-lg border transition-colors ${
+                            selected.status === s.key ? statusColor(s.key) + ' font-black ring-1' : 'bg-slate-50 text-slateText-body border-slate-200 hover:bg-white'
                           }`}
                         >
-                          {statusLabel(s)}
+                          {s.label}
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Full Details (12 Fields) */}
-                  <div className="g-card p-5 space-y-3">
+                  {selected.interview && (
+                    <div className="g-card p-5 space-y-3 bg-purple-50/50 border-2 border-purple-200 shadow-sm animate-fade-in">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs md:text-sm font-extrabold text-purple-950 flex items-center gap-1.5">
+                          <span>📅 المقابلة المحددة عبر Google Meet</span>
+                        </h4>
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-purple-200/70 text-purple-900 rounded-full">مؤكدة</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="bg-white p-3 rounded-xl border border-purple-100 text-center">
+                          <span className="text-[10px] text-slateText-muted block mb-0.5">التاريخ</span>
+                          <strong className="text-purple-950">{selected.interview.date}</strong>
+                        </div>
+                        <div className="bg-white p-3 rounded-xl border border-purple-100 text-center">
+                          <span className="text-[10px] text-slateText-muted block mb-0.5">الوقت</span>
+                          <strong className="text-purple-950">{selected.interview.time}</strong>
+                        </div>
+                      </div>
+                      {selected.interview.meetLink && (
+                        <a
+                          href={selected.interview.meetLink}
+                          target="_blank"
+                          className="block text-center py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-black rounded-xl text-xs shadow-sm transition-transform active:scale-98"
+                        >
+                          فتح رابط Google Meet للمقابلة ➔
+                        </a>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="g-card p-5 space-y-3 shadow-sm">
                     <h4 className="text-xs font-bold text-brand-800 uppercase tracking-wide border-b border-slate-100 pb-2">البيانات والمعلومات الكاملة</h4>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
                       <div className="bg-slate-50 p-3 rounded-xl">
@@ -1218,37 +1352,10 @@
                     </div>
                   </div>
 
-                  {/* Interview Info if scheduled */}
-                  {selected.interview && (
-                    <div className="g-card p-5 space-y-3 bg-purple-50/50 border-purple-200">
-                      <h4 className="text-xs font-bold text-purple-900 uppercase tracking-wide">📅 المقابلة المجدولة</h4>
-                      <div className="grid grid-cols-3 gap-2 text-xs">
-                        <div className="bg-white p-2.5 rounded-lg text-center">
-                          <span className="text-[10px] text-slateText-muted block">التاريخ</span>
-                          <strong>{selected.interview.date}</strong>
-                        </div>
-                        <div className="bg-white p-2.5 rounded-lg text-center">
-                          <span className="text-[10px] text-slateText-muted block">الوقت</span>
-                          <strong>{selected.interview.time}</strong>
-                        </div>
-                        <div className="bg-white p-2.5 rounded-lg text-center">
-                          <span className="text-[10px] text-slateText-muted block">المنصة</span>
-                          <strong>Google Meet</strong>
-                        </div>
-                      </div>
-                      {selected.interview.meetLink && (
-                        <a href={selected.interview.meetLink} target="_blank" className="block text-center py-2 bg-purple-700 text-white font-bold rounded-xl text-xs hover:bg-purple-800">
-                          فتح رابط المقابلة ➔
-                        </a>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Delete Button */}
                   <div className="flex justify-end pt-2">
                     <button
                       onClick={() => onDeleteApplicant(selected.code)}
-                      className="px-4 py-2 rounded-lg bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100 flex items-center gap-1"
+                      className="px-4 py-2 rounded-xl bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100 flex items-center gap-1.5"
                     >
                       <Icon.Trash size={13} /> حذف هذا المتقدم نهائياً
                     </button>
@@ -1259,17 +1366,16 @@
                   <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slateText-light">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                   </div>
-                  <p className="text-xs font-bold text-slateText-body">اختر متقدماً من القائمة لعرض ملفه الكامل</p>
-                  <p className="text-[11px] text-slateText-muted">يمكنك قبول أو رفض أو جدولة مقابلة لأي متقدم</p>
+                  <p className="text-xs font-bold text-slateText-body">اختر متقدماً من القائمة أعلاه لعرض ملفه</p>
+                  <p className="text-[11px] text-slateText-muted">يمكنك رفض المتقدم أو تحديد موعد مقابلة شخصية معه بضغطة زر</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* INSTANT IN-APP PHOTO LIGHTBOX MODAL */}
           {previewPhoto && (
             <div
-              className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in"
+              className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in"
               onClick={() => setPreviewPhoto(null)}
             >
               <div
@@ -1292,98 +1398,36 @@
             </div>
           )}
 
-          {/* INSTANT IN-APP CV / DOCUMENT VIEWER MODAL */}
-          {previewCv && (
-            <div
-              className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 md:p-6 z-50 animate-fade-in text-right"
-              onClick={() => setPreviewCv(null)}
-            >
-              <div
-                className="bg-white rounded-2xl max-w-4xl w-full h-[88vh] flex flex-col overflow-hidden border border-slate-300 shadow-2xl"
-                onClick={e => e.stopPropagation()}
-              >
-                {/* Modal Header */}
-                <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center text-xs font-bold">
-                      PDF
-                    </div>
-                    <div>
-                      <h3 className="text-xs md:text-sm font-extrabold text-slateText-title">السيرة الذاتية — {selected?.fullName}</h3>
-                      <p className="text-[10px] text-slateText-muted">{previewCv.name} ({previewCv.size || ''})</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {previewCv.dataUrl && (
-                      <a
-                        href={previewCv.dataUrl}
-                        download={previewCv.name || `CV_${selected?.fullName}.pdf`}
-                        className="px-3 py-1.5 bg-brand-800 text-white rounded-lg text-xs font-bold hover:bg-brand-900"
-                      >
-                        تحميل الملف ⬇
-                      </a>
-                    )}
-                    <button
-                      onClick={() => setPreviewCv(null)}
-                      className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slateText-title text-sm font-bold"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-
-                {/* Modal Body / Viewer */}
-                <div className="flex-1 bg-slate-100 p-2 overflow-hidden flex flex-col">
-                  {previewCv.dataUrl ? (
-                    <iframe
-                      src={previewCv.dataUrl}
-                      title="السيرة الذاتية"
-                      className="w-full h-full rounded-xl border border-slate-300 bg-white"
-                    />
-                  ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-3 bg-white rounded-xl">
-                      <div className="w-16 h-16 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center text-2xl font-bold">
-                        📄
-                      </div>
-                      <h4 className="text-sm font-bold text-slateText-title">{previewCv.name || 'ملف السيرة الذاتية'}</h4>
-                      <p className="text-xs text-slateText-muted max-w-sm">
-                        تم إرفاق ملف السيرة الذاتية بحجم ({previewCv.size || 'غير محدد'}). للمعاينة الكاملة يمكنك تحميل الملف مباشرة.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Schedule Interview Modal */}
           {scheduleOpen && selected && (
-            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in text-right">
-              <div className="bg-white rounded-2xl p-5 max-w-sm w-full space-y-3.5 border border-slate-200 shadow-xl">
-                <h3 className="font-bold text-sm text-slateText-title">📅 جدولة مقابلة لـ: {selected.fullName}</h3>
-                <div>
-                  <label className="block text-xs font-bold mb-1">تاريخ المقابلة</label>
-                  <input type="date" value={intDate} onChange={e => setIntDate(e.target.value)} className="w-full h-10 px-3 border border-slate-200 rounded-xl text-xs bg-slate-50" />
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in text-right">
+              <div className="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 border border-slate-200 shadow-2xl">
+                <div className="border-b border-slate-100 pb-3">
+                  <h3 className="font-black text-sm md:text-base text-slateText-title">📅 تحديد موعد مقابلة شخصية</h3>
+                  <p className="text-xs text-brand-800 font-bold mt-0.5">للمتقدم: {selected.fullName}</p>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold mb-1">وقت المقابلة</label>
-                  <input type="time" value={intTime} onChange={e => setIntTime(e.target.value)} className="w-full h-10 px-3 border border-slate-200 rounded-xl text-xs bg-slate-50" />
+                  <label className="block text-xs font-bold mb-1.5 text-slateText-body">تاريخ المقابلة</label>
+                  <input type="date" value={intDate} onChange={e => setIntDate(e.target.value)} className="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs bg-slate-50 outline-none focus:border-brand-800" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold mb-1">رابط Google Meet</label>
-                  <input type="text" value={meetLink} onChange={e => setMeetLink(e.target.value)} className="w-full h-10 px-3 border border-slate-200 rounded-xl text-xs bg-slate-50" dir="ltr" />
+                  <label className="block text-xs font-bold mb-1.5 text-slateText-body">وقت المقابلة</label>
+                  <input type="time" value={intTime} onChange={e => setIntTime(e.target.value)} className="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs bg-slate-50 outline-none focus:border-brand-800" />
                 </div>
-                <div className="flex gap-2 pt-1">
+                <div>
+                  <label className="block text-xs font-bold mb-1.5 text-slateText-body">رابط Google Meet</label>
+                  <input type="text" value={meetLink} onChange={e => setMeetLink(e.target.value)} className="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs bg-slate-50 outline-none focus:border-brand-800" dir="ltr" />
+                </div>
+                <div className="flex gap-2 pt-2">
                   <button
                     onClick={() => {
                       onScheduleInterview(selected.code, { date: intDate, time: intTime, meetLink });
                       setScheduleOpen(false);
                     }}
-                    className="flex-1 h-10 bg-purple-700 text-white text-xs font-bold rounded-xl hover:bg-purple-800"
+                    className="flex-1 h-12 bg-purple-700 hover:bg-purple-800 text-white text-xs font-extrabold rounded-xl shadow-sm transition-transform active:scale-98"
                   >
                     تأكيد وحفظ الموعد ✓
                   </button>
-                  <button onClick={() => setScheduleOpen(false)} className="px-4 h-10 border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-50">إلغاء</button>
+                  <button onClick={() => setScheduleOpen(false)} className="px-4 h-12 border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-50">إلغاء</button>
                 </div>
               </div>
             </div>
@@ -1415,21 +1459,33 @@
         setIsSubmitting(true);
         const currentList = await DB.getAll();
         const nextNum = currentList.length + 1;
-        const newCode = 'APP-' + String(nextNum).padStart(4, '0');
+        const code = `APP-${String(nextNum).padStart(4, '0')}`;
 
-        const newApp = {
+        const newApplicant = {
           id: String(Date.now()),
-          code: newCode,
+          code,
+          fullName: formData.fullName,
+          phone: formData.phone,
+          email: formData.email,
+          nationality: formData.nationality,
+          city: formData.city,
+          age: formData.age,
+          education: formData.education,
+          currentJob: formData.currentJob,
+          yearsExperience: formData.yearsExperience,
+          expectedSalary: formData.expectedSalary,
+          skills: formData.skills,
+          vatExperience: formData.vatExperience,
+          photoBase64: formData.photoBase64,
+          cvFile: formData.cvFile,
           status: 'SUBMITTED',
           submittedAt: new Date().toLocaleDateString('ar-SA'),
-          interview: null,
-          ...formData
+          interview: null
         };
 
-        await DB.save(newApp);
-        const updated = [newApp, ...currentList.filter(a => a.code !== newApp.code && normalizeStr(a.phone) !== normalizeStr(newApp.phone))];
-        setApplicants(updated);
-        setActiveApplicant(newApp);
+        await DB.save(newApplicant);
+        setApplicants([newApplicant, ...currentList]);
+        setActiveApplicant(newApplicant);
         setIsSubmitting(false);
         setView("success");
       };
@@ -1518,7 +1574,7 @@
             <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-right">
               <div className="flex items-center gap-1.5">
                 <Icon.Scale size={15} />
-                <span className="font-bold text-slateText-body">مكتب المستشار للمحاماة والاستشارات القانونية — الرياض</span>
+                <span className="font-bold text-slateText-body">بوابة التوظيف واستقطاب الكفاءات الإلكترونية</span>
               </div>
               <div
                 onClick={() => setIsAdminModalOpen(true)}
