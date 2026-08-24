@@ -16,40 +16,70 @@ export default async function handler(req, res) {
 
   const databaseUrl = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL || DEFAULT_NEON_URL;
 
-  // Execute SQL via Neon HTTP SQL API
+  // Execute SQL via Neon HTTP SQL API with strict error reporting
   async function queryNeon(sql, params = []) {
-    try {
-      const urlObj = new URL(databaseUrl.replace('-pooler', ''));
-      const host = urlObj.host;
-      const endpoint = `https://${host}/sql`;
+    const urlObj = new URL(databaseUrl.replace('-pooler', ''));
+    const host = urlObj.host;
+    const endpoint = `https://${host}/sql`;
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Neon-Connection-String': databaseUrl.replace('-pooler', ''),
-        },
-        body: JSON.stringify({ query: sql, params })
-      });
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Neon-Connection-String': databaseUrl.replace('-pooler', ''),
+      },
+      body: JSON.stringify({ query: sql, params })
+    });
 
-      if (response.ok) {
-        return await response.json();
-      } else {
-        const errText = await response.text();
-        console.error('Neon SQL Error Response:', errText);
-      }
-    } catch (err) {
-      console.error('Neon Query Exception:', err);
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('Neon SQL Error Response:', errText);
+      throw new Error(`Neon SQL Error: ${errText}`);
     }
-    return null;
+
+    const json = await response.json();
+    return json;
+  }
+
+  // Idempotent table creation
+  async function ensureTable() {
+    try {
+      await queryNeon(`
+        CREATE TABLE IF NOT EXISTS applicants (
+          id TEXT PRIMARY KEY,
+          code TEXT UNIQUE,
+          full_name TEXT,
+          phone TEXT,
+          email TEXT,
+          nationality TEXT,
+          city TEXT,
+          age TEXT,
+          education TEXT,
+          current_job TEXT,
+          years_experience TEXT,
+          expected_salary TEXT,
+          skills TEXT,
+          vat_experience TEXT,
+          status TEXT,
+          submitted_at TEXT,
+          interview TEXT,
+          photo_base64 TEXT,
+          cv_file TEXT
+        );
+      `);
+    } catch(e) {
+      console.warn('ensureTable notice:', e.message);
+    }
   }
 
   // Handle GET (Fetch all applicants)
   if (req.method === 'GET') {
-    const neonRes = await queryNeon(`SELECT * FROM applicants ORDER BY id DESC;`);
+    try {
+      await ensureTable();
+      const neonRes = await queryNeon(`SELECT * FROM applicants ORDER BY id DESC;`);
+      const rows = (neonRes && Array.isArray(neonRes.rows)) ? neonRes.rows : [];
 
-    if (neonRes && Array.isArray(neonRes.rows)) {
-      const mapped = neonRes.rows.map(r => ({
+      const mapped = rows.map(r => ({
         id: r.id,
         code: r.code,
         fullName: r.full_name,
@@ -71,7 +101,11 @@ export default async function handler(req, res) {
         cvFile: typeof r.cv_file === 'string' ? JSON.parse(r.cv_file) : (r.cv_file || null)
       }));
       return res.status(200).json({ source: 'neon_postgres', applicants: mapped });
+    } catch(e) {
+      console.error('GET Error:', e);
+      return res.status(500).json({ error: e.message, applicants: [] });
     }
+  }
 
     // Fallback to cloud mirror if neon query failed
     try {
