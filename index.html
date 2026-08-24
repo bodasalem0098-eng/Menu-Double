@@ -162,18 +162,20 @@
     }
 
     const DB = {
-      async getAll() {
-        // 0. FAST: Read local cache FIRST (instant, never blocks UI)
-        let localData = null;
+      async getAll(forceFresh = false) {
+        // 1. Query live /api/db endpoint FIRST (fastest on Vercel)
         try {
-          const localRaw = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('almustashar_neon_synced_v1');
-          if (localRaw) {
-            localData = JSON.parse(localRaw);
-            if (!Array.isArray(localData)) localData = null;
+          const res = await fetchWithTimeout('/api/db', { cache: 'no-cache' }, 4000);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && Array.isArray(data.applicants) && data.applicants.length > 0) {
+              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data.applicants));
+              return data.applicants;
+            }
           }
-        } catch(e) { localData = null; }
+        } catch(e) {}
 
-        // 1. Try Neon Postgres Directly (with 4s timeout)
+        // 2. Query Neon Postgres Directly
         try {
           const neonRes = await executeNeonSql('SELECT * FROM applicants ORDER BY id DESC;');
           if (neonRes && Array.isArray(neonRes.rows) && neonRes.rows.length > 0) {
@@ -203,20 +205,15 @@
           }
         } catch(e) {}
 
-        // 2. Try /api/db serverless endpoint (with timeout)
+        // 3. Fallback to Local Cache only if network fails
         try {
-          const res = await fetchWithTimeout('/api/db', { cache: 'no-cache' }, 3000);
-          if (res.ok) {
-            const data = await res.json();
-            if (data && Array.isArray(data.applicants) && data.applicants.length > 0) {
-              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data.applicants));
-              return data.applicants;
-            }
+          const localRaw = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('almustashar_neon_synced_v1');
+          if (localRaw) {
+            const localData = JSON.parse(localRaw);
+            if (Array.isArray(localData) && localData.length > 0) return localData;
           }
         } catch(e) {}
 
-        // 3. Fallback to local cache
-        if (localData && localData.length > 0) return localData;
         return [];
       },
 
