@@ -65,7 +65,9 @@ export default async function handler(req, res) {
         vatExperience: r.vat_experience,
         status: r.status,
         submittedAt: r.submitted_at,
-        interview: typeof r.interview === 'string' ? JSON.parse(r.interview) : r.interview
+        interview: typeof r.interview === 'string' ? JSON.parse(r.interview) : r.interview,
+        photoBase64: r.photo_base64 || null,
+        cvFile: typeof r.cv_file === 'string' ? JSON.parse(r.cv_file) : (r.cv_file || null)
       }));
       return res.status(200).json({ source: 'neon_postgres', applicants: mapped });
     }
@@ -95,8 +97,8 @@ export default async function handler(req, res) {
           INSERT INTO applicants (
             id, code, full_name, phone, email, nationality, city, age, 
             education, current_job, years_experience, expected_salary, skills, 
-            vat_experience, status, submitted_at, interview
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+            vat_experience, status, submitted_at, interview, photo_base64, cv_file
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
           ON CONFLICT (code) DO UPDATE SET
             status = EXCLUDED.status,
             interview = EXCLUDED.interview,
@@ -104,7 +106,9 @@ export default async function handler(req, res) {
             phone = EXCLUDED.phone,
             expected_salary = EXCLUDED.expected_salary,
             education = EXCLUDED.education,
-            years_experience = EXCLUDED.years_experience;
+            years_experience = EXCLUDED.years_experience,
+            photo_base64 = EXCLUDED.photo_base64,
+            cv_file = EXCLUDED.cv_file;
         `, [
           applicant.id || String(Date.now()),
           applicant.code,
@@ -117,12 +121,14 @@ export default async function handler(req, res) {
           applicant.education || '',
           applicant.currentJob || '',
           applicant.yearsExperience || '',
-          applicant.expectedSalary || '2,500 ريال',
+          applicant.expectedSalary || '',
           applicant.skills || '',
           applicant.vatExperience || '',
           applicant.status || 'SUBMITTED',
           applicant.submittedAt || new Date().toLocaleDateString('ar-SA'),
-          applicant.interview ? JSON.stringify(applicant.interview) : null
+          applicant.interview ? JSON.stringify(applicant.interview) : null,
+          applicant.photoBase64 || null,
+          applicant.cvFile ? JSON.stringify(applicant.cvFile) : null
         ]);
       }
 
