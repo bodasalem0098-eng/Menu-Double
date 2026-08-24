@@ -991,6 +991,7 @@
       const [intTime, setIntTime] = useState('19:00');
       const [meetLink, setMeetLink] = useState('https://meet.google.com/ahh-wubn-okf');
       const [filter, setFilter] = useState('ALL');
+      const [natFilter, setNatFilter] = useState('ALL');
       const [previewPhoto, setPreviewPhoto] = useState(null);
       const [previewCv, setPreviewCv] = useState(null);
 
@@ -1015,15 +1016,28 @@
         return 'bg-slate-100 text-slate-700 border-slate-300';
       };
 
+      // Available nationalities
+      const availableNats = Array.from(new Set(applicants.map(a => (a.nationality || '').trim()).filter(Boolean)));
+      const baseNats = ['مصري', 'سعودي', 'أردني', 'سوري', 'يمني', 'سوداني'];
+      const uniqueNats = Array.from(new Set([...baseNats, ...availableNats]));
+
       const filtered = applicants.filter(a => {
-        const matchFilter = filter === 'ALL' || a.status === filter;
-        if (!matchFilter) return false;
+        const matchStatus = filter === 'ALL' || a.status === filter;
+        if (!matchStatus) return false;
+        
+        if (natFilter !== 'ALL') {
+          const aNat = normalizeStr(a.nationality || '');
+          const targetNat = normalizeStr(natFilter);
+          if (!aNat.includes(targetNat)) return false;
+        }
+
         if (!searchQuery.trim()) return true;
         const q = normalizeStr(searchQuery);
         return normalizeStr(a.fullName).includes(q) ||
                normalizeStr(a.code).includes(q) ||
                normalizeStr(a.phone).includes(q) ||
-               normalizeStr(a.education).includes(q);
+               normalizeStr(a.education).includes(q) ||
+               normalizeStr(a.nationality).includes(q);
       });
 
       return (
@@ -1039,13 +1053,15 @@
             </button>
           </div>
 
+          {/* Search and Filters Section */}
           <div className="space-y-2.5">
+            {/* Search Input */}
             <div className="relative">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="🔍 بحث سريع بالاسم، رقم الطلب، أو رقم الهاتف..."
+                placeholder="🔍 بحث سريع بالاسم، رقم الطلب، الهاتف، أو الجنسية..."
                 className="w-full h-11 pr-4 pl-9 rounded-xl border border-slate-200 text-xs md:text-sm bg-white shadow-sm outline-none text-right focus:border-brand-800 focus:ring-2 focus:ring-brand-100"
               />
               {searchQuery && (
@@ -1058,9 +1074,10 @@
               )}
             </div>
 
+            {/* Status Filter Pills */}
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
               {[
-                { key: 'ALL', label: 'الكل', count: applicants.length },
+                { key: 'ALL', label: 'كل الحالات', count: applicants.length },
                 { key: 'SUBMITTED', label: 'جدد', count: applicants.filter(a=>a.status==='SUBMITTED').length },
                 { key: 'INTERVIEW_SCHEDULED', label: 'مقابلات', count: applicants.filter(a=>a.status==='INTERVIEW_SCHEDULED').length },
                 { key: 'ACCEPTED', label: 'مقبولين', count: applicants.filter(a=>a.status==='ACCEPTED').length },
@@ -1079,6 +1096,42 @@
                   {tab.label} ({tab.count})
                 </button>
               ))}
+            </div>
+
+            {/* Nationality Filter Bar */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 pt-0.5">
+              <span className="text-[11px] font-black text-slateText-title flex-shrink-0 ml-1">🌍 الجنسية:</span>
+              <button
+                onClick={() => setNatFilter('ALL')}
+                className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border whitespace-nowrap transition-all flex-shrink-0 ${
+                  natFilter === 'ALL'
+                    ? 'bg-slate-800 text-white border-slate-800 shadow-sm'
+                    : 'bg-white text-slateText-body border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                الكل ({applicants.length})
+              </button>
+              {uniqueNats.map(nat => {
+                const count = applicants.filter(a => normalizeStr(a.nationality || '').includes(normalizeStr(nat))).length;
+                if (count === 0 && !['مصري', 'سعودي'].includes(nat)) return null;
+                const isSelected = natFilter === nat;
+                return (
+                  <button
+                    key={nat}
+                    onClick={() => setNatFilter(isSelected ? 'ALL' : nat)}
+                    className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border whitespace-nowrap transition-all flex-shrink-0 flex items-center gap-1 ${
+                      isSelected
+                        ? 'bg-brand-700 text-white border-brand-700 shadow-sm ring-2 ring-brand-200'
+                        : 'bg-white text-slateText-body border-slate-200 hover:bg-brand-50 hover:text-brand-800'
+                    }`}
+                  >
+                    <span>{nat}</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slateText-muted'}`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
