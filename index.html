@@ -163,9 +163,9 @@
 
     const DB = {
       async getAll(forceFresh = false) {
-        // 1. Query live /api/db endpoint FIRST (fastest on Vercel)
+        // 1. Query live /api/db endpoint FIRST with cache-buster
         try {
-          const res = await fetchWithTimeout('/api/db', { cache: 'no-cache' }, 4000);
+          const res = await fetchWithTimeout(`/api/db?_t=${Date.now()}`, { cache: 'no-store' }, 4000);
           if (res.ok) {
             const data = await res.json();
             if (data && Array.isArray(data.applicants) && data.applicants.length > 0) {
@@ -1240,6 +1240,7 @@
     }
 
     function AdminDashboardView({ applicants, onUpdateStatus, onScheduleInterview, onDeleteApplicant, onResetAll, onRefresh }) {
+      const [list, setList] = useState(applicants || []);
       const [selected, setSelected] = useState(applicants[0] || null);
       const [searchQuery, setSearchQuery] = useState('');
       const [scheduleOpen, setScheduleOpen] = useState(false);
@@ -1252,47 +1253,42 @@
       const [previewCv, setPreviewCv] = useState(null);
       const [isRefreshing, setIsRefreshing] = useState(false);
 
-      // Auto-refresh immediately upon entering admin view + periodic background sync every 5s
-      useEffect(() => {
-        const fetchLatest = async () => {
-          setIsRefreshing(true);
-          try {
-            if (onRefresh) {
-              const fresh = await onRefresh();
-              if (Array.isArray(fresh) && fresh.length > 0) {
-                setSelected(prev => prev ? (fresh.find(f => f.code === prev.code) || fresh[0]) : fresh[0]);
-              }
+      const doRefresh = async () => {
+        setIsRefreshing(true);
+        try {
+          if (onRefresh) {
+            const fresh = await onRefresh();
+            if (Array.isArray(fresh)) {
+              setList(fresh);
+              setSelected(prev => prev ? (fresh.find(f => f.code === prev.code) || fresh[0]) : fresh[0]);
             }
-          } catch(e) {}
-          finally {
-            setIsRefreshing(false);
           }
-        };
-        fetchLatest();
+        } catch(e) {}
+        finally {
+          setIsRefreshing(false);
+        }
+      };
 
-        const interval = setInterval(() => {
-          if (onRefresh) onRefresh().catch(() => {});
-        }, 5000);
+      // Auto-refresh immediately upon entering admin view + periodic background sync every 4s
+      useEffect(() => {
+        doRefresh();
+        const interval = setInterval(doRefresh, 4000);
         return () => clearInterval(interval);
       }, []);
 
       useEffect(() => {
-        if (!selected && applicants.length > 0) setSelected(applicants[0]);
-        if (selected) {
-          const fresh = applicants.find(a => a.code === selected.code);
-          if (fresh) setSelected(fresh);
+        if (Array.isArray(applicants)) {
+          setList(applicants);
+          if (!selected && applicants.length > 0) setSelected(applicants[0]);
+          if (selected) {
+            const fresh = applicants.find(a => a.code === selected.code);
+            if (fresh) setSelected(fresh);
+          }
         }
       }, [applicants]);
 
-      const handleManualRefresh = async () => {
-        setIsRefreshing(true);
-        if (onRefresh) {
-          const fresh = await onRefresh();
-          if (Array.isArray(fresh) && fresh.length > 0 && !selected) {
-            setSelected(fresh[0]);
-          }
-        }
-        setTimeout(() => setIsRefreshing(false), 300);
+      const handleManualRefresh = () => {
+        doRefresh();
       };
 
       const statusLabel = (s) => {
@@ -1309,11 +1305,11 @@
       };
 
       // Available nationalities
-      const availableNats = Array.from(new Set(applicants.map(a => (a.nationality || '').trim()).filter(Boolean)));
+      const availableNats = Array.from(new Set(list.map(a => (a.nationality || '').trim()).filter(Boolean)));
       const baseNats = ['مصري', 'سعودي', 'أردني', 'سوري', 'يمني', 'سوداني'];
       const uniqueNats = Array.from(new Set([...baseNats, ...availableNats]));
 
-      const filtered = applicants.filter(a => {
+      const filtered = list.filter(a => {
         const matchStatus = filter === 'ALL' || a.status === filter;
         if (!matchStatus) return false;
         
@@ -1338,7 +1334,7 @@
           <div className="g-card p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
             <div>
               <h2 className="text-sm md:text-base font-black text-slateText-title">لوحة إدارة المتقدمين والتوظيف</h2>
-              <p className="text-[11px] text-slateText-muted">إجمالي المتقدمين في النظام: <strong className="text-brand-800 text-sm font-black">{applicants.length}</strong> متقدم</p>
+              <p className="text-[11px] text-slateText-muted">إجمالي المتقدمين في النظام: <strong className="text-brand-800 text-sm font-black">{list.length}</strong> متقدم</p>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -1347,7 +1343,7 @@
                 className="px-4 py-2 rounded-xl bg-brand-800 hover:bg-brand-900 text-white text-xs font-black shadow-sm flex items-center gap-2 transition-transform active:scale-95 disabled:opacity-75"
               >
                 <Icon.RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
-                <span>{isRefreshing ? "جارٍ التحديث..." : `تحديث الطلبات (${applicants.length}) 🔄`}</span>
+                <span>{isRefreshing ? "جارٍ التحديث..." : `تحديث الطلبات (${list.length}) 🔄`}</span>
               </button>
             </div>
           </div>
@@ -1376,12 +1372,12 @@
             {/* Status Filter Pills */}
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
               {[
-                { key: 'ALL', label: 'كل الحالات', count: applicants.length },
-                { key: 'SUBMITTED', label: 'جدد', count: applicants.filter(a=>a.status==='SUBMITTED').length },
-                { key: 'INTERVIEW_SCHEDULED', label: 'مقابلات', count: applicants.filter(a=>a.status==='INTERVIEW_SCHEDULED').length },
-                { key: 'ACCEPTED', label: 'مقبولين', count: applicants.filter(a=>a.status==='ACCEPTED').length },
-                { key: 'REJECTED', label: 'مرفوضين', count: applicants.filter(a=>a.status==='REJECTED').length },
-                { key: 'CV_VIEWED', label: 'فحص CV', count: applicants.filter(a=>a.status==='CV_VIEWED').length },
+                { key: 'ALL', label: 'كل الحالات', count: list.length },
+                { key: 'SUBMITTED', label: 'جدد', count: list.filter(a=>a.status==='SUBMITTED').length },
+                { key: 'INTERVIEW_SCHEDULED', label: 'مقابلات', count: list.filter(a=>a.status==='INTERVIEW_SCHEDULED').length },
+                { key: 'ACCEPTED', label: 'مقبولين', count: list.filter(a=>a.status==='ACCEPTED').length },
+                { key: 'REJECTED', label: 'مرفوضين', count: list.filter(a=>a.status==='REJECTED').length },
+                { key: 'CV_VIEWED', label: 'فحص CV', count: list.filter(a=>a.status==='CV_VIEWED').length },
               ].map(tab => (
                 <button
                   key={tab.key}
