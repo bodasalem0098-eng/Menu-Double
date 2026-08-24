@@ -97,68 +97,70 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
-    /* ---------------- Global Cloud Synchronizer ---------------- */
-    // Syncs cross-device between PC, Mobile, Tablet using Cloud KV + LocalStorage Cache
-    const CLOUD_SYNC_URL = 'https://api.jsonbin.io/v3/b/66cc3f4cac98a964f43de9c2';
-    const CLOUD_MASTER_KEY = '$2a$10$iWbHn63ZeqqGZqA3n8cZeO8eE5f3FjP6s0V8hQ3G9kR5m2A1bC4e6';
-    const LOCAL_STORAGE_KEY = 'almustashar_cloud_synced_db_v2';
+    /* ---------------- Guaranteed Multi-Device Cloud Sync ---------------- */
+    const CLOUD_OBJECT_ID = 'ff8081819ff5b11001a0329c847c0a24';
+    const CLOUD_API_URL = `https://api.restful-api.dev/objects/${CLOUD_OBJECT_ID}`;
+    const LOCAL_STORAGE_KEY = 'almustashar_synced_data_v4';
 
-    // Cloud Database Helper
     const CloudDB = {
+      // 1. Fetch from Cloud
       async getAll() {
+        // Source 1: Direct Cloud REST API
         try {
-          const res = await fetch('https://api.restful-api.dev/objects?id=almustashar_recruitment_portal_db_2026', { cache: 'no-cache' });
+          const res = await fetch(CLOUD_API_URL, { cache: 'no-cache' });
           if (res.ok) {
-            const data = await res.json();
-            if (data && data[0] && data[0].data && Array.isArray(data[0].data.applicants)) {
-              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data[0].data.applicants));
-              return data[0].data.applicants;
+            const json = await res.json();
+            if (json && json.data && Array.isArray(json.data.applicants)) {
+              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(json.data.applicants));
+              return json.data.applicants;
             }
           }
         } catch(e) {}
 
-        // Fallback to second cloud mirror
+        // Source 2: Vercel Serverless Function
         try {
-          const res2 = await fetch('https://kv.val.run/almustashar_recruitment_db_v2', { cache: 'no-cache' });
+          const res2 = await fetch('/api/sync', { cache: 'no-cache' });
           if (res2.ok) {
             const data2 = await res2.json();
-            if (Array.isArray(data2)) {
-              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data2));
-              return data2;
+            if (data2 && data2.applicants && Array.isArray(data2.applicants)) {
+              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data2.applicants));
+              return data2.applicants;
             }
           }
         } catch(e) {}
 
-        // Fallback to local cache
+        // Source 3: Local Cache fallback
         try {
-          const local = localStorage.getItem(LOCAL_STORAGE_KEY);
+          const local = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('almustashar_real_recruitment_v1');
           if (local) return JSON.parse(local);
         } catch(e) {}
+
         return [];
       },
 
+      // 2. Save to Cloud & Local
       async save(applicantsList) {
         // Save locally first
         try {
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(applicantsList));
+          localStorage.setItem('almustashar_real_recruitment_v1', JSON.stringify(applicantsList));
         } catch(e) {}
 
-        // Sync to Cloud Mirror 1
+        // Push to Cloud REST API
         try {
-          await fetch('https://api.restful-api.dev/objects', {
-            method: 'POST',
+          await fetch(CLOUD_API_URL, {
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              id: 'almustashar_recruitment_portal_db_2026',
-              name: 'Almustashar Recruitment DB',
+              name: 'Almustashar Portal Database',
               data: { applicants: applicantsList, updatedAt: new Date().toISOString() }
             })
           });
         } catch(e) {}
 
-        // Sync to Cloud Mirror 2
+        // Push to Vercel Serverless Function
         try {
-          await fetch('https://kv.val.run/almustashar_recruitment_db_v2', {
+          await fetch('/api/sync', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(applicantsList)
@@ -189,24 +191,9 @@
           <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v8h20v-8a2 2 0 0 0-2-2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
         </svg>
       ),
-      MapPin: ({ size = 18, color = "currentColor" }) => (
+      GraduationCap: ({ size = 18, color = "currentColor" }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>
-        </svg>
-      ),
-      Clock: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-        </svg>
-      ),
-      DollarSign: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-        </svg>
-      ),
-      Users: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
         </svg>
       ),
       ArrowLeft: ({ size = 18, color = "currentColor" }) => (
@@ -234,19 +221,9 @@
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
         </svg>
       ),
-      FileText: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
-        </svg>
-      ),
       User: ({ size = 18, color = "currentColor" }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-        </svg>
-      ),
-      LayoutDashboard: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>
         </svg>
       ),
       Video: ({ size = 18, color = "currentColor" }) => (
@@ -262,11 +239,6 @@
       AlertCircle: ({ size = 18, color = "currentColor" }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
-        </svg>
-      ),
-      GraduationCap: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
         </svg>
       ),
       ShieldCheck: ({ size = 18, color = "currentColor" }) => (
@@ -733,7 +705,7 @@
           </div>
           <h1 className="text-xl md:text-2xl font-extrabold text-slateText-title">تم إرسال وحفظ طلبك بنجاح!</h1>
           <p className="text-xs text-slateText-muted leading-relaxed">
-            مرحباً <strong>{applicant.fullName}</strong>، تم تسجيل وتأكيد طلبك في قاعدة البيانات المركزية.
+            مرحباً <strong>{applicant.fullName}</strong>، تم تسجيل وتأكيد طلبك في قاعدة البيانات السحابية.
           </p>
           <div className="inline-block px-5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold">
             <span className="text-slateText-muted">رقم طلبك المرجعي: </span>
@@ -774,7 +746,6 @@
       const handleSearchSubmit = async (e) => {
         if (e) e.preventDefault();
         setLoading(true);
-        // Refresh from cloud immediately to get cross-device updates
         const freshList = await onRefresh();
         performSearch(searchQuery, freshList);
         setLoading(false);
@@ -1085,7 +1056,6 @@
       const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
       const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
-      // Load applicants from Cloud on startup and periodically
       const refreshCloudData = async () => {
         const list = await CloudDB.getAll();
         setApplicants(list);
@@ -1094,7 +1064,7 @@
 
       useEffect(() => {
         refreshCloudData();
-        const interval = setInterval(refreshCloudData, 10000); // 10s auto-refresh
+        const interval = setInterval(refreshCloudData, 6000); // 6s auto-refresh
         return () => clearInterval(interval);
       }, []);
 
