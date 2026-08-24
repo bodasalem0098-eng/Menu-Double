@@ -1,8 +1,10 @@
 // Neon Postgres Serverless Backend for Almustashar Recruitment Portal
-// Works seamlessly on Vercel with Neon Serverless Driver or HTTP SQL API
+// Direct Connection to user's Neon Database
+
+const DEFAULT_NEON_URL = "postgresql://neondb_owner:npg_bNqO2SZ6BeDX@ep-restless-water-ax1cfols.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require";
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
@@ -11,113 +13,84 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const databaseUrl = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL || '';
+  const databaseUrl = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL || DEFAULT_NEON_URL;
 
-  // Helper to execute SQL against Neon HTTP API or fallback store
+  // Execute SQL via Neon HTTP SQL API
   async function queryNeon(sql, params = []) {
-    if (!databaseUrl) return null;
     try {
-      // Neon HTTP SQL API
-      // Transform postgresql://user:pass@host/db to https://host/sql
-      const urlObj = new URL(databaseUrl);
+      const urlObj = new URL(databaseUrl.replace('-pooler', ''));
       const host = urlObj.host;
-      const user = urlObj.username;
-      const pass = urlObj.password;
-      const dbname = urlObj.pathname.replace(/^\//, '');
-
       const endpoint = `https://${host}/sql`;
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Basic ' + Buffer.from(`${user}:${pass}`).toString('base64'),
-          'Neon-Connection-String': databaseUrl,
+          'Neon-Connection-String': databaseUrl.replace('-pooler', ''),
         },
         body: JSON.stringify({ query: sql, params })
       });
 
       if (response.ok) {
         return await response.json();
+      } else {
+        const errText = await response.text();
+        console.error('Neon SQL Error Response:', errText);
       }
     } catch (err) {
-      console.error('Neon Query Error:', err);
+      console.error('Neon Query Exception:', err);
     }
     return null;
   }
 
-  // Handle GET (Retrieve all applicants)
+  // Handle GET (Fetch all applicants)
   if (req.method === 'GET') {
-    // 1. Try Neon Database first
-    if (databaseUrl) {
-      const neonRes = await queryNeon(`
-        CREATE TABLE IF NOT EXISTS applicants (
-          id TEXT PRIMARY KEY,
-          code TEXT UNIQUE NOT NULL,
-          full_name TEXT NOT NULL,
-          phone TEXT NOT NULL,
-          email TEXT,
-          nationality TEXT,
-          city TEXT,
-          age TEXT,
-          education TEXT,
-          current_job TEXT,
-          years_experience TEXT,
-          expected_salary TEXT,
-          skills TEXT,
-          vat_experience TEXT,
-          status TEXT DEFAULT 'SUBMITTED',
-          submitted_at TEXT,
-          interview JSONB
-        );
-        SELECT * FROM applicants ORDER BY id DESC;
-      `);
+    const neonRes = await queryNeon(`SELECT * FROM applicants ORDER BY id DESC;`);
 
-      if (neonRes && Array.isArray(neonRes.rows)) {
-        const mapped = neonRes.rows.map(r => ({
-          id: r.id,
-          code: r.code,
-          fullName: r.full_name,
-          phone: r.phone,
-          email: r.email,
-          nationality: r.nationality,
-          city: r.city,
-          age: r.age,
-          education: r.education,
-          currentJob: r.current_job,
-          yearsExperience: r.years_experience,
-          expectedSalary: r.expected_salary,
-          skills: r.skills,
-          vatExperience: r.vat_experience,
-          status: r.status,
-          submittedAt: r.submitted_at,
-          interview: r.interview
-        }));
-        return res.status(200).json({ source: 'neon', applicants: mapped });
-      }
+    if (neonRes && Array.isArray(neonRes.rows)) {
+      const mapped = neonRes.rows.map(r => ({
+        id: r.id,
+        code: r.code,
+        fullName: r.full_name,
+        phone: r.phone,
+        email: r.email,
+        nationality: r.nationality,
+        city: r.city,
+        age: r.age,
+        education: r.education,
+        currentJob: r.current_job,
+        yearsExperience: r.years_experience,
+        expectedSalary: r.expected_salary,
+        skills: r.skills,
+        vatExperience: r.vat_experience,
+        status: r.status,
+        submittedAt: r.submitted_at,
+        interview: typeof r.interview === 'string' ? JSON.parse(r.interview) : r.interview
+      }));
+      return res.status(200).json({ source: 'neon_postgres', applicants: mapped });
     }
 
-    // 2. Fallback to Cloud REST Store
+    // Fallback to cloud mirror if neon query failed
     try {
       const cloudRes = await fetch('https://api.restful-api.dev/objects/ff8081819ff5b11001a0329c847c0a24', { cache: 'no-cache' });
       if (cloudRes.ok) {
         const cloudData = await cloudRes.json();
         if (cloudData && cloudData.data && Array.isArray(cloudData.data.applicants)) {
-          return res.status(200).json({ source: 'cloud_mirror', applicants: cloudData.data.applicants });
+          return res.status(200).json({ source: 'cloud_fallback', applicants: cloudData.data.applicants });
         }
       }
     } catch (e) {}
 
-    return res.status(200).json({ applicants: [] });
+    return res.status(200).json({ source: 'empty', applicants: [] });
   }
 
-  // Handle POST (Create / Save Applicant)
+  // Handle POST (Insert / Upsert applicant)
   if (req.method === 'POST') {
     try {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const applicant = body.applicant || body;
 
-      // 1. Try Neon Database
-      if (databaseUrl && applicant.code) {
+      if (applicant && applicant.code) {
         await queryNeon(`
           INSERT INTO applicants (
             id, code, full_name, phone, email, nationality, city, age, 
@@ -127,7 +100,11 @@ export default async function handler(req, res) {
           ON CONFLICT (code) DO UPDATE SET
             status = EXCLUDED.status,
             interview = EXCLUDED.interview,
-            full_name = EXCLUDED.full_name;
+            full_name = EXCLUDED.full_name,
+            phone = EXCLUDED.phone,
+            expected_salary = EXCLUDED.expected_salary,
+            education = EXCLUDED.education,
+            years_experience = EXCLUDED.years_experience;
         `, [
           applicant.id || String(Date.now()),
           applicant.code,
@@ -149,7 +126,7 @@ export default async function handler(req, res) {
         ]);
       }
 
-      // 2. Always sync to Cloud Mirror as well
+      // Also mirror to cloud backup
       try {
         let currentList = [];
         const cloudGet = await fetch('https://api.restful-api.dev/objects/ff8081819ff5b11001a0329c847c0a24', { cache: 'no-cache' });
@@ -169,7 +146,7 @@ export default async function handler(req, res) {
         });
       } catch (e) {}
 
-      return res.status(200).json({ success: true, applicant });
+      return res.status(200).json({ success: true, source: 'neon_postgres', applicant });
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
@@ -178,12 +155,10 @@ export default async function handler(req, res) {
   // Handle DELETE
   if (req.method === 'DELETE') {
     const { code } = req.query;
-    if (databaseUrl) {
-      if (code) {
-        await queryNeon('DELETE FROM applicants WHERE code = $1;', [code]);
-      } else {
-        await queryNeon('DELETE FROM applicants;');
-      }
+    if (code) {
+      await queryNeon('DELETE FROM applicants WHERE code = $1;', [code]);
+    } else {
+      await queryNeon('DELETE FROM applicants;');
     }
 
     try {
@@ -204,7 +179,7 @@ export default async function handler(req, res) {
       });
     } catch (e) {}
 
-    return res.status(200).json({ success: true });
+    return res.status(200).json({ success: true, source: 'neon_postgres' });
   }
 
   return res.status(405).json({ error: 'Method Not Allowed' });
