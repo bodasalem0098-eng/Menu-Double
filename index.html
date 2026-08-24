@@ -85,13 +85,40 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
+    /* ---------------- Normalize Utilities (Arabic Digits & Letters) ---------------- */
+    function normalizeStr(str) {
+      if (!str) return '';
+      let s = String(str);
+      const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+      for (let i = 0; i < 10; i++) {
+        s = s.split(arabicDigits[i]).join(String(i));
+      }
+      // Normalize arabic letters
+      s = s.replace(/[أإآ]/g, 'ا')
+           .replace(/[ة]/g, 'ه')
+           .replace(/[ى]/g, 'ي')
+           .replace(/[\u064B-\u065F]/g, ''); // Remove tashkeel
+      return s.toLowerCase().replace(/[\s\-\+\(\)\_]/g, '');
+    }
+
     /* ---------------- Multi-Device Cloud Sync Engine ---------------- */
     const CLOUD_OBJECT_ID = 'ff8081819ff5b11001a0329c847c0a24';
     const CLOUD_API_URL = `https://api.restful-api.dev/objects/${CLOUD_OBJECT_ID}`;
-    const LOCAL_STORAGE_KEY = 'almustashar_synced_data_v5';
+    const LOCAL_STORAGE_KEY = 'almustashar_synced_data_v6';
 
     const CloudDB = {
       async getAll() {
+        let list = [];
+        // 1. Local Cache first (instant)
+        try {
+          const local = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('almustashar_synced_data_v5') || localStorage.getItem('almustashar_synced_data_v4');
+          if (local) {
+            const parsed = JSON.parse(local);
+            if (Array.isArray(parsed) && parsed.length > 0) list = parsed;
+          }
+        } catch(e) {}
+
+        // 2. Fetch from Cloud REST API
         try {
           const res = await fetch(CLOUD_API_URL, { cache: 'no-cache' });
           if (res.ok) {
@@ -103,11 +130,7 @@
           }
         } catch(e) {}
 
-        try {
-          const local = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('almustashar_real_recruitment_v1');
-          if (local) return JSON.parse(local);
-        } catch(e) {}
-        return [];
+        return list;
       },
 
       async save(applicantsList) {
@@ -128,7 +151,7 @@
       }
     };
 
-    /* ---------------- Crisp Icons ---------------- */
+    /* ---------------- Icons ---------------- */
     const Icon = {
       Scale: ({ size = 18 }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -173,6 +196,11 @@
       Shield: ({ size = 18 }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+        </svg>
+      ),
+      User: ({ size = 18 }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
         </svg>
       )
     };
@@ -270,7 +298,6 @@
       return (
         <div className="max-w-2xl mx-auto px-3 md:px-4 py-5 md:py-8 space-y-4 animate-fade-in text-right">
           
-          {/* Header Card */}
           <div className="g-card g-header p-5 md:p-7 space-y-2.5">
             <h1 className="text-xl md:text-2xl font-extrabold text-slateText-title">استمارة التقديم على وظيفة محاسب مالي</h1>
             <p className="text-xs text-slateText-muted leading-relaxed">
@@ -290,7 +317,7 @@
 
           <form onSubmit={handleSubmit} className="space-y-4">
 
-            {/* Section 1: Personal Info */}
+            {/* 1. Personal Info */}
             <div className="g-card p-5 md:p-6 space-y-4">
               <h2 className="text-xs font-bold text-brand-800 uppercase tracking-wide">1. البيانات الشخصية</h2>
               
@@ -367,7 +394,7 @@
               </div>
             </div>
 
-            {/* Section 2: Professional & Experience */}
+            {/* 2. Professional & Experience */}
             <div className="g-card p-5 md:p-6 space-y-4">
               <h2 className="text-xs font-bold text-brand-800 uppercase tracking-wide">2. المؤهلات والخبرات</h2>
 
@@ -428,7 +455,7 @@
               </div>
             </div>
 
-            {/* Section 3: Questions */}
+            {/* 3. Questions */}
             <div className="g-card p-5 md:p-6 space-y-4">
               <h2 className="text-xs font-bold text-brand-800 uppercase tracking-wide">3. الأسئلة المهنية</h2>
 
@@ -451,7 +478,7 @@
               </div>
             </div>
 
-            {/* Section 4: Attachments */}
+            {/* 4. Attachments */}
             <div className="g-card p-5 md:p-6 space-y-4">
               <h2 className="text-xs font-bold text-brand-800 uppercase tracking-wide">4. المستندات والمرفقات</h2>
 
@@ -482,7 +509,6 @@
               </div>
             </div>
 
-            {/* Submit Button */}
             <div className="pt-2">
               <button
                 type="submit"
@@ -508,7 +534,7 @@
           </div>
           <h1 className="text-xl font-extrabold text-slateText-title">تم إرسال وحفظ طلبك بنجاح!</h1>
           <p className="text-xs text-slateText-muted leading-relaxed">
-            مرحباً <strong>{applicant.fullName}</strong>، تم تسجيل طلبك لوظيفة محاسب مالي في مكتب المستشار للمحاماة.
+            مرحباً <strong>{applicant.fullName}</strong>، تم تسجيل وتأكيد طلبك في المنصة.
           </p>
           <div className="inline-block px-5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold">
             <span className="text-slateText-muted">رقم طلبك المرجعي: </span>
@@ -516,42 +542,41 @@
           </div>
           <div className="pt-2">
             <button onClick={goDashboard} className="w-full h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-brand-900">
-              الدخول للوحة متابعة طلبي وموعد المقابلة ➔
+              الانتقال لشاشة متابعة طلبي ➔
             </button>
           </div>
         </div>
       );
     }
 
-    /* ---------------- Query Dashboard ---------------- */
+    /* ---------------- Query Dashboard with Fail-Safe Instant Search ---------------- */
     function ApplicantDashboard({ applicants, activeApplicant, onRefresh, onGoApply }) {
       const [searchQuery, setSearchQuery] = useState(activeApplicant ? activeApplicant.code : '');
-      const [current, setCurrent] = useState(activeApplicant || null);
+      const [selectedApplicant, setSelectedApplicant] = useState(activeApplicant || (applicants.length > 0 ? applicants[0] : null));
       const [loading, setLoading] = useState(false);
-      const [hasSearched, setHasSearched] = useState(Boolean(activeApplicant));
 
-      const performSearch = (q, list = applicants) => {
-        const trimmed = q.trim().toLowerCase();
-        if (!trimmed) {
-          setCurrent(null);
-          setHasSearched(false);
-          return;
-        }
-        setHasSearched(true);
-        const found = list.find(a => 
-          (a.code && a.code.toLowerCase().includes(trimmed)) ||
-          (a.phone && a.phone.includes(trimmed)) ||
-          (a.fullName && a.fullName.toLowerCase().includes(trimmed))
-        );
-        setCurrent(found || null);
-      };
+      // Filtered applicants as user types (Instant Live Search)
+      const normalizedQ = normalizeStr(searchQuery);
+      const filteredApplicants = normalizedQ ? applicants.filter(a => {
+        const normCode = normalizeStr(a.code);
+        const normPhone = normalizeStr(a.phone);
+        const normName = normalizeStr(a.fullName);
+        return normCode.includes(normalizedQ) || normPhone.includes(normalizedQ) || normName.includes(normalizedQ);
+      }) : applicants;
 
-      const handleSearchSubmit = async (e) => {
+      const handleManualSearch = async (e) => {
         if (e) e.preventDefault();
         setLoading(true);
-        const freshList = await onRefresh();
-        performSearch(searchQuery, freshList);
+        const fresh = await onRefresh();
         setLoading(false);
+        const normQ = normalizeStr(searchQuery);
+        if (!normQ) return;
+        const found = fresh.find(a => 
+          normalizeStr(a.code).includes(normQ) ||
+          normalizeStr(a.phone).includes(normQ) ||
+          normalizeStr(a.fullName).includes(normQ)
+        );
+        if (found) setSelectedApplicant(found);
       };
 
       const getStageIdx = (status) => {
@@ -567,51 +592,73 @@
       return (
         <div className="max-w-2xl mx-auto px-3 md:px-4 py-5 md:py-8 space-y-4 animate-fade-in text-right">
           
+          {/* Search Box */}
           <div className="g-card p-5 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-extrabold text-slateText-title">الاستعلام ومتابعة حالة الطلب</h2>
-              <button onClick={handleSearchSubmit} className="text-xs text-brand-800 font-bold flex items-center gap-1">
+              <button onClick={async () => { setLoading(true); await onRefresh(); setLoading(false); }} className="text-xs text-brand-800 font-bold flex items-center gap-1">
                 <Icon.RefreshCw size={12} className={loading ? "animate-spin" : ""} /> <span>تحديث</span>
               </button>
             </div>
-            <p className="text-xs text-slateText-muted">أدخل رقم الهاتف أو رقم الطلب (مثال: APP-0001) للاستعلام</p>
+            <p className="text-xs text-slateText-muted">ابحث برقم الهاتف أو الاسم أو رقم الطلب (أو اختر اسمك مباشرة من القائمة بالأسفل):</p>
 
-            <form onSubmit={handleSearchSubmit} className="flex gap-2">
+            <form onSubmit={handleManualSearch} className="flex gap-2">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="رقم الهاتف أو رقم الطلب..."
-                className="flex-1 h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50 outline-none text-right focus:border-brand-800"
+                placeholder="رقم الهاتف (05xxxxxxxx) أو الاسم أو رقم الطلب..."
+                className="flex-1 h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50 outline-none text-right focus:border-brand-800 focus:bg-white"
               />
               <button
                 type="submit"
                 disabled={loading}
                 className="px-5 h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-brand-900"
               >
-                استعلام
+                بحث
               </button>
             </form>
+
+            {/* Quick Click List of Registered Applicants */}
+            {applicants.length > 0 && (
+              <div className="pt-2 border-t border-slate-100">
+                <span className="text-[11px] font-bold text-slateText-muted block mb-1.5">الطلبات المسجلة في النظام (اضغط على اسمك لعرض ملفك فوراً):</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {filteredApplicants.map(a => (
+                    <button
+                      key={a.code}
+                      onClick={() => { setSelectedApplicant(a); setSearchQuery(a.code); }}
+                      className={`text-xs px-3 py-1.5 rounded-lg border font-bold transition-all ${
+                        selectedApplicant?.code === a.code ? 'bg-brand-800 text-white border-brand-800 shadow-sm' : 'bg-slate-50 text-slateText-body border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      {a.fullName} ({a.code})
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {current ? (
+          {/* Selected Applicant Card */}
+          {selectedApplicant ? (
             <div className="space-y-4">
               <div className="g-card p-5 space-y-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <span className="font-mono text-xs font-bold text-brand-800 bg-brand-50 px-2 py-0.5 rounded border border-brand-100">{current.code}</span>
-                    <h3 className="text-base font-extrabold text-slateText-title mt-1">{current.fullName}</h3>
-                    <p className="text-xs text-slateText-muted" dir="ltr">{current.phone}</p>
+                    <span className="font-mono text-xs font-bold text-brand-800 bg-brand-50 px-2.5 py-0.5 rounded border border-brand-100">{selectedApplicant.code}</span>
+                    <h3 className="text-base font-extrabold text-slateText-title mt-1">{selectedApplicant.fullName}</h3>
+                    <p className="text-xs text-slateText-muted" dir="ltr">{selectedApplicant.phone}</p>
                   </div>
                   <span className="text-xs font-bold px-3 py-1 rounded-full bg-brand-50 text-brand-800 border border-brand-200">
-                    {current.status}
+                    {selectedApplicant.status}
                   </span>
                 </div>
 
                 <div className="overflow-x-auto no-scrollbar pt-2">
                   <div style={{ minWidth: 500 }} className="flex flex-row w-full">
                     {STAGES.map((s, i) => {
-                      const activeIdx = getStageIdx(current.status);
+                      const activeIdx = getStageIdx(selectedApplicant.status);
                       const done = i < activeIdx;
                       const isCur = i === activeIdx;
                       return (
@@ -631,7 +678,7 @@
                 </div>
               </div>
 
-              {current.interview && (
+              {selectedApplicant.interview && (
                 <div className="g-card p-5 space-y-3 bg-purple-50/40 border-purple-200">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center">
@@ -640,12 +687,12 @@
                     <strong className="text-xs font-bold text-purple-950">موعد المقابلة المرئية عبر Google Meet</strong>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div><span className="text-slateText-muted block">التاريخ:</span> <strong>{current.interview.date}</strong></div>
-                    <div><span className="text-slateText-muted block">الوقت:</span> <strong>{current.interview.time}</strong></div>
+                    <div><span className="text-slateText-muted block">التاريخ:</span> <strong>{selectedApplicant.interview.date}</strong></div>
+                    <div><span className="text-slateText-muted block">الوقت:</span> <strong>{selectedApplicant.interview.time}</strong></div>
                   </div>
-                  {current.interview.meetLink && (
+                  {selectedApplicant.interview.meetLink && (
                     <a
-                      href={current.interview.meetLink}
+                      href={selectedApplicant.interview.meetLink}
                       target="_blank"
                       className="block text-center py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl text-xs shadow-sm"
                     >
@@ -656,26 +703,26 @@
               )}
 
               <div className="g-card p-4 grid grid-cols-2 gap-3 text-xs">
-                <div><span className="text-slateText-muted block">المؤهل:</span> <strong>{current.education}</strong></div>
-                <div><span className="text-slateText-muted block">الخبرة:</span> <strong>{current.yearsExperience}</strong></div>
-                <div><span className="text-slateText-muted block">المدينة:</span> <strong>{current.city || 'الرياض'}</strong></div>
-                <div><span className="text-slateText-muted block">الراتب:</span> <strong>{current.expectedSalary || '2,500 ريال'}</strong></div>
+                <div><span className="text-slateText-muted block">المؤهل:</span> <strong>{selectedApplicant.education}</strong></div>
+                <div><span className="text-slateText-muted block">الخبرة:</span> <strong>{selectedApplicant.yearsExperience}</strong></div>
+                <div><span className="text-slateText-muted block">المدينة:</span> <strong>{selectedApplicant.city || 'الرياض'}</strong></div>
+                <div><span className="text-slateText-muted block">الراتب المحدد:</span> <strong>{selectedApplicant.expectedSalary || '2,500 ريال'}</strong></div>
               </div>
             </div>
-          ) : hasSearched ? (
+          ) : (
             <div className="g-card p-6 text-center space-y-3">
-              <p className="text-xs text-slateText-muted">لم يتم العثور على طلب بهذا الرقم أو الهاتف.</p>
+              <p className="text-xs text-slateText-muted">لا توجد طلبات مسجلة حالياً، قدّم أول طلب الآن:</p>
               <button onClick={onGoApply} className="px-5 py-2 bg-brand-800 text-white text-xs font-bold rounded-xl shadow-sm">
-                تقديم طلب جديد ➔
+                تعبئة استمارة التقديم ➔
               </button>
             </div>
-          ) : null}
+          )}
 
         </div>
       );
     }
 
-    /* ---------------- Admin Panel with Delete / Reset ---------------- */
+    /* ---------------- Admin Panel ---------------- */
     function AdminAuthModal({ onSuccess, onClose }) {
       const [email, setEmail] = useState('');
       const [password, setPassword] = useState('');
@@ -887,7 +934,7 @@
           ...formData
         };
 
-        const updated = [newApp, ...currentList.filter(a => a.phone !== newApp.phone && a.code !== newApp.code)];
+        const updated = [newApp, ...currentList.filter(a => normalizeStr(a.phone) !== normalizeStr(newApp.phone) && a.code !== newApp.code)];
         await CloudDB.save(updated);
         setApplicants(updated);
         setActiveApplicant(newApp);
