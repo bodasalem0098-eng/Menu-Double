@@ -902,15 +902,27 @@
 
     /* ---------------- Admin Panel ---------------- */
     function AdminAuthModal({ onSuccess, onClose }) {
-      const [email, setEmail] = useState('');
+      const [loginId, setLoginId] = useState('');
       const [password, setPassword] = useState('');
       const [errorMsg, setErrorMsg] = useState('');
 
       const handleLogin = (e) => {
         e.preventDefault();
-        const validEmails = ['bodasalem0098@gmail.com', 'moabdo038@gmail.com', 'admin@almustashar.com'];
-        if (!validEmails.includes(email.trim().toLowerCase())) {
-          setErrorMsg('البريد الإلكتروني غير مصرح له.');
+        const norm = normalizeStr(loginId);
+        const validIdentifiers = [
+          '0550340929',
+          '966550340929',
+          '550340929',
+          '0555102513',
+          '966555102513',
+          '555102513',
+          'bodasalem0098@gmail.com',
+          'moabdo038@gmail.com',
+          'admin@almustashar.com'
+        ];
+        
+        if (!validIdentifiers.includes(norm) && !validIdentifiers.includes(loginId.trim().toLowerCase())) {
+          setErrorMsg('رقم الهاتف أو الحساب غير مصرح له بالدخول.');
           return;
         }
         if (password.trim() !== '102044') {
@@ -921,29 +933,49 @@
       };
 
       return (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in text-right">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full border border-slate-200 shadow-xl space-y-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in text-right">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full border border-slate-200 shadow-2xl space-y-4">
             <div className="text-center">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-800 flex items-center justify-center mx-auto mb-2">
-                <Icon.Shield size={20} />
+              <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-800 flex items-center justify-center mx-auto mb-2 shadow-sm">
+                <Icon.Shield size={22} />
               </div>
-              <h3 className="font-bold text-sm text-slateText-title">دخول المشرفين</h3>
+              <h3 className="font-black text-base text-slateText-title">تسجيل دخول لوحة الإدارة</h3>
+              <p className="text-[11px] text-slateText-muted mt-0.5">أدخل رقم الهاتف المعتمد وكلمة المرور</p>
             </div>
 
-            {errorMsg && <div className="p-2 bg-red-50 text-red-600 text-xs font-bold rounded-xl text-center">{errorMsg}</div>}
+            {errorMsg && <div className="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl text-center border border-red-200">{errorMsg}</div>}
 
-            <form onSubmit={handleLogin} className="space-y-3">
+            <form onSubmit={handleLogin} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">البريد الإلكتروني</label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="bodasalem0098@gmail.com" required className="w-full h-10 px-3 rounded-xl text-xs outline-none border border-slate-200 bg-slate-50 text-right focus:border-brand-800" />
+                <label className="block text-xs font-bold text-slateText-body mb-1.5">رقم الهاتف أو البريد الإلكتروني</label>
+                <input
+                  type="text"
+                  dir="ltr"
+                  value={loginId}
+                  onChange={e => setLoginId(e.target.value)}
+                  placeholder="0550340929 أو 0555102513"
+                  required
+                  className="w-full h-11 px-3.5 rounded-xl text-xs outline-none border border-slate-200 bg-slate-50 text-center font-mono focus:border-brand-800 focus:bg-white"
+                />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">كلمة المرور</label>
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••" required className="w-full h-10 px-3 rounded-xl text-xs outline-none border border-slate-200 bg-slate-50 text-center font-mono tracking-widest text-sm focus:border-brand-800" />
+                <label className="block text-xs font-bold text-slateText-body mb-1.5">كلمة المرور</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••"
+                  required
+                  className="w-full h-11 px-3.5 rounded-xl text-xs outline-none border border-slate-200 bg-slate-50 text-center font-mono tracking-widest text-sm focus:border-brand-800 focus:bg-white"
+                />
               </div>
-              <div className="flex gap-2 pt-1">
-                <button type="submit" className="flex-1 h-10 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm">دخول</button>
-                <button type="button" onClick={onClose} className="px-4 h-10 border border-slate-200 text-slateText-body rounded-xl text-xs font-bold">إلغاء</button>
+              <div className="flex gap-2 pt-2">
+                <button type="submit" className="flex-1 h-11 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs font-black shadow-md transition-transform active:scale-98">
+                  تسجيل الدخول ➔
+                </button>
+                <button type="button" onClick={onClose} className="px-4 h-11 border border-slate-200 text-slateText-body rounded-xl text-xs font-bold hover:bg-slate-50">
+                  إلغاء
+                </button>
               </div>
             </form>
           </div>
