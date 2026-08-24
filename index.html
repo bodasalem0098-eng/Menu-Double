@@ -940,7 +940,7 @@
                 <Icon.Shield size={22} />
               </div>
               <h3 className="font-black text-base text-slateText-title">تسجيل دخول لوحة الإدارة</h3>
-              <p className="text-[11px] text-slateText-muted mt-0.5">أدخل رقم الهاتف المعتمد وكلمة المرور</p>
+              <p className="text-[11px] text-slateText-muted mt-0.5">لوحة تحكم إدارة التوظيف للمصرح لهم فقط</p>
             </div>
 
             {errorMsg && <div className="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl text-center border border-red-200">{errorMsg}</div>}
@@ -953,7 +953,7 @@
                   dir="ltr"
                   value={loginId}
                   onChange={e => setLoginId(e.target.value)}
-                  placeholder="0550340929 أو 0555102513"
+                  placeholder="05xxxxxxxx"
                   required
                   className="w-full h-11 px-3.5 rounded-xl text-xs outline-none border border-slate-200 bg-slate-50 text-center font-mono focus:border-brand-800 focus:bg-white"
                 />
