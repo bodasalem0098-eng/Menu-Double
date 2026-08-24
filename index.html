@@ -134,29 +134,46 @@
     const NEON_CONN_STR = "postgresql://neondb_owner:npg_bNqO2SZ6BeDX@ep-restless-water-ax1cfols.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require";
     const LOCAL_STORAGE_KEY = 'almustashar_neon_synced_v2';
 
+    function fetchWithTimeout(url, options, timeoutMs = 4000) {
+      return Promise.race([
+        fetch(url, options),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Request timeout')), timeoutMs))
+      ]);
+    }
+
     async function executeNeonSql(sql, params = []) {
       try {
-        const res = await fetch(NEON_SQL_ENDPOINT, {
+        const res = await fetchWithTimeout(NEON_SQL_ENDPOINT, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Neon-Connection-String': NEON_CONN_STR
           },
           body: JSON.stringify({ query: sql, params })
-        });
+        }, 4000);
         if (res.ok) {
           const json = await res.json();
           return json;
         }
       } catch(e) {
-        console.warn('Direct Neon SQL Error:', e);
+        console.warn('Direct Neon SQL Error:', e.message || e);
       }
       return null;
     }
 
     const DB = {
       async getAll() {
-        // 1. Query Neon Postgres Directly
+        // 0. FAST: Read local cache FIRST (instant, never blocks UI)
+        let localData = null;
+        try {
+          const localRaw = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('almustashar_neon_synced_v1');
+          if (localRaw) {
+            localData = JSON.parse(localRaw);
+            if (!Array.isArray(localData)) localData = null;
+          }
+        } catch(e) { localData = null; }
+
+        // 1. Try Neon Postgres Directly (with 4s timeout)
         try {
           const neonRes = await executeNeonSql('SELECT * FROM applicants ORDER BY id DESC;');
           if (neonRes && Array.isArray(neonRes.rows) && neonRes.rows.length > 0) {
@@ -186,9 +203,9 @@
           }
         } catch(e) {}
 
-        // 2. Query /api/db serverless endpoint
+        // 2. Try /api/db serverless endpoint (with timeout)
         try {
-          const res = await fetch('/api/db', { cache: 'no-cache' });
+          const res = await fetchWithTimeout('/api/db', { cache: 'no-cache' }, 3000);
           if (res.ok) {
             const data = await res.json();
             if (data && Array.isArray(data.applicants) && data.applicants.length > 0) {
@@ -198,12 +215,8 @@
           }
         } catch(e) {}
 
-        // 3. Query Local Cache
-        try {
-          const local = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('almustashar_neon_synced_v1');
-          if (local) return JSON.parse(local);
-        } catch(e) {}
-
+        // 3. Fallback to local cache
+        if (localData && localData.length > 0) return localData;
         return [];
       },
 
