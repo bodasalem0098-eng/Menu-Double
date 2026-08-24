@@ -1242,7 +1242,7 @@
       );
     }
 
-    function AdminDashboardView({ applicants, onUpdateStatus, onScheduleInterview, onDeleteApplicant, onResetAll }) {
+    function AdminDashboardView({ applicants, onUpdateStatus, onScheduleInterview, onDeleteApplicant, onResetAll, onRefresh }) {
       const [selected, setSelected] = useState(applicants[0] || null);
       const [searchQuery, setSearchQuery] = useState('');
       const [scheduleOpen, setScheduleOpen] = useState(false);
@@ -1253,6 +1253,15 @@
       const [natFilter, setNatFilter] = useState('ALL');
       const [previewPhoto, setPreviewPhoto] = useState(null);
       const [previewCv, setPreviewCv] = useState(null);
+      const [isRefreshing, setIsRefreshing] = useState(false);
+
+      // Auto-refresh when entering admin view
+      useEffect(() => {
+        if (onRefresh) {
+          setIsRefreshing(true);
+          onRefresh().finally(() => setIsRefreshing(false));
+        }
+      }, []);
 
       useEffect(() => {
         if (!selected && applicants.length > 0) setSelected(applicants[0]);
@@ -1261,6 +1270,12 @@
           if (fresh) setSelected(fresh);
         }
       }, [applicants]);
+
+      const handleManualRefresh = async () => {
+        setIsRefreshing(true);
+        if (onRefresh) await onRefresh();
+        setTimeout(() => setIsRefreshing(false), 400);
+      };
 
       const statusLabel = (s) => {
         const map = { SUBMITTED:'جديد', CV_VIEWED:'تم فحص CV', SHORTLISTED:'مرشح', INTERVIEW_SCHEDULED:'مقابلة محددة', ACCEPTED:'مقبول ✓', REJECTED:'مرفوض ✕' };
@@ -1307,9 +1322,19 @@
               <h2 className="text-sm md:text-base font-black text-slateText-title">لوحة إدارة المتقدمين والتوظيف</h2>
               <p className="text-[11px] text-slateText-muted">إجمالي المتقدمين في النظام: <strong className="text-brand-800">{applicants.length}</strong> متقدم</p>
             </div>
-            <button onClick={onResetAll} className="px-3 py-1.5 rounded-xl bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100 flex items-center gap-1.5 transition-colors">
-              <Icon.Trash size={13} /> <span>تصفير النظام</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleManualRefresh}
+                disabled={isRefreshing}
+                className="px-3.5 py-1.5 rounded-xl bg-brand-800 hover:bg-brand-900 text-white text-xs font-black shadow-sm flex items-center gap-1.5 transition-transform active:scale-95 disabled:opacity-75"
+              >
+                <Icon.RefreshCw size={13} className={isRefreshing ? "animate-spin" : ""} />
+                <span>{isRefreshing ? "جارٍ التحديث..." : "تحديث الطلبات 🔄"}</span>
+              </button>
+              <button onClick={onResetAll} className="px-3 py-1.5 rounded-xl bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100 flex items-center gap-1.5 transition-colors">
+                <Icon.Trash size={13} /> <span>تصفير</span>
+              </button>
+            </div>
           </div>
 
           {/* Search and Filters Section */}
@@ -1915,6 +1940,7 @@
                 onScheduleInterview={scheduleInt}
                 onDeleteApplicant={deleteApplicant}
                 onResetAll={resetAll}
+                onRefresh={refreshData}
               />
             )}
           </main>
