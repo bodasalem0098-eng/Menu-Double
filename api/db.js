@@ -93,7 +93,20 @@ export default async function handler(req, res) {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const applicant = body.applicant || body;
 
-      if (applicant && applicant.code) {
+      if (applicant) {
+        // Generate atomic sequential code if not provided or marked as new
+        if (!applicant.code || applicant.isNew) {
+          const maxRes = await queryNeon("SELECT code FROM applicants WHERE code LIKE 'APP-%';");
+          let maxNum = 0;
+          if (maxRes && Array.isArray(maxRes.rows)) {
+            maxRes.rows.forEach(r => {
+              const num = parseInt((r.code || '').replace(/\D/g, ''), 10);
+              if (!isNaN(num) && num > maxNum) maxNum = num;
+            });
+          }
+          applicant.code = `APP-${String(maxNum + 1).padStart(4, '0')}`;
+        }
+
         await queryNeon(`
           INSERT INTO applicants (
             id, code, full_name, phone, email, nationality, city, age, 

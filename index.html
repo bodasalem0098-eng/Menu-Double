@@ -218,12 +218,20 @@
       },
 
       async save(applicant) {
-        // 1. Update Local Cache immediately for instant response
-        try {
-          const list = await this.getAll();
-          const updated = [applicant, ...list.filter(a => a.code !== applicant.code && normalizeStr(a.phone) !== normalizeStr(applicant.phone))];
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-        } catch(e) {}
+        // 1. If code not assigned or marked as new, query Neon for the atomic max code
+        if (!applicant.code || applicant.isNew) {
+          try {
+            const liveRes = await executeNeonSql("SELECT code FROM applicants WHERE code LIKE 'APP-%';");
+            let maxNum = 0;
+            if (liveRes && Array.isArray(liveRes.rows)) {
+              liveRes.rows.forEach(r => {
+                const num = parseInt((r.code || '').replace(/\D/g, ''), 10);
+                if (!isNaN(num) && num > maxNum) maxNum = num;
+              });
+            }
+            applicant.code = `APP-${String(maxNum + 1).padStart(4, '0')}`;
+          } catch(e) {}
+        }
 
         // 2. Direct Upsert to Neon Postgres
         try {
@@ -266,14 +274,29 @@
           ]);
         } catch(e) {}
 
-        // 3. Push to /api/db endpoint if serverless is active
+        // 3. Post to /api/db endpoint with cache-buster
         try {
-          fetch('/api/db', {
+          const apiRes = await fetchWithTimeout(`/api/db?_t=${Date.now()}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ applicant })
-          }).catch(() => {});
+          }, 4000);
+          if (apiRes.ok) {
+            const json = await apiRes.json();
+            if (json.applicant && json.applicant.code) {
+              applicant.code = json.applicant.code;
+            }
+          }
         } catch(e) {}
+
+        // 4. Update Local Cache
+        try {
+          const list = await this.getAll();
+          const updated = [applicant, ...list.filter(a => a.code !== applicant.code && normalizeStr(a.phone) !== normalizeStr(applicant.phone))];
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+        } catch(e) {}
+
+        return applicant;
       },
 
       async delete(code) {
@@ -1837,18 +1860,10 @@
 
       const handleFormSubmit = async (formData) => {
         setIsSubmitting(true);
-        const currentList = await DB.getAll();
-        const existingNums = currentList.map(a => {
-          const num = parseInt((a.code || '').replace(/\D/g, ''), 10);
-          return isNaN(num) ? 0 : num;
-        });
-        const maxNum = existingNums.length > 0 ? Math.max(...existingNums) : 0;
-        const nextNum = maxNum + 1;
-        const code = `APP-${String(nextNum).padStart(4, '0')}`;
-
         const newApplicant = {
           id: String(Date.now()),
-          code,
+          code: '',
+          isNew: true,
           fullName: formData.fullName,
           phone: formData.phone,
           email: formData.email,
@@ -1868,9 +1883,9 @@
           interview: null
         };
 
-        await DB.save(newApplicant);
-        setApplicants([newApplicant, ...currentList.filter(a => a.code !== code)]);
-        setActiveApplicant(newApplicant);
+        const saved = await DB.save(newApplicant);
+        await refreshData();
+        setActiveApplicant(saved || newApplicant);
         setIsSubmitting(false);
         setView("success");
       };
