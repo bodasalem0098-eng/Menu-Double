@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>المستشار للمحاماة | بوابة التوظيف واستقطاب الكفاءات</title>
+  <title>المستشار للمحاماة | استمارة التقديم على وظيفة محاسب</title>
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -27,7 +27,6 @@
           fontFamily: {
             cairo: ['Cairo', 'sans-serif'],
             mono: ['JetBrains Mono', 'monospace'],
-            sora: ['Sora', 'sans-serif'],
           },
           colors: {
             brand: {
@@ -38,13 +37,6 @@
               700: '#114D43',
               800: '#0C3831',
               900: '#082823',
-              950: '#041614',
-            },
-            accent: {
-              50: '#FAF6EE',
-              100: '#F5ECDB',
-              500: '#C59341',
-              600: '#A8792F',
             },
             slateText: {
               title: '#0F172A',
@@ -68,18 +60,14 @@
       background-color: #F8FAF9;
       color: #0F172A;
     }
-    .clean-card {
+    .g-card {
       background: #FFFFFF;
       border: 1px solid #E2E8F0;
-      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
-      border-radius: 20px;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
-    .clean-card-hover {
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .clean-card-hover:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px -5px rgba(12, 56, 49, 0.08), 0 0 0 1.5px #1B6B5D;
+    .g-header {
+      border-top: 8px solid #0C3831;
     }
     .pulse-dot { animation: pulseDot 1.6s ease-in-out infinite; }
     @keyframes pulseDot { 
@@ -95,17 +83,15 @@
   <div id="root" class="flex-1 flex flex-col"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState, useEffect } = React;
 
-    /* ---------------- Guaranteed Multi-Device Cloud Sync ---------------- */
+    /* ---------------- Multi-Device Cloud Sync Engine ---------------- */
     const CLOUD_OBJECT_ID = 'ff8081819ff5b11001a0329c847c0a24';
     const CLOUD_API_URL = `https://api.restful-api.dev/objects/${CLOUD_OBJECT_ID}`;
-    const LOCAL_STORAGE_KEY = 'almustashar_synced_data_v4';
+    const LOCAL_STORAGE_KEY = 'almustashar_synced_data_v5';
 
     const CloudDB = {
-      // 1. Fetch from Cloud
       async getAll() {
-        // Source 1: Direct Cloud REST API
         try {
           const res = await fetch(CLOUD_API_URL, { cache: 'no-cache' });
           if (res.ok) {
@@ -117,36 +103,18 @@
           }
         } catch(e) {}
 
-        // Source 2: Vercel Serverless Function
-        try {
-          const res2 = await fetch('/api/sync', { cache: 'no-cache' });
-          if (res2.ok) {
-            const data2 = await res2.json();
-            if (data2 && data2.applicants && Array.isArray(data2.applicants)) {
-              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data2.applicants));
-              return data2.applicants;
-            }
-          }
-        } catch(e) {}
-
-        // Source 3: Local Cache fallback
         try {
           const local = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('almustashar_real_recruitment_v1');
           if (local) return JSON.parse(local);
         } catch(e) {}
-
         return [];
       },
 
-      // 2. Save to Cloud & Local
       async save(applicantsList) {
-        // Save locally first
         try {
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(applicantsList));
-          localStorage.setItem('almustashar_real_recruitment_v1', JSON.stringify(applicantsList));
         } catch(e) {}
 
-        // Push to Cloud REST API
         try {
           await fetch(CLOUD_API_URL, {
             method: 'PUT',
@@ -157,53 +125,14 @@
             })
           });
         } catch(e) {}
-
-        // Push to Vercel Serverless Function
-        try {
-          await fetch('/api/sync', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(applicantsList)
-          });
-        } catch(e) {}
       }
     };
 
-    /* ---------------- Vector Icons ---------------- */
+    /* ---------------- Crisp Icons ---------------- */
     const Icon = {
-      Scale: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      Scale: ({ size = 18 }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
-        </svg>
-      ),
-      Briefcase: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-        </svg>
-      ),
-      Sparkles: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>
-        </svg>
-      ),
-      Building2: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v8h20v-8a2 2 0 0 0-2-2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
-        </svg>
-      ),
-      GraduationCap: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
-        </svg>
-      ),
-      ArrowLeft: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
-        </svg>
-      ),
-      ArrowRight: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
         </svg>
       ),
       CheckCircle2: ({ size = 18, color = "currentColor" }) => (
@@ -211,23 +140,13 @@
           <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
         </svg>
       ),
-      Circle: ({ size = 18, color = "currentColor", fill = "none" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color} strokeWidth="1.8">
-          <circle cx="12" cy="12" r="10"/>
-        </svg>
-      ),
-      Upload: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      Upload: ({ size = 18 }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
         </svg>
       ),
-      User: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-        </svg>
-      ),
-      Video: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      Video: ({ size = 18 }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
         </svg>
       ),
@@ -236,26 +155,26 @@
           <polyline points="20 6 9 17 4 12"/>
         </svg>
       ),
-      AlertCircle: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+      Circle: ({ size = 18, color = "currentColor", fill = "none" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color} strokeWidth="1.8">
+          <circle cx="12" cy="12" r="10"/>
         </svg>
       ),
-      ShieldCheck: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>
-        </svg>
-      ),
-      Trash: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      Trash: ({ size = 16 }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
         </svg>
       ),
-      RefreshCw: ({ size = 18, color = "currentColor", className = "" }) => (
-        <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      RefreshCw: ({ size = 16, className = "" }) => (
+        <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>
         </svg>
       ),
+      Shield: ({ size = 18 }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+        </svg>
+      )
     };
 
     const STAGES = [
@@ -265,81 +184,36 @@
       { key: "SHORTLISTED", label: "القائمة المختصرة" },
       { key: "INTERVIEW_SCHEDULED", label: "مقابلة مجدولة" },
       { key: "INTERVIEW_COMPLETED", label: "تمت المقابلة" },
-      { key: "UNDER_REVIEW", label: "تحت المراجعة" },
       { key: "DECISION", label: "القرار النهائي" },
     ];
-
-    /* ---------------- Pipeline Rail ---------------- */
-    function PipelineRail({ steps, activeIndex }) {
-      return (
-        <div className="flex flex-row w-full">
-          {steps.map((s, i) => {
-            const done = i < activeIndex;
-            const current = i === activeIndex;
-            const nodeColor = done ? '#16A34A' : current ? '#0C3831' : '#CBD5E1';
-            const nodeBg = done ? '#F0FDF4' : current ? '#F2F8F6' : 'transparent';
-            return (
-              <div key={s.key || i} className="flex-1 flex flex-col items-center">
-                <div className="flex items-center w-full">
-                  {i !== 0 && <div className={`flex-1 h-0.5 ${done || current ? 'bg-green-600' : 'bg-slate-200'}`} />}
-                  <div
-                    style={{
-                      width: 30, height: 30, borderRadius: 999, border: `2px solid ${nodeColor}`,
-                      background: nodeBg, display: "flex", alignItems: "center", justifyContent: "center",
-                      color: nodeColor, flexShrink: 0,
-                    }}
-                  >
-                    {done ? <Icon.Check size={13} color="#16A34A" /> : current ? (
-                      <span className="pulse-dot" style={{ width: 8, height: 8, borderRadius: 999, background: nodeColor, display: "block" }} />
-                    ) : <Icon.Circle size={7} fill={nodeColor} color={nodeColor} />}
-                  </div>
-                  {i !== steps.length - 1 && <div className={`flex-1 h-0.5 ${done ? 'bg-green-600' : 'bg-slate-200'}`} />}
-                </div>
-                <div className="mt-2 text-center px-1">
-                  <p style={{ color: current ? '#0F172A' : done ? '#475569' : '#94A3B8', fontWeight: current ? 700 : 500, fontSize: 11 }}>
-                    {s.label || s}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      );
-    }
 
     /* ---------------- Navbar ---------------- */
     function Navbar({ view, setView }) {
       return (
-        <header className="bg-white border-b border-[#E2E8F0] sticky top-0 z-40 px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="max-w-5xl mx-auto flex items-center justify-between">
-            <button onClick={() => setView("welcome")} className="flex items-center gap-3 group text-right">
-              <div className="w-9 h-9 rounded-xl bg-brand-800 text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-                <Icon.Scale size={18} color="#E1EFEA" />
+        <header className="bg-white border-b border-[#E2E8F0] sticky top-0 z-40 px-3 md:px-4 py-2.5">
+          <div className="max-w-3xl mx-auto flex items-center justify-between">
+            <button onClick={() => setView("form")} className="flex items-center gap-2.5 text-right">
+              <div className="w-8 h-8 rounded-lg bg-brand-800 text-white flex items-center justify-center">
+                <Icon.Scale size={16} />
               </div>
               <div>
-                <h1 className="font-extrabold text-sm text-slateText-title leading-tight">المستشار للمحاماة</h1>
-                <p className="text-[11px] text-brand-700 font-semibold">بوابة استقطاب الكفاءات</p>
+                <h1 className="font-extrabold text-xs md:text-sm text-slateText-title leading-tight">المستشار للمحاماة</h1>
+                <p className="text-[10px] text-brand-700 font-semibold">استمارة التوظيف الإلكترونية</p>
               </div>
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button
-                onClick={() => setView("welcome")}
-                className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${view === 'welcome' ? 'bg-brand-50 text-brand-800' : 'text-slateText-muted hover:bg-slate-100'}`}
+                onClick={() => setView("form")}
+                className={`text-[11px] md:text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${view === 'form' ? 'bg-brand-800 text-white' : 'bg-slate-100 text-slateText-body'}`}
               >
-                الرئيسية
-              </button>
-              <button
-                onClick={() => setView("register")}
-                className={`text-xs font-bold px-3.5 py-1.5 rounded-lg transition-colors ${view === 'register' || view === 'apply' ? 'bg-brand-800 text-white shadow-sm' : 'bg-brand-50 text-brand-800 hover:bg-brand-100'}`}
-              >
-                تقديم طلب
+                استمارة التقديم
               </button>
               <button
                 onClick={() => setView("dashboard")}
-                className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${view === 'dashboard' ? 'bg-brand-50 text-brand-800' : 'text-slateText-muted hover:bg-slate-100'}`}
+                className={`text-[11px] md:text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${view === 'dashboard' ? 'bg-brand-800 text-white' : 'bg-slate-100 text-slateText-body'}`}
               >
-                استعلام ومتابعة
+                استعلام عن طلب
               </button>
             </div>
           </div>
@@ -347,372 +221,301 @@
       );
     }
 
-    /* ---------------- 1. Welcome Screen ---------------- */
-    function WelcomeScreen({ onStartApply, onStartTrack }) {
-      return (
-        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6 animate-fade-in text-right">
-          <div className="bg-brand-800 text-white rounded-3xl p-7 md:p-12 shadow-sm relative overflow-hidden">
-            <div className="relative z-10 space-y-4 max-w-lg">
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-white/10 text-brand-100 border border-white/10">
-                <Icon.Sparkles size={13} /> فرصة وظيفية بالرياض · دوام كامل
-              </div>
-
-              <h1 className="text-2xl md:text-4xl font-extrabold leading-tight text-white">
-                بوابة التوظيف المالي <br />
-                <span className="text-[#E1EFEA]">مكتب المستشار للمحاماة</span>
-              </h1>
-
-              <p className="text-xs md:text-sm text-white/85 leading-relaxed font-normal">
-                نستقبل طلبات الانضمام لوظيفة <strong>محاسب مالي</strong>. سجّل بياناتك الحقيقية للبدء في استمارة التقديم.
-              </p>
-
-              <div className="pt-2 flex flex-wrap items-center gap-3">
-                <button
-                  onClick={onStartApply}
-                  className="px-6 h-11 bg-white text-brand-900 hover:bg-brand-50 rounded-xl font-extrabold text-xs shadow-sm transition-transform active:scale-95 flex items-center gap-2"
-                >
-                  <Icon.Briefcase size={16} color="#0C3831" />
-                  <span>بدء التسجيل والتقديم ➔</span>
-                </button>
-                <button
-                  onClick={onStartTrack}
-                  className="px-5 h-11 bg-white/15 hover:bg-white/25 text-white rounded-xl font-bold text-xs border border-white/20 transition-colors"
-                >
-                  استعلام عن حالة الطلب
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="clean-card p-5 space-y-2 text-right">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-800 flex items-center justify-center">
-                <Icon.Building2 size={20} />
-              </div>
-              <h3 className="font-bold text-sm text-slateText-title">المسمى والمهام</h3>
-              <p className="text-xs text-slateText-muted leading-relaxed">
-                محاسب مالي عام لإدارة القيود والتسويات البنكية وضريبة القيمة المضافة ZATCA.
-              </p>
-            </div>
-
-            <div className="clean-card p-5 space-y-2 text-right">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-800 flex items-center justify-center">
-                <Icon.GraduationCap size={20} />
-              </div>
-              <h3 className="font-bold text-sm text-slateText-title">المؤهل المطلوب</h3>
-              <p className="text-xs text-slateText-muted leading-relaxed">
-                بكالوريوس أو دبلوم محاسبة أو مالية، مع إجادة برامج Excel وERP.
-              </p>
-            </div>
-
-            <div className="clean-card p-5 space-y-2 text-right">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-800 flex items-center justify-center">
-                <Icon.Video size={20} />
-              </div>
-              <h3 className="font-bold text-sm text-slateText-title">المقابلات الشخصية</h3>
-              <p className="text-xs text-slateText-muted leading-relaxed">
-                مقابلات مرئية مباشرة للمرشحين المختارين عبر Google Meet.
-              </p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    /* ---------------- 2. First Registration Step ---------------- */
-    function RegisterStep({ onRegisterSuccess, onBack }) {
-      const [regData, setRegData] = useState({ fullName: '', phone: '', email: '' });
-      const [error, setError] = useState('');
-
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!regData.fullName.trim()) {
-          setError('الاسم الكامل مطلوب.');
-          return;
-        }
-        if (!regData.phone.trim()) {
-          setError('رقم الهاتف مطلوب.');
-          return;
-        }
-        setError('');
-        onRegisterSuccess(regData);
-      };
-
-      return (
-        <div className="max-w-md mx-auto px-4 py-8 animate-fade-in text-right space-y-4">
-          <button onClick={onBack} className="inline-flex items-center gap-1 text-xs font-bold text-slateText-muted hover:text-slateText-title">
-            <Icon.ArrowRight size={14} /> <span>العودة للرئيسية</span>
-          </button>
-
-          <div className="clean-card p-6 md:p-8 space-y-5">
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-800 flex items-center justify-center mx-auto mb-2 shadow-sm">
-                <Icon.User size={22} color="#0C3831" />
-              </div>
-              <h2 className="text-lg font-extrabold text-slateText-title">الخطوة الأولى: تسجيل البيانات الأساسية</h2>
-              <p className="text-xs text-slateText-muted mt-1">سجل اسمك ورقم هاتفك للانتقال فوراً لاستمارة التقديم على وظيفة محاسب.</p>
-            </div>
-
-            {error && <div className="p-2.5 bg-red-50 text-red-600 rounded-xl text-xs font-bold text-center border border-red-200">{error}</div>}
-
-            <form onSubmit={handleSubmit} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">الاسم الرباعي <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  value={regData.fullName}
-                  onChange={e => setRegData({ ...regData, fullName: e.target.value })}
-                  placeholder="اكتب اسمك كما في الهوية..."
-                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">رقم الهاتف (واتساب) <span className="text-red-500">*</span></label>
-                <input
-                  type="tel"
-                  dir="ltr"
-                  value={regData.phone}
-                  onChange={e => setRegData({ ...regData, phone: e.target.value })}
-                  placeholder="05XXXXXXXX"
-                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">البريد الإلكتروني (اختياري)</label>
-                <input
-                  type="email"
-                  dir="ltr"
-                  value={regData.email}
-                  onChange={e => setRegData({ ...regData, email: e.target.value })}
-                  placeholder="example@gmail.com"
-                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-brand-900 transition-transform active:scale-95"
-              >
-                متابعة وتعبئة استمارة التقديم ➔
-              </button>
-            </form>
-          </div>
-        </div>
-      );
-    }
-
-    /* ---------------- 3. Multi-Step Form ---------------- */
-    const FORM_STEPS = ["المعلومات الشخصية", "المعلومات المهنية", "الخبرات والمهارات", "المستندات", "أسئلة الوظيفة", "المراجعة والإرسال"];
-
-    function ApplicationForm({ initialData, onSubmit, onBack, isSubmitting }) {
-      const [step, setStep] = useState(0);
+    /* ---------------- Google-Style Form ---------------- */
+    function GoogleStyleForm({ onSubmit, isSubmitting }) {
       const [data, setData] = useState({
-        fullName: initialData?.fullName || "",
-        phone: initialData?.phone || "",
-        email: initialData?.email || "",
-        nationality: "سعودي",
-        city: "الرياض",
-        dob: "28",
-        currentJob: "محاسب",
-        yearsExperience: "3",
-        education: "بكالوريوس محاسبة",
-        expectedSalary: "8,500 ريال",
-        skills: "Excel, Odoo, إعداد التقارير المالية",
-        certifications: "",
+        fullName: "",
+        phone: "",
+        email: "",
+        nationality: "",
+        city: "",
+        age: "",
+        education: "",
+        currentJob: "",
+        yearsExperience: "",
+        expectedSalary: "2,500 ريال",
+        skills: "",
+        vatExperience: "",
         photoBase64: null,
         cvFile: null,
-        answers: { vat: "نعم", ifrs: "نعم", excel: "متقدم" },
       });
       const [error, setError] = useState("");
 
       const set = (k, v) => setData(d => ({ ...d, [k]: v }));
-      const setAnswer = (id, v) => setData(d => ({ ...d, answers: { ...d.answers, [id]: v } }));
 
-      const handlePhotoUpload = (e) => {
+      const handlePhoto = (e) => {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = (event) => set("photoBase64", event.target.result);
+        reader.onload = (ev) => set("photoBase64", ev.target.result);
         reader.readAsDataURL(file);
       };
 
-      const handleCvUpload = (e) => {
+      const handleCv = (e) => {
         const file = e.target.files[0];
         if (!file) return;
         set("cvFile", { name: file.name, size: (file.size / 1024).toFixed(0) + " KB" });
       };
 
-      const validate = () => {
-        if (step === 0 && (!data.fullName || !data.phone)) return "الاسم ورقم الهاتف مطلوبان.";
-        if (step === 1 && !data.yearsExperience) return "يرجى كتابة سنوات الخبرة.";
-        return "";
-      };
-
-      const next = () => {
-        const err = validate();
-        if (err) { setError(err); return; }
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!data.fullName.trim()) { setError("يرجى كتابة الاسم الكامل."); return; }
+        if (!data.phone.trim()) { setError("يرجى كتابة رقم الهاتف."); return; }
+        if (!data.education.trim()) { setError("يرجى كتابة المؤهل العلمي."); return; }
+        if (!data.yearsExperience.trim()) { setError("يرجى كتابة سنوات الخبرة."); return; }
         setError("");
-        if (step < FORM_STEPS.length - 1) setStep(step + 1);
+        onSubmit(data);
       };
-      const back = () => { setError(""); step > 0 ? setStep(step - 1) : onBack(); };
 
       return (
-        <div className="max-w-3xl mx-auto px-4 py-6 md:py-8 animate-fade-in text-right space-y-4">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-bold text-slateText-title">استمارة التقديم على وظيفة محاسب</span>
-            <span className="text-[11px] text-brand-800 font-bold bg-brand-50 px-2.5 py-0.5 rounded-full">الخطوة {step + 1} من 6</span>
-          </div>
-
-          <div className="my-4">
-            <PipelineRail steps={FORM_STEPS.map((t, i) => ({ key: i, label: t }))} activeIndex={step} />
-          </div>
-
-          <div className="clean-card p-6 md:p-8 space-y-5">
-            {step === 0 && (
-              <div className="grid sm:grid-cols-2 gap-3.5">
-                <Field label="الاسم الكامل *" value={data.fullName} onChange={v => set("fullName", v)} placeholder="اكتب اسمك كاملاً" />
-                <Field label="رقم الهاتف (واتساب) *" value={data.phone} onChange={v => set("phone", v)} placeholder="05XXXXXXXX" />
-                <Field label="البريد الإلكتروني" value={data.email} onChange={v => set("email", v)} placeholder="example@gmail.com" />
-                <Field label="الجنسية" value={data.nationality} onChange={v => set("nationality", v)} placeholder="سعودي / مصري / أردني..." />
-                <Field label="مدينة الإقامة" value={data.city} onChange={v => set("city", v)} placeholder="الرياض" />
-                <Field label="العمر" type="number" value={data.dob} onChange={v => set("dob", v)} placeholder="28" />
-              </div>
-            )}
-
-            {step === 1 && (
-              <div className="grid sm:grid-cols-2 gap-3.5">
-                <Field label="المسمى الوظيفي الحالي" value={data.currentJob} onChange={v => set("currentJob", v)} placeholder="محاسب عام" />
-                <Field label="سنوات الخبرة *" type="number" value={data.yearsExperience} onChange={v => set("yearsExperience", v)} placeholder="3" />
-                <Field label="المؤهل العلمي" value={data.education} onChange={v => set("education", v)} placeholder="بكالوريوس محاسبة" />
-                <Field label="الراتب المتوقع (ريال)" value={data.expectedSalary} onChange={v => set("expectedSalary", v)} placeholder="8,500 ريال" />
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="space-y-3.5">
-                <Field label="البرامج المحاسبية والأنظمة التي تجيدها" value={data.skills} onChange={v => set("skills", v)} placeholder="Odoo, SAP, Excel, سماك, دفترة..." />
-                <Field label="الشهادات المهنية إن وجدت (SOCPA, CMA, IFRS)" value={data.certifications} onChange={v => set("certifications", v)} placeholder="شهادات معتمدة..." />
-              </div>
-            )}
-
-            {step === 3 && (
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                  <label className="block text-xs font-bold text-slateText-body mb-2">الصورة الشخصية</label>
-                  {data.photoBase64 ? (
-                    <img src={data.photoBase64} alt="" className="w-16 h-16 rounded-xl object-cover mx-auto" />
-                  ) : (
-                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl text-xs font-bold cursor-pointer border border-slate-200 shadow-sm">
-                      <Icon.Upload size={14} /> <span>اختيار صورة</span>
-                      <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-                    </label>
-                  )}
-                </div>
-
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center">
-                  <label className="block text-xs font-bold text-slateText-body mb-2">السيرة الذاتية (CV)</label>
-                  {data.cvFile ? (
-                    <span className="text-xs font-bold text-green-600 block py-2">✓ {data.cvFile.name}</span>
-                  ) : (
-                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl text-xs font-bold cursor-pointer border border-slate-200 shadow-sm">
-                      <Icon.Upload size={14} /> <span>رفع ملف CV</span>
-                      <input type="file" accept=".pdf,.doc,.docx" onChange={handleCvUpload} className="hidden" />
-                    </label>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {step === 4 && (
-              <div className="space-y-4">
-                <div>
-                  <span className="text-xs font-bold text-slateText-body block mb-1">مستوى إجادة برنامج Excel</span>
-                  <select value={data.answers.excel} onChange={e => setAnswer("excel", e.target.value)} className="w-full h-10 rounded-xl px-3 text-xs outline-none border border-slate-200 bg-slate-50">
-                    <option value="مبتدئ">مبتدئ</option>
-                    <option value="متوسط">متوسط</option>
-                    <option value="متقدم">متقدم</option>
-                    <option value="خبير">خبير</option>
-                  </select>
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-slateText-body block mb-1">هل لديك خبرة عملية في ضريبة القيمة المضافة ZATCA؟</span>
-                  <div className="flex gap-2">
-                    {["نعم", "لا"].map(opt => (
-                      <button key={opt} type="button" onClick={() => setAnswer("vat", opt)} className={`px-5 h-9 rounded-xl text-xs font-bold border transition-colors ${
-                        data.answers.vat === opt ? 'bg-brand-800 text-white border-brand-800' : 'bg-slate-50 text-slateText-body border-slate-200'
-                      }`}>{opt}</button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {step === 5 && (
-              <div className="space-y-3 text-xs">
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-                  <div className="flex justify-between"><span>الاسم:</span><strong>{data.fullName}</strong></div>
-                  <div className="flex justify-between"><span>الهاتف:</span><strong dir="ltr">{data.phone}</strong></div>
-                  <div className="flex justify-between"><span>الخبرة:</span><strong>{data.yearsExperience} سنوات</strong></div>
-                  <div className="flex justify-between"><span>المؤهل:</span><strong>{data.education}</strong></div>
-                </div>
-                <p className="text-[11px] text-slateText-muted">بالضغط على إرسال، يتم حفظ وتحديث طلبك في السحابة المركزية مباشرة.</p>
-              </div>
-            )}
-
-            {error && <p className="text-xs text-red-500 flex items-center gap-1.5"><Icon.AlertCircle size={13} />{error}</p>}
-
-            <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between">
-              <button type="button" onClick={back} className="text-xs font-bold text-slateText-muted hover:text-slateText-title">➔ السابق</button>
-              {step < FORM_STEPS.length - 1 ? (
-                <button type="button" onClick={next} className="px-6 h-10 bg-brand-800 text-white rounded-xl text-xs font-bold hover:bg-brand-900 shadow-sm">المتابعة ➔</button>
-              ) : (
-                <button
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={() => onSubmit(data)}
-                  className="px-7 h-10 bg-brand-800 text-white rounded-xl text-xs font-bold hover:bg-brand-900 shadow-sm disabled:opacity-50 flex items-center gap-2"
-                >
-                  {isSubmitting && <Icon.RefreshCw size={14} className="animate-spin" />}
-                  <span>إرسال وحفظ الطلب نهائياً ✓</span>
-                </button>
-              )}
+        <div className="max-w-2xl mx-auto px-3 md:px-4 py-5 md:py-8 space-y-4 animate-fade-in text-right">
+          
+          {/* Header Card */}
+          <div className="g-card g-header p-5 md:p-7 space-y-2.5">
+            <h1 className="text-xl md:text-2xl font-extrabold text-slateText-title">استمارة التقديم على وظيفة محاسب مالي</h1>
+            <p className="text-xs text-slateText-muted leading-relaxed">
+              مكتب المستشار للمحاماة والاستشارات القانونية — الرياض.<br />
+              الراتب المحدد: <strong>2,500 ريال</strong>. يرجى تعبئة جميع الحقول المطلوبة بدقة.
+            </p>
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-red-500 font-semibold">
+              <span>* تشير إلى حقل مطلوب</span>
             </div>
           </div>
+
+          {error && (
+            <div className="p-3 bg-red-50 text-red-600 rounded-xl text-xs font-bold text-center border border-red-200">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Section 1: Personal Info */}
+            <div className="g-card p-5 md:p-6 space-y-4">
+              <h2 className="text-xs font-bold text-brand-800 uppercase tracking-wide">1. البيانات الشخصية</h2>
+              
+              <div>
+                <label className="block text-xs font-bold text-slateText-body mb-1.5">الاسم الرباعي <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  value={data.fullName}
+                  onChange={e => set("fullName", e.target.value)}
+                  placeholder="إجابتك"
+                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800 focus:bg-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-bold text-slateText-body mb-1.5">رقم الهاتف (واتساب) <span className="text-red-500">*</span></label>
+                  <input
+                    type="tel"
+                    dir="ltr"
+                    value={data.phone}
+                    onChange={e => set("phone", e.target.value)}
+                    placeholder="05XXXXXXXX"
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800 focus:bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slateText-body mb-1.5">البريد الإلكتروني</label>
+                  <input
+                    type="email"
+                    dir="ltr"
+                    value={data.email}
+                    onChange={e => set("email", e.target.value)}
+                    placeholder="example@gmail.com"
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800 focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div>
+                  <label className="block text-xs font-bold text-slateText-body mb-1.5">الجنسية</label>
+                  <input
+                    type="text"
+                    value={data.nationality}
+                    onChange={e => set("nationality", e.target.value)}
+                    placeholder="إجابتك"
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slateText-body mb-1.5">مدينة الإقامة</label>
+                  <input
+                    type="text"
+                    value={data.city}
+                    onChange={e => set("city", e.target.value)}
+                    placeholder="الرياض / غيرها"
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slateText-body mb-1.5">العمر</label>
+                  <input
+                    type="number"
+                    value={data.age}
+                    onChange={e => set("age", e.target.value)}
+                    placeholder="مثال: 26"
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Section 2: Professional & Experience */}
+            <div className="g-card p-5 md:p-6 space-y-4">
+              <h2 className="text-xs font-bold text-brand-800 uppercase tracking-wide">2. المؤهلات والخبرات</h2>
+
+              <div>
+                <label className="block text-xs font-bold text-slateText-body mb-1.5">المؤهل العلمي <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  value={data.education}
+                  onChange={e => set("education", e.target.value)}
+                  placeholder="بكالوريوس محاسبة / دبلوم..."
+                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-bold text-slateText-body mb-1.5">سنوات الخبرة في المحاسبة <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    value={data.yearsExperience}
+                    onChange={e => set("yearsExperience", e.target.value)}
+                    placeholder="مثال: سنتين / 3 سنوات"
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slateText-body mb-1.5">الوظيفة الحالية أو السابقة</label>
+                  <input
+                    type="text"
+                    value={data.currentJob}
+                    onChange={e => set("currentJob", e.target.value)}
+                    placeholder="محاسب عام / غير موظف حالياً"
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slateText-body mb-1.5">البرامج المحاسبية والأنظمة التي تجيدها</label>
+                <input
+                  type="text"
+                  value={data.skills}
+                  onChange={e => set("skills", e.target.value)}
+                  placeholder="Excel, Odoo, SAP, دفترة, سماك..."
+                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slateText-body mb-1.5">الراتب المحدد للوظيفة</label>
+                <input
+                  type="text"
+                  value={data.expectedSalary}
+                  onChange={e => set("expectedSalary", e.target.value)}
+                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-100 outline-none text-right font-bold text-brand-800"
+                />
+              </div>
+            </div>
+
+            {/* Section 3: Questions */}
+            <div className="g-card p-5 md:p-6 space-y-4">
+              <h2 className="text-xs font-bold text-brand-800 uppercase tracking-wide">3. الأسئلة المهنية</h2>
+
+              <div>
+                <label className="block text-xs font-bold text-slateText-body mb-2">هل لديك خبرة في ضريبة القيمة المضافة ZATCA وإعداد الإقرارات؟</label>
+                <div className="flex gap-2">
+                  {["نعم", "لا"].map(opt => (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => set("vatExperience", opt)}
+                      className={`px-5 h-9 rounded-xl text-xs font-bold border transition-colors ${
+                        data.vatExperience === opt ? 'bg-brand-800 text-white border-brand-800' : 'bg-slate-50 text-slateText-body border-slate-200'
+                      }`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Section 4: Attachments */}
+            <div className="g-card p-5 md:p-6 space-y-4">
+              <h2 className="text-xs font-bold text-brand-800 uppercase tracking-wide">4. المستندات والمرفقات</h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
+                  <label className="block text-xs font-bold text-slateText-body mb-2">الصورة الشخصية</label>
+                  {data.photoBase64 ? (
+                    <img src={data.photoBase64} alt="" className="w-14 h-14 rounded-lg object-cover mx-auto" />
+                  ) : (
+                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg text-xs font-bold cursor-pointer border border-slate-200 shadow-sm">
+                      <Icon.Upload size={13} /> <span>إرفاق صورة</span>
+                      <input type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
+                    </label>
+                  )}
+                </div>
+
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
+                  <label className="block text-xs font-bold text-slateText-body mb-2">السيرة الذاتية (CV)</label>
+                  {data.cvFile ? (
+                    <span className="text-xs font-bold text-green-600 block py-1">✓ {data.cvFile.name}</span>
+                  ) : (
+                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg text-xs font-bold cursor-pointer border border-slate-200 shadow-sm">
+                      <Icon.Upload size={13} /> <span>إرفاق ملف PDF</span>
+                      <input type="file" accept=".pdf,.doc,.docx" onChange={handleCv} className="hidden" />
+                    </label>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full h-12 bg-brand-800 text-white rounded-xl font-extrabold text-sm shadow-sm hover:bg-brand-900 disabled:opacity-60 flex items-center justify-center gap-2 transition-transform active:scale-98"
+              >
+                {isSubmitting && <Icon.RefreshCw size={16} className="animate-spin" />}
+                <span>إرسال الطلب وحفظ البيانات ✓</span>
+              </button>
+            </div>
+
+          </form>
         </div>
       );
     }
 
-    function Field({ label, value, onChange, placeholder, type = "text" }) {
-      return (
-        <label className="block text-right">
-          <span className="text-[11px] font-bold text-slateText-body block mb-1">{label}</span>
-          <input
-            type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-            className="w-full h-10 px-3 rounded-xl border border-slate-200 text-xs outline-none bg-slate-50/50 text-right focus:border-brand-800"
-          />
-        </label>
-      );
-    }
-
-    /* ---------------- 4. Success Screen ---------------- */
+    /* ---------------- Success Screen ---------------- */
     function SuccessScreen({ applicant, goDashboard }) {
       return (
-        <div className="max-w-md mx-auto px-4 py-14 text-center animate-fade-in space-y-4">
-          <div className="w-16 h-16 rounded-full bg-green-50 text-green-600 border border-green-200 flex items-center justify-center mx-auto">
-            <Icon.CheckCircle2 size={32} color="#16A34A" />
+        <div className="max-w-md mx-auto px-4 py-12 text-center animate-fade-in space-y-4">
+          <div className="w-14 h-14 rounded-full bg-green-50 text-green-600 border border-green-200 flex items-center justify-center mx-auto">
+            <Icon.CheckCircle2 size={30} color="#16A34A" />
           </div>
-          <h1 className="text-xl md:text-2xl font-extrabold text-slateText-title">تم إرسال وحفظ طلبك بنجاح!</h1>
+          <h1 className="text-xl font-extrabold text-slateText-title">تم إرسال وحفظ طلبك بنجاح!</h1>
           <p className="text-xs text-slateText-muted leading-relaxed">
-            مرحباً <strong>{applicant.fullName}</strong>، تم تسجيل وتأكيد طلبك في قاعدة البيانات السحابية.
+            مرحباً <strong>{applicant.fullName}</strong>، تم تسجيل طلبك لوظيفة محاسب مالي في مكتب المستشار للمحاماة.
           </p>
           <div className="inline-block px-5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold">
             <span className="text-slateText-muted">رقم طلبك المرجعي: </span>
             <strong className="text-brand-800 font-mono text-sm">{applicant.code}</strong>
           </div>
-          <div className="pt-3">
-            <button onClick={goDashboard} className="px-7 h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-brand-900">
+          <div className="pt-2">
+            <button onClick={goDashboard} className="w-full h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-brand-900">
               الدخول للوحة متابعة طلبي وموعد المقابلة ➔
             </button>
           </div>
@@ -720,8 +523,8 @@
       );
     }
 
-    /* ---------------- 5. Real Applicant Dashboard (Cloud Synced) ---------------- */
-    function ApplicantDashboard({ applicants, activeApplicant, onGoApply, onRefresh }) {
+    /* ---------------- Query Dashboard ---------------- */
+    function ApplicantDashboard({ applicants, activeApplicant, onRefresh, onGoApply }) {
       const [searchQuery, setSearchQuery] = useState(activeApplicant ? activeApplicant.code : '');
       const [current, setCurrent] = useState(activeApplicant || null);
       const [loading, setLoading] = useState(false);
@@ -757,93 +560,94 @@
         if (status === 'SHORTLISTED') return 3;
         if (status === 'INTERVIEW_SCHEDULED') return 4;
         if (status === 'INTERVIEW_COMPLETED') return 5;
-        if (status === 'ACCEPTED' || status === 'REJECTED') return 7;
+        if (status === 'ACCEPTED' || status === 'REJECTED') return 6;
         return 0;
       };
 
       return (
-        <div className="max-w-5xl mx-auto px-4 py-6 md:py-8 space-y-5 animate-fade-in text-right">
+        <div className="max-w-2xl mx-auto px-3 md:px-4 py-5 md:py-8 space-y-4 animate-fade-in text-right">
           
-          {/* Query Bar */}
-          <div className="clean-card p-5">
-            <div className="flex items-center justify-between mb-1">
-              <h2 className="text-sm font-extrabold text-slateText-title">الاستعلام ومتابعة حالة الطلب السحابية</h2>
-              <button onClick={handleSearchSubmit} className="text-xs text-brand-800 font-bold flex items-center gap-1 hover:opacity-80">
-                <Icon.RefreshCw size={13} className={loading ? "animate-spin" : ""} /> <span>تحديث السحابة</span>
+          <div className="g-card p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-extrabold text-slateText-title">الاستعلام ومتابعة حالة الطلب</h2>
+              <button onClick={handleSearchSubmit} className="text-xs text-brand-800 font-bold flex items-center gap-1">
+                <Icon.RefreshCw size={12} className={loading ? "animate-spin" : ""} /> <span>تحديث</span>
               </button>
             </div>
-            <p className="text-xs text-slateText-muted mb-3">أدخل رقم هاتفك أو رقم طلبك الحقيقي لعرض ملفك المحدث من أي جهاز</p>
+            <p className="text-xs text-slateText-muted">أدخل رقم الهاتف أو رقم الطلب (مثال: APP-0001) للاستعلام</p>
 
             <form onSubmit={handleSearchSubmit} className="flex gap-2">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="رقم الهاتف (مثال: 05XXXXXXXX) أو رقم الطلب (APP-0001)..."
-                className="flex-1 h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800"
+                placeholder="رقم الهاتف أو رقم الطلب..."
+                className="flex-1 h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50 outline-none text-right focus:border-brand-800"
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-brand-900 disabled:opacity-60 flex items-center gap-2"
+                className="px-5 h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-brand-900"
               >
-                {loading && <Icon.RefreshCw size={14} className="animate-spin" />}
-                <span>استعلام</span>
+                استعلام
               </button>
             </form>
           </div>
 
-          {/* Results */}
           {current ? (
             <div className="space-y-4">
-              <div className="clean-card p-6 space-y-5">
-                <div className="flex items-start justify-between flex-wrap gap-2">
+              <div className="g-card p-5 space-y-4">
+                <div className="flex items-start justify-between">
                   <div>
-                    <span className="font-mono text-xs font-bold text-brand-800 bg-brand-50 px-2.5 py-0.5 rounded border border-brand-100">{current.code}</span>
-                    <h3 className="text-base font-extrabold text-slateText-title mt-1.5">{current.fullName}</h3>
+                    <span className="font-mono text-xs font-bold text-brand-800 bg-brand-50 px-2 py-0.5 rounded border border-brand-100">{current.code}</span>
+                    <h3 className="text-base font-extrabold text-slateText-title mt-1">{current.fullName}</h3>
                     <p className="text-xs text-slateText-muted" dir="ltr">{current.phone}</p>
                   </div>
-
-                  <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
-                    current.status === 'ACCEPTED' ? 'bg-green-50 text-green-800 border-green-200' :
-                    current.status === 'INTERVIEW_SCHEDULED' ? 'bg-purple-50 text-purple-800 border-purple-200' :
-                    'bg-brand-50 text-brand-800 border-brand-200'
-                  }`}>
+                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-brand-50 text-brand-800 border border-brand-200">
                     {current.status}
                   </span>
                 </div>
 
                 <div className="overflow-x-auto no-scrollbar pt-2">
-                  <div style={{ minWidth: 550 }}>
-                    <PipelineRail steps={STAGES} activeIndex={getStageIdx(current.status)} />
+                  <div style={{ minWidth: 500 }} className="flex flex-row w-full">
+                    {STAGES.map((s, i) => {
+                      const activeIdx = getStageIdx(current.status);
+                      const done = i < activeIdx;
+                      const isCur = i === activeIdx;
+                      return (
+                        <div key={s.key} className="flex-1 flex flex-col items-center">
+                          <div className="flex items-center w-full">
+                            {i !== 0 && <div className={`flex-1 h-0.5 ${done || isCur ? 'bg-green-600' : 'bg-slate-200'}`} />}
+                            <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center ${done ? 'bg-green-50 border-green-600 text-green-600' : isCur ? 'bg-brand-50 border-brand-800 text-brand-800' : 'border-slate-300 text-slate-300'}`}>
+                              {done ? <Icon.Check size={11} color="#16A34A" /> : isCur ? <span className="pulse-dot w-2 h-2 rounded-full bg-brand-800" /> : <Icon.Circle size={6} />}
+                            </div>
+                            {i !== STAGES.length - 1 && <div className={`flex-1 h-0.5 ${done ? 'bg-green-600' : 'bg-slate-200'}`} />}
+                          </div>
+                          <p className="text-[10px] text-center mt-1.5 font-bold text-slateText-muted">{s.label}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
 
-              {/* Interview if scheduled */}
               {current.interview && (
-                <div className="clean-card p-6 space-y-3 bg-purple-50/40 border-purple-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center">
-                        <Icon.Video size={16} />
-                      </div>
-                      <strong className="text-xs font-bold text-purple-950">موعد المقابلة المرئية عبر Google Meet</strong>
+                <div className="g-card p-5 space-y-3 bg-purple-50/40 border-purple-200">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center">
+                      <Icon.Video size={16} />
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-800">محدد</span>
+                    <strong className="text-xs font-bold text-purple-950">موعد المقابلة المرئية عبر Google Meet</strong>
                   </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs pt-1">
+                  <div className="grid grid-cols-2 gap-2 text-xs">
                     <div><span className="text-slateText-muted block">التاريخ:</span> <strong>{current.interview.date}</strong></div>
                     <div><span className="text-slateText-muted block">الوقت:</span> <strong>{current.interview.time}</strong></div>
-                    <div><span className="text-slateText-muted block">المنصة:</span> <strong>Google Meet</strong></div>
                   </div>
-
                   {current.interview.meetLink && (
                     <a
                       href={current.interview.meetLink}
                       target="_blank"
-                      className="block text-center py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl text-xs shadow-sm mt-2"
+                      className="block text-center py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl text-xs shadow-sm"
                     >
                       الانضمام إلى المقابلة عبر Google Meet ➔
                     </a>
@@ -851,35 +655,27 @@
                 </div>
               )}
 
-              {/* Profile Details */}
-              <div className="clean-card p-5 grid sm:grid-cols-3 gap-3 text-xs">
+              <div className="g-card p-4 grid grid-cols-2 gap-3 text-xs">
                 <div><span className="text-slateText-muted block">المؤهل:</span> <strong>{current.education}</strong></div>
-                <div><span className="text-slateText-muted block">سنوات الخبرة:</span> <strong>{current.yearsExperience} سنوات</strong></div>
+                <div><span className="text-slateText-muted block">الخبرة:</span> <strong>{current.yearsExperience}</strong></div>
                 <div><span className="text-slateText-muted block">المدينة:</span> <strong>{current.city || 'الرياض'}</strong></div>
+                <div><span className="text-slateText-muted block">الراتب:</span> <strong>{current.expectedSalary || '2,500 ريال'}</strong></div>
               </div>
             </div>
           ) : hasSearched ? (
-            <div className="clean-card p-8 text-center space-y-3">
-              <p className="text-xs text-slateText-muted">
-                لم يتم العثور على طلب بهذا الرقم أو الهاتف. تأكد من صحة الرقم أو قدّم طلباً جديداً:
-              </p>
-              <button
-                onClick={onGoApply}
-                className="px-6 py-2.5 bg-brand-800 text-white text-xs font-bold rounded-xl shadow-sm hover:bg-brand-900"
-              >
-                تقديم طلب توظيف الآن ➔
+            <div className="g-card p-6 text-center space-y-3">
+              <p className="text-xs text-slateText-muted">لم يتم العثور على طلب بهذا الرقم أو الهاتف.</p>
+              <button onClick={onGoApply} className="px-5 py-2 bg-brand-800 text-white text-xs font-bold rounded-xl shadow-sm">
+                تقديم طلب جديد ➔
               </button>
             </div>
-          ) : (
-            <div className="clean-card p-8 text-center text-xs text-slateText-muted">
-              يرجى كتابة رقم الطلب أو رقم الهاتف في خانة البحث بالأعلى ثم الضغط على "استعلام".
-            </div>
-          )}
+          ) : null}
+
         </div>
       );
     }
 
-    /* ---------------- 6. Admin Panel (Hidden in footer) ---------------- */
+    /* ---------------- Admin Panel with Delete / Reset ---------------- */
     function AdminAuthModal({ onSuccess, onClose }) {
       const [email, setEmail] = useState('');
       const [password, setPassword] = useState('');
@@ -889,7 +685,7 @@
         e.preventDefault();
         const validEmails = ['bodasalem0098@gmail.com', 'moabdo038@gmail.com', 'admin@almustashar.com'];
         if (!validEmails.includes(email.trim().toLowerCase())) {
-          setErrorMsg('البريد الإلكتروني غير مصرح له بالدخول.');
+          setErrorMsg('البريد الإلكتروني غير مصرح له.');
           return;
         }
         if (password.trim() !== '102044') {
@@ -901,28 +697,28 @@
 
       return (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in text-right">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full border border-slate-200 shadow-xl space-y-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full border border-slate-200 shadow-xl space-y-4">
             <div className="text-center">
-              <div className="w-11 h-11 rounded-2xl bg-brand-50 text-brand-800 flex items-center justify-center mx-auto mb-2">
-                <Icon.ShieldCheck size={22} />
+              <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-800 flex items-center justify-center mx-auto mb-2">
+                <Icon.Shield size={20} />
               </div>
-              <h3 className="font-bold text-base text-slateText-title">دخول المشرفين</h3>
+              <h3 className="font-bold text-sm text-slateText-title">دخول المشرفين</h3>
             </div>
 
             {errorMsg && <div className="p-2 bg-red-50 text-red-600 text-xs font-bold rounded-xl text-center">{errorMsg}</div>}
 
             <form onSubmit={handleLogin} className="space-y-3">
               <div>
-                <label className="block text-[11px] font-bold text-slateText-body mb-1">البريد الإلكتروني</label>
+                <label className="block text-xs font-bold text-slateText-body mb-1">البريد الإلكتروني</label>
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="bodasalem0098@gmail.com" required className="w-full h-10 px-3 rounded-xl text-xs outline-none border border-slate-200 bg-slate-50 text-right focus:border-brand-800" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-slateText-body mb-1">كلمة المرور</label>
+                <label className="block text-xs font-bold text-slateText-body mb-1">كلمة المرور</label>
                 <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••" required className="w-full h-10 px-3 rounded-xl text-xs outline-none border border-slate-200 bg-slate-50 text-center font-mono tracking-widest text-sm focus:border-brand-800" />
               </div>
               <div className="flex gap-2 pt-1">
-                <button type="submit" className="flex-1 h-10 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-brand-900">دخول</button>
-                <button type="button" onClick={onClose} className="px-4 h-10 border border-slate-200 text-slateText-body rounded-xl text-xs font-bold hover:bg-slate-50">إلغاء</button>
+                <button type="submit" className="flex-1 h-10 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm">دخول</button>
+                <button type="button" onClick={onClose} className="px-4 h-10 border border-slate-200 text-slateText-body rounded-xl text-xs font-bold">إلغاء</button>
               </div>
             </form>
           </div>
@@ -930,40 +726,44 @@
       );
     }
 
-    function AdminDashboardView({ applicants, onUpdateStatus, onScheduleInterview, onResetAll }) {
+    function AdminDashboardView({ applicants, onUpdateStatus, onScheduleInterview, onDeleteApplicant, onResetAll }) {
       const [selected, setSelected] = useState(applicants[0] || null);
       const [scheduleOpen, setScheduleOpen] = useState(false);
       const [intDate, setIntDate] = useState('2026-08-25');
       const [intTime, setIntTime] = useState('19:00');
       const [meetLink, setMeetLink] = useState('https://meet.google.com/xyz-lawfirm-hr');
 
+      useEffect(() => {
+        if (!selected && applicants.length > 0) setSelected(applicants[0]);
+      }, [applicants]);
+
       return (
-        <div className="max-w-5xl mx-auto px-4 py-6 md:py-8 space-y-4 animate-fade-in text-right">
-          <div className="clean-card p-4 flex items-center justify-between">
-            <h2 className="text-sm font-extrabold text-slateText-title">لوحة المشرفين — إدارة طلبات التوظيف الحقيقية</h2>
+        <div className="max-w-4xl mx-auto px-3 md:px-4 py-5 md:py-8 space-y-4 animate-fade-in text-right">
+          <div className="g-card p-4 flex items-center justify-between">
+            <h2 className="text-xs md:text-sm font-extrabold text-slateText-title">لوحة المشرفين ({applicants.length} متقدم)</h2>
             <button onClick={onResetAll} className="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100 flex items-center gap-1">
-              <Icon.Trash size={13} /> <span>تصفير السحابة والنظام</span>
+              <Icon.Trash size={13} /> <span>تصفير الكل</span>
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-1 space-y-2">
               {applicants.length === 0 ? (
-                <div className="clean-card p-6 text-center text-xs text-slateText-muted">
-                  لا توجد طلبات مسجلة بعد في السحابة.
+                <div className="g-card p-6 text-center text-xs text-slateText-muted">
+                  لا توجد طلبات مسجلة حالياً.
                 </div>
               ) : (
                 applicants.map(app => (
                   <div
                     key={app.code}
                     onClick={() => setSelected(app)}
-                    className={`clean-card p-3.5 cursor-pointer ${selected?.code === app.code ? 'border-brand-800 ring-2 ring-brand-100' : ''}`}
+                    className={`g-card p-3 cursor-pointer ${selected?.code === app.code ? 'border-brand-800 ring-2 ring-brand-100' : ''}`}
                   >
                     <div className="flex justify-between items-center">
                       <strong className="text-xs font-bold text-slateText-title">{app.fullName}</strong>
                       <span className="font-mono text-[10px] font-bold text-brand-800 bg-brand-50 px-1 rounded">{app.code}</span>
                     </div>
-                    <p className="text-[11px] text-slateText-muted mt-0.5">{app.phone} · {app.yearsExperience} سنوات خبرة</p>
+                    <p className="text-[11px] text-slateText-muted mt-0.5">{app.phone} · {app.education}</p>
                   </div>
                 ))
               )}
@@ -971,17 +771,17 @@
 
             <div className="md:col-span-2">
               {selected ? (
-                <div className="clean-card p-5 space-y-4">
+                <div className="g-card p-5 space-y-4">
                   <div className="flex justify-between items-center border-b border-slate-100 pb-3">
                     <div>
-                      <h3 className="font-bold text-base text-slateText-title">{selected.fullName}</h3>
+                      <h3 className="font-bold text-sm md:text-base text-slateText-title">{selected.fullName}</h3>
                       <p className="text-xs text-slateText-muted">{selected.phone} · {selected.education}</p>
                     </div>
                     <div className="flex gap-1.5">
                       <select
                         value={selected.status}
                         onChange={e => onUpdateStatus(selected.code, e.target.value)}
-                        className="h-9 px-2.5 rounded-lg border border-slate-200 text-xs font-bold bg-slate-50"
+                        className="h-9 px-2 rounded-lg border border-slate-200 text-xs font-bold bg-slate-50"
                       >
                         <option value="SUBMITTED">جديد</option>
                         <option value="CV_VIEWED">فحص الـ CV</option>
@@ -991,21 +791,28 @@
                         <option value="REJECTED">مرفوض ✕</option>
                       </select>
                       <button onClick={() => setScheduleOpen(true)} className="px-3 h-9 bg-brand-800 text-white rounded-lg text-xs font-bold">
-                        جدولة مقابلة
+                        مقابلة
+                      </button>
+                      <button
+                        onClick={() => onDeleteApplicant(selected.code)}
+                        title="حذف هذا المتقدم"
+                        className="w-9 h-9 flex items-center justify-center rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
+                      >
+                        <Icon.Trash size={14} />
                       </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-100">
-                    <div><span className="text-slateText-muted block">سنوات الخبرة:</span> <strong>{selected.yearsExperience} سنوات</strong></div>
-                    <div><span className="text-slateText-muted block">الراتب المتوقع:</span> <strong>{selected.expectedSalary || 'لم يحدد'}</strong></div>
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div><span className="text-slateText-muted block">سنوات الخبرة:</span> <strong>{selected.yearsExperience}</strong></div>
+                    <div><span className="text-slateText-muted block">الراتب المحدد:</span> <strong>{selected.expectedSalary || '2,500 ريال'}</strong></div>
                     <div><span className="text-slateText-muted block">المدينة:</span> <strong>{selected.city || 'الرياض'}</strong></div>
-                    <div className="sm:col-span-3"><span className="text-slateText-muted block">البرامج والمهارات:</span> <strong>{selected.skills || 'لم تسجل'}</strong></div>
+                    <div><span className="text-slateText-muted block">البرامج:</span> <strong>{selected.skills || 'لم تسجل'}</strong></div>
                   </div>
                 </div>
               ) : (
-                <div className="clean-card p-8 text-center text-xs text-slateText-muted">
-                  اختر مرشحاً لعرض تفاصيل طلبه.
+                <div className="g-card p-8 text-center text-xs text-slateText-muted">
+                  اختر مرشحاً لعرض بياناته.
                 </div>
               )}
             </div>
@@ -1013,14 +820,14 @@
 
           {scheduleOpen && selected && (
             <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in text-right">
-              <div className="bg-white rounded-3xl p-5 max-w-sm w-full space-y-3.5">
-                <h3 className="font-bold text-sm text-slateText-title">تحديد موعد مقابلة لـ: {selected.fullName}</h3>
+              <div className="bg-white rounded-2xl p-5 max-w-sm w-full space-y-3">
+                <h3 className="font-bold text-xs md:text-sm text-slateText-title">جدولة مقابلة لـ: {selected.fullName}</h3>
                 <div>
-                  <label className="block text-xs font-bold mb-1">تاريخ المقابلة</label>
+                  <label className="block text-xs font-bold mb-1">التاريخ</label>
                   <input type="date" value={intDate} onChange={e => setIntDate(e.target.value)} className="w-full h-9 px-3 border rounded-lg text-xs" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold mb-1">وقت المقابلة</label>
+                  <label className="block text-xs font-bold mb-1">الوقت</label>
                   <input type="time" value={intTime} onChange={e => setIntTime(e.target.value)} className="w-full h-9 px-3 border rounded-lg text-xs" />
                 </div>
                 <div>
@@ -1035,7 +842,7 @@
                     }}
                     className="flex-1 h-9 bg-brand-800 text-white text-xs font-bold rounded-lg"
                   >
-                    حفظ وتأكيد الموعد
+                    تأكيد الموعد
                   </button>
                   <button onClick={() => setScheduleOpen(false)} className="px-3 h-9 border rounded-lg text-xs">إلغاء</button>
                 </div>
@@ -1046,11 +853,10 @@
       );
     }
 
-    /* ---------------- Main App Component ---------------- */
+    /* ---------------- Main Root App ---------------- */
     function App() {
-      const [view, setView] = useState("welcome");
+      const [view, setView] = useState("form");
       const [applicants, setApplicants] = useState([]);
-      const [registeredUser, setRegisteredUser] = useState(null);
       const [activeApplicant, setActiveApplicant] = useState(null);
       const [isSubmitting, setIsSubmitting] = useState(false);
       const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
@@ -1064,21 +870,14 @@
 
       useEffect(() => {
         refreshCloudData();
-        const interval = setInterval(refreshCloudData, 6000); // 6s auto-refresh
-        return () => clearInterval(interval);
       }, []);
-
-      const handleRegister = (regData) => {
-        setRegisteredUser(regData);
-        setView("apply");
-      };
 
       const handleFormSubmit = async (formData) => {
         setIsSubmitting(true);
         const currentList = await CloudDB.getAll();
         const nextNum = currentList.length + 1;
         const newCode = 'APP-' + String(nextNum).padStart(4, '0');
-        
+
         const newApp = {
           id: String(Date.now()),
           code: newCode,
@@ -1110,13 +909,21 @@
         if (activeApplicant?.code === code) setActiveApplicant({ ...activeApplicant, status: 'INTERVIEW_SCHEDULED', interview: interviewData });
       };
 
+      const deleteApplicant = async (code) => {
+        if (confirm(`هل أنت متأكد من حذف المتقدم ${code} نهائياً؟`)) {
+          const updated = applicants.filter(a => a.code !== code);
+          setApplicants(updated);
+          await CloudDB.save(updated);
+          if (activeApplicant?.code === code) setActiveApplicant(null);
+        }
+      };
+
       const resetAll = async () => {
         if (confirm('هل تريد تصفير جميع بيانات المتقدمين من السحابة والبدء من الصفر؟')) {
           await CloudDB.save([]);
           localStorage.clear();
           setApplicants([]);
           setActiveApplicant(null);
-          setRegisteredUser(null);
           alert('تم تصفير السحابة وقاعدة البيانات بنجاح.');
         }
       };
@@ -1126,26 +933,10 @@
           <Navbar view={view} setView={setView} />
 
           <main className="flex-1">
-            {view === "welcome" && (
-              <WelcomeScreen
-                onStartApply={() => setView("register")}
-                onStartTrack={() => setView("dashboard")}
-              />
-            )}
-
-            {view === "register" && (
-              <RegisterStep
-                onRegisterSuccess={handleRegister}
-                onBack={() => setView("welcome")}
-              />
-            )}
-
-            {view === "apply" && (
-              <ApplicationForm
-                initialData={registeredUser}
-                isSubmitting={isSubmitting}
+            {view === "form" && (
+              <GoogleStyleForm
                 onSubmit={handleFormSubmit}
-                onBack={() => setView("register")}
+                isSubmitting={isSubmitting}
               />
             )}
 
@@ -1161,7 +952,7 @@
                 applicants={applicants}
                 activeApplicant={activeApplicant}
                 onRefresh={refreshCloudData}
-                onGoApply={() => setView("register")}
+                onGoApply={() => setView("form")}
               />
             )}
 
@@ -1170,22 +961,23 @@
                 applicants={applicants}
                 onUpdateStatus={updateStatus}
                 onScheduleInterview={scheduleInt}
+                onDeleteApplicant={deleteApplicant}
                 onResetAll={resetAll}
               />
             )}
           </main>
 
-          <footer className="mt-auto bg-white border-t border-[#E2E8F0] py-6 px-4 text-xs text-slateText-muted">
-            <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-right">
-              <div className="flex items-center gap-2">
-                <Icon.Scale size={16} color="#0C3831" />
+          <footer className="mt-auto bg-white border-t border-[#E2E8F0] py-5 px-3 text-xs text-slateText-muted">
+            <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-right">
+              <div className="flex items-center gap-1.5">
+                <Icon.Scale size={15} />
                 <span className="font-bold text-slateText-body">مكتب المستشار للمحاماة والاستشارات القانونية — الرياض</span>
               </div>
               <div
                 onClick={() => setIsAdminModalOpen(true)}
-                className="cursor-default select-none text-[11px] text-slateText-light hover:text-slateText-muted transition-colors"
+                className="cursor-default select-none text-[11px] text-slateText-light hover:text-slateText-muted"
               >
-                © 2026 جميع الحقوق محفوظة لمكتب المستشار للمحاماة · بوابة التوظيف الذكية
+                © 2026 جميع الحقوق محفوظة · بوابة التوظيف
               </div>
             </div>
           </footer>
