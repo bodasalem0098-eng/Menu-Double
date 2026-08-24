@@ -72,11 +72,29 @@ export default async function handler(req, res) {
     }
   }
 
-  // Handle GET (Fetch all applicants)
+  // Handle GET (Fetch all applicants / on-demand CV)
   if (req.method === 'GET') {
     try {
       await ensureTable();
-      const neonRes = await queryNeon(`SELECT * FROM applicants ORDER BY id DESC;`);
+
+      // On-demand CV fetch for a single applicant
+      if (req.query.cv === 'true' && req.query.code) {
+        const cvRes = await queryNeon('SELECT cv_file FROM applicants WHERE code = $1;', [req.query.code]);
+        const cvRaw = cvRes?.rows?.[0]?.cv_file;
+        const cvFile = typeof cvRaw === 'string' ? JSON.parse(cvRaw) : (cvRaw || null);
+        return res.status(200).json({ code: req.query.code, cvFile });
+      }
+
+      // Fast lightweight query for the list
+      const neonRes = await queryNeon(`
+        SELECT 
+          id, code, full_name, phone, email, nationality, city, age, 
+          education, current_job, years_experience, expected_salary, skills, 
+          vat_experience, status, submitted_at, interview, photo_base64, 
+          (cv_file IS NOT NULL) as has_cv 
+        FROM applicants 
+        ORDER BY id DESC;
+      `);
       const rows = (neonRes && Array.isArray(neonRes.rows)) ? neonRes.rows : [];
 
       const mapped = rows.map(r => ({
@@ -98,7 +116,8 @@ export default async function handler(req, res) {
         submittedAt: r.submitted_at,
         interview: typeof r.interview === 'string' ? JSON.parse(r.interview) : r.interview,
         photoBase64: r.photo_base64 || null,
-        cvFile: typeof r.cv_file === 'string' ? JSON.parse(r.cv_file) : (r.cv_file || null)
+        hasCv: Boolean(r.has_cv),
+        cvFile: r.has_cv ? { name: 'السيرة الذاتية (CV)', size: 'PDF' } : null
       }));
       return res.status(200).json({ source: 'neon_postgres', applicants: mapped });
     } catch(e) {
