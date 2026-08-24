@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>المستشار للمحاماة والاستشارات القانونية | بوابة التوظيف المالي</title>
+  <title>المستشار للمحاماة | HireFlow Creative UI</title>
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -20,523 +20,651 @@
   <!-- Babel -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            cairo: ['Cairo', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          },
-          colors: {
-            brand: {
-              50: '#F2F8F6',
-              100: '#E1EFEA',
-              200: '#C2DFD6',
-              500: '#1B6B5D',
-              700: '#114D43',
-              800: '#0C3831',
-              900: '#082823',
-              950: '#041614',
-            },
-            accent: {
-              50: '#FAF6EE',
-              100: '#F5ECDB',
-              500: '#C59341',
-              600: '#A8792F',
-            },
-            slateText: {
-              title: '#0F172A',
-              body: '#334155',
-              muted: '#64748B',
-              light: '#94A3B8',
-            }
-          },
-          animation: {
-            'fade-in': 'fadeIn 0.2s ease-out forwards',
-          },
-          keyframes: {
-            fadeIn: {
-              '0%': { opacity: '0', transform: 'translateY(4px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
-            }
-          }
-        }
-      }
-    }
-  </script>
-
   <style>
     * { 
       font-family: 'Cairo', sans-serif; 
       -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
     }
-    body { 
-      background-color: #F8FAF9;
-      color: #0F172A; 
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    .clean-card {
-      background: #FFFFFF;
-      border: 1px solid #E5E9E7;
-      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
-      border-radius: 20px;
-    }
-    .clean-card-hover {
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .clean-card-hover:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px -5px rgba(12, 56, 49, 0.08), 0 0 0 1.5px #1B6B5D;
+    .font-sora { font-family: 'Sora', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    
+    .pulse-dot { animation: pulseDot 1.6s ease-in-out infinite; }
+    @keyframes pulseDot { 
+      0%, 100% { opacity: 1; transform: scale(1); } 
+      50% { opacity: .4; transform: scale(1.3); } 
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-[#F8FAF9] text-[#0F172A]">
+<body>
 
-  <div id="root" class="flex-1 flex flex-col"></div>
+  <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef, useMemo } = React;
 
-    // --- CRISP VECTOR ICONS ---
+    /* ---------------- Creative Design Tokens ---------------- */
+    const palette = {
+      light: {
+        bg: "#FFF8ED", 
+        surface: "#FFFFFF", 
+        surfaceAlt: "#FFF1DC", 
+        surfaceRaised: "#FFFFFF",
+        border: "#F5E3C6", 
+        borderStrong: "#EFD3A3",
+        text: "#2B1D0E", 
+        textMuted: "#8A7256", 
+        textFaint: "#B8A483",
+        primary: "#F2994A", 
+        primaryHover: "#E07F2A", 
+        primarySoft: "#FFEBD2", 
+        primaryText: "#C4671A",
+        accent: "#FFC94A", 
+        accentSoft: "#FFF3CF", 
+        accentText: "#8A6A05",
+        success: "#2FA36B", 
+        successSoft: "#E5F7EE", 
+        successText: "#1E7A4E",
+        danger: "#E2574C", 
+        dangerSoft: "#FDEAE8", 
+        dangerText: "#B93F35",
+        info: "#4A90D9", 
+        infoSoft: "#E9F2FC", 
+        infoText: "#2A6DAE",
+        shadow: "0 1px 3px rgba(60,35,5,0.05), 0 12px 32px rgba(60,35,5,0.08)",
+      },
+      dark: {
+        bg: "#1C130A", 
+        surface: "#26190D", 
+        surfaceAlt: "#301F0F", 
+        surfaceRaised: "#2C1D0F",
+        border: "#3D2A15", 
+        borderStrong: "#503820",
+        text: "#FBF0DF", 
+        textMuted: "#D3B892", 
+        textFaint: "#98805F",
+        primary: "#FFA555", 
+        primaryHover: "#FFB670", 
+        primarySoft: "#3A2712", 
+        primaryText: "#FFB670",
+        accent: "#FFD166", 
+        accentSoft: "#3A2F10", 
+        accentText: "#FFDD8C",
+        success: "#4EC98A", 
+        successSoft: "#12301F", 
+        successText: "#7FE0AC",
+        danger: "#F0847A", 
+        dangerSoft: "#3A1D19", 
+        dangerText: "#F5A199",
+        info: "#7CB3E8", 
+        infoSoft: "#152436", 
+        infoText: "#A9CFF2",
+        shadow: "0 1px 3px rgba(0,0,0,0.3), 0 12px 36px rgba(0,0,0,0.5)",
+      },
+    };
+
+    /* ---------------- Crisp Vector Icons ---------------- */
     const Icon = {
-      Scale: ({ className = "w-5 h-5" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
-          <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
-          <path d="M7 21h10"/>
-          <path d="M12 3v18"/>
-          <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
+      Scale: ({ size = 18, color = "currentColor", className = "" }) => (
+        <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
         </svg>
       ),
-      Briefcase: ({ className = "w-5 h-5" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-          <rect width="20" height="14" x="2" y="6" rx="2"/>
+      Briefcase: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
         </svg>
       ),
-      User: ({ className = "w-5 h-5" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
+      Sparkles: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>
         </svg>
       ),
-      FileText: ({ className = "w-5 h-5" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
-          <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
-          <path d="M10 9H8"/>
-          <path d="M16 13H8"/>
-          <path d="M16 17H8"/>
+      Building2: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v8h20v-8a2 2 0 0 0-2-2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
         </svg>
       ),
-      Camera: ({ className = "w-5 h-5" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
-          <circle cx="12" cy="13" r="3"/>
+      MapPin: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>
         </svg>
       ),
-      Search: ({ className = "w-5 h-5" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="m21 21-4.3-4.3"/>
+      Clock: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
         </svg>
       ),
-      Shield: ({ className = "w-5 h-5" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
-          <path d="m9 12 2 2 4-4"/>
+      DollarSign: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
         </svg>
       ),
-      Check: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      Users: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      ),
+      ArrowLeft: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+        </svg>
+      ),
+      ArrowRight: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+        </svg>
+      ),
+      CheckCircle2: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+        </svg>
+      ),
+      Circle: ({ size = 18, color = "currentColor", fill = "none" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color} strokeWidth="2">
+          <circle cx="12" cy="12" r="10"/>
+        </svg>
+      ),
+      ChevronRight: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m9 18 6-6-6-6"/>
+        </svg>
+      ),
+      Upload: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
+        </svg>
+      ),
+      FileText: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+        </svg>
+      ),
+      Bell: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+        </svg>
+      ),
+      Settings: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+      ),
+      User: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+      ),
+      LayoutDashboard: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>
+        </svg>
+      ),
+      Video: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+        </svg>
+      ),
+      Moon: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+        </svg>
+      ),
+      Sun: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+        </svg>
+      ),
+      Check: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="20 6 9 17 4 12"/>
         </svg>
       ),
-      Calendar: ({ className = "w-5 h-5" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <rect width="18" height="18" x="3" y="4" rx="2"/>
-          <line x1="16" x2="16" y1="2" y2="6"/>
-          <line x1="8" x2="8" y1="2" y2="6"/>
-          <line x1="3" x2="21" y1="10" y2="10"/>
+      AlertCircle: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
         </svg>
       ),
-      Video: ({ className = "w-5 h-5" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m22 8-6 4 6 4V8Z"/>
-          <rect width="14" height="12" x="2" y="6" rx="2"/>
+      Search: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
         </svg>
       ),
-      Phone: ({ className = "w-5 h-5" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      GraduationCap: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
+        </svg>
+      ),
+      Mail: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+        </svg>
+      ),
+      Phone: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
         </svg>
       ),
-      MessageSquare: ({ className = "w-5 h-5" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      ShieldCheck: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>
+        </svg>
+      ),
+      PlayCircle: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
+        </svg>
+      ),
+      RotateCcw: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+        </svg>
+      ),
+      FastForward: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/>
+        </svg>
+      ),
+      HelpCircle: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>
+        </svg>
+      ),
+      TrendingUp: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+        </svg>
+      ),
+      ChevronDown: ({ size = 18, color = "currentColor", style = {} }) => (
+        <svg width={size} height={size} style={style} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
+      ),
+      LogOut: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>
+        </svg>
+      ),
+      MessageSquare: ({ size = 18, color = "currentColor" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        </svg>
-      ),
-      UploadCloud: ({ className = "w-6 h-6" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
-          <path d="M12 12v9"/>
-          <path d="m16 16-4-4-4 4"/>
-        </svg>
-      ),
-      Trash: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 6h18"/>
-          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-        </svg>
-      ),
-      Building: ({ className = "w-4 h-4" }) => (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
-          <path d="M9 22v-4h6v4"/>
-          <path d="M8 6h.01"/>
-          <path d="M16 6h.01"/>
-          <path d="M8 10h.01"/>
-          <path d="M16 10h.01"/>
-          <path d="M8 14h.01"/>
-          <path d="M16 14h.01"/>
         </svg>
       ),
     };
 
-    const STORAGE_KEY = 'almustashar_unified_db_v1';
-    const SEQ_KEY = 'almustashar_unified_seq_v1';
+    /* ---------------- Mock / Initial Jobs ---------------- */
+    const JOBS = [
+      {
+        id: "accountant",
+        title: "محاسب مالي أول (Senior Accountant)",
+        dept: "الإدارة المالية",
+        icon: Icon.Building2,
+        location: "الرياض، المملكة العربية السعودية",
+        type: "دوام كامل (حضوري)",
+        level: "متوسط - متقدم",
+        salary: "8,000 – 12,000 ريال",
+        applicants: 42,
+        posted: "منذ يومين",
+        description: "يبحث مكتب المستشار للمحاماة والاستشارات القانونية عن محاسب مالي متميز يمتلك خبرة في إدارة العمليات المحاسبية اليومية، والامتثال للأنظمة الضريبية السعودية (ZATCA)، ومعايير المحاسبة الدولية IFRS.",
+        responsibilities: [
+          "إدارة الإقفال المالي الشهري والسنوي بدقة",
+          "إعداد الإقرارات الضريبية لضريبة القيمة المضافة ومطابقتها مع هيئة الزكاة والضريبة والجمارك",
+          "تسوية الحسابات البنكية ومطابقة حسابات العملاء والموردين",
+          "إعداد التقارير المالية الدورية للإدارة القانونية والموازنات التقديرية",
+        ],
+        requirements: [
+          "بكالوريوس في المحاسبة أو المالية",
+          "خبرة 3+ سنوات في مجال المحاسبة",
+          "إلمام تام بضريبة القيمة المضافة والمعايير الدولية IFRS",
+          "مهارات متقدمة في برامج Excel والأنظمة السحابية (ERP)",
+        ],
+        skills: ["IFRS", "ضريبة القيمة المضافة (VAT)", "Excel متقدم", "أنظمة ERP", "التسويات البنكية"],
+        benefits: ["تأمين طبي شامل", "بيئة عمل مهنية مرنة", "مكافأة أداء سنوية", "إجازات سنوية مدفوعة"],
+        questions: [
+          { id: "exp_years", label: "عدد سنوات الخبرة المحاسبية", type: "number" },
+          { id: "erp", label: "البرامج المحاسبية التي تجيدها (مثل Odoo, SAP, دفترة, سماك)", type: "text" },
+          { id: "excel", label: "مستوى إجادة برنامج Excel", type: "select", options: ["مبتدئ", "متوسط", "متقدم", "خبير"] },
+          { id: "vat", label: "هل لديك خبرة عملية في ضريبة القيمة المضافة ZATCA؟", type: "yesno" },
+          { id: "ifrs", label: "هل لديك دراية بالمعايير المحاسبية الدولية IFRS؟", type: "yesno" },
+        ],
+      },
+      {
+        id: "legal_advisor",
+        title: "مستشار قانوني (Legal Advisor)",
+        dept: "الاستشارات القانونية",
+        icon: Icon.Scale,
+        location: "الرياض · دوام كامل",
+        type: "دوام كامل",
+        level: "متقدم",
+        salary: "12,000 – 16,000 ريال",
+        applicants: 28,
+        posted: "منذ 4 أيام",
+        description: "صياغة العقود التجارية وتقديم المشورة القانونية للشركات والعملاء مع تمثيل المكتب باحترافية.",
+        responsibilities: [
+          "صياغة ومراجعة العقود والاتفاقيات التجارية",
+          "تقديم الاستشارات القانونية في نظام الشركات والعمل",
+        ],
+        requirements: ["بكالوريوس أنظمة أو شريعة", "خبرة 4+ سنوات في مكتب محاماة"],
+        skills: ["صياغة العقود", "الأنظمة التجارية", "التحكيم"],
+        benefits: ["تأمين طبي فئة A", "مكافآت قضايا واستشارات"],
+        questions: [
+          { id: "court_exp", label: "هل لديك خبرة في الترافع التجاري؟", type: "yesno" },
+        ],
+      }
+    ];
 
-    function getStoredApplicants() {
+    const STAGES = [
+      { key: "SUBMITTED", label: "تم الإرسال" },
+      { key: "RECEIVED", label: "تم الاستلام" },
+      { key: "CV_VIEWED", label: "فحص الـ CV" },
+      { key: "SHORTLISTED", label: "القائمة المختصرة" },
+      { key: "INTERVIEW_SCHEDULED", label: "مقابلة مجدولة" },
+      { key: "INTERVIEW_COMPLETED", label: "تمت المقابلة" },
+      { key: "UNDER_REVIEW", label: "تحت المراجعة" },
+      { key: "DECISION", label: "القرار النهائي" },
+    ];
+
+    const STORAGE_KEY = 'almustashar_creative_db_v1';
+
+    function getStoredApps() {
       try {
-        const data = localStorage.getItem(STORAGE_KEY);
-        if (data) {
-          const parsed = JSON.parse(data);
-          if (Array.isArray(parsed)) return parsed;
-        }
+        const d = localStorage.getItem(STORAGE_KEY);
+        if (d) return JSON.parse(d);
       } catch(e) {}
       return [];
     }
 
-    // Flexible query matching (by phone, code, or name)
-    function matchApplicant(applicant, queryStr) {
-      if (!queryStr || !applicant) return false;
-      const toEng = (s) => (s || '').toString().replace(/[٠١٢٣٤٥٦٧٨٩]/g, d => "0123456789"["٠١٢٣٤٥٦٧٨٩".indexOf(d)]);
-      const rawQ = toEng(queryStr).toLowerCase().trim();
-      const cleanQ = rawQ.replace(/[\s\-_#+()]/g, '');
-      const digitsOnlyQ = rawQ.replace(/\D/g, '');
-
-      // Match Code
-      const appCode = toEng(applicant.code || '').toLowerCase().replace(/[\s\-_#]/g, '');
-      if (appCode === cleanQ || appCode.includes(cleanQ)) return true;
-      if (digitsOnlyQ && applicant.code) {
-        const appCodeNum = applicant.code.replace(/\D/g, '');
-        if (parseInt(digitsOnlyQ, 10) === parseInt(appCodeNum, 10)) return true;
-      }
-
-      // Match Phone
-      const appPhone = toEng(applicant.phone || '').replace(/\D/g, '');
-      if (digitsOnlyQ && appPhone) {
-        if (appPhone.includes(digitsOnlyQ) || digitsOnlyQ.includes(appPhone)) return true;
-        if (digitsOnlyQ.length >= 7 && appPhone.slice(-7) === digitsOnlyQ.slice(-7)) return true;
-      }
-
-      // Match Name
-      const appName = (applicant.fullName || '').toLowerCase();
-      if (appName && appName.includes(rawQ)) return true;
-
-      return false;
+    function fmtHMS(ms) {
+      if (ms < 0) ms = 0;
+      const s = Math.floor(ms / 1000);
+      const h = String(Math.floor(s / 3600)).padStart(2, "0");
+      const m = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+      const sec = String(s % 60).padStart(2, "0");
+      return `${h}:${m}:${sec}`;
     }
 
-    function App() {
-      const [view, setView] = useState('welcome');
-      const [applicants, setApplicants] = useState(getStoredApplicants);
-      const [currentApplicant, setCurrentApplicant] = useState(null);
-      const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
-      const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+    function statusColors(c, status) {
+      if (status === "ACCEPTED") return { bg: c.successSoft, text: c.successText };
+      if (status === "REJECTED") return { bg: c.dangerSoft, text: c.dangerText };
+      if (status === "DECISION" || status === "UNDER_REVIEW") return { bg: c.infoSoft, text: c.infoText };
+      if (status === "INTERVIEW_SCHEDULED" || status === "INTERVIEW_COMPLETED") return { bg: c.accentSoft, text: c.accentText };
+      return { bg: c.primarySoft, text: c.primaryText };
+    }
 
-      const saveApplicants = (newList) => {
-        setApplicants(newList);
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(newList));
-        } catch(e) {}
-      };
-
-      // Form submission
-      const handleFormSubmit = (formData) => {
-        let currentSeq = parseInt(localStorage.getItem(SEQ_KEY) || '0', 10);
-        currentSeq += 1;
-        try {
-          localStorage.setItem(SEQ_KEY, currentSeq.toString());
-        } catch(e) {}
-
-        const newCode = 'APP-' + String(currentSeq).padStart(4, '0');
-        const newApp = {
-          id: String(Date.now()),
-          code: newCode,
-          submittedAt: new Date().toLocaleDateString('ar-SA', { day: 'numeric', month: 'long', year: 'numeric' }),
-          status: 'SUBMITTED',
-          cvViewed: false,
-          interview: null,
-          ...formData
-        };
-
-        const updated = [newApp, ...applicants.filter(a => a.phone !== newApp.phone)];
-        saveApplicants(updated);
-        setCurrentApplicant(newApp);
-        setView('success');
-      };
-
-      const updateApplicantStatus = (code, newStatus) => {
-        const updated = applicants.map(a => a.code === code ? { ...a, status: newStatus, cvViewed: true } : a);
-        saveApplicants(updated);
-        if (currentApplicant && currentApplicant.code === code) {
-          setCurrentApplicant({ ...currentApplicant, status: newStatus, cvViewed: true });
-        }
-      };
-
-      const handleScheduleInterview = (code, interviewData) => {
-        const updated = applicants.map(a => a.code === code ? { ...a, status: 'INTERVIEW_SCHEDULED', interview: interviewData } : a);
-        saveApplicants(updated);
-        if (currentApplicant && currentApplicant.code === code) {
-          setCurrentApplicant({ ...currentApplicant, status: 'INTERVIEW_SCHEDULED', interview: interviewData });
-        }
-      };
-
-      const handleResetAll = () => {
-        if (confirm('هل تريد تصفير جميع الطلبات في النظام؟')) {
-          localStorage.clear();
-          setApplicants([]);
-          setCurrentApplicant(null);
-          alert('تم تصفير النظام بنجاح.');
-        }
-      };
-
+    /* ---------------- Pipeline Rail (Signature Element) ---------------- */
+    function PipelineRail({ c, steps, activeIndex, orientation = "horizontal", size = "md" }) {
+      const isH = orientation === "horizontal";
       return (
-        <div className="min-h-screen flex flex-col bg-[#F8FAF9]">
-          
-          {/* HEADER */}
-          <header className="bg-white border-b border-[#E2E8F0] sticky top-0 z-40 px-4 py-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-            <div className="max-w-4xl mx-auto flex items-center justify-between">
-              
-              <div 
-                className="flex items-center gap-3 cursor-pointer group"
-                onClick={() => setView('welcome')}
+        <div style={{ display: "flex", flexDirection: isH ? "row" : "column", width: "100%" }}>
+          {steps.map((s, i) => {
+            const done = i < activeIndex;
+            const current = i === activeIndex;
+            const nodeColor = done ? c.success : current ? c.primary : c.borderStrong;
+            const nodeBg = done ? c.successSoft : current ? c.primarySoft : "transparent";
+            return (
+              <div key={s.key || i} className={isH ? "flex-1 flex flex-col items-center" : "flex flex-row items-start gap-3 pb-6"}>
+                <div className={isH ? "flex items-center w-full" : "flex flex-col items-center"}>
+                  {isH && (
+                    <>
+                      {i !== 0 && <div style={{ flex: 1, height: 2, background: done || current ? c.success : c.border }} />}
+                      <div
+                        style={{
+                          width: 32, height: 32, borderRadius: 999, border: `2px solid ${nodeColor}`,
+                          background: nodeBg, display: "flex", alignItems: "center", justifyContent: "center",
+                          color: nodeColor, flexShrink: 0,
+                        }}
+                      >
+                        {done ? <Icon.Check size={14} color={c.success} /> : current ? (
+                          <span className="pulse-dot" style={{ width: 8, height: 8, borderRadius: 999, background: nodeColor, display: "block" }} />
+                        ) : <Icon.Circle size={8} fill={nodeColor} color={nodeColor} />}
+                      </div>
+                      {i !== steps.length - 1 && <div style={{ flex: 1, height: 2, background: done ? c.success : c.border }} />}
+                    </>
+                  )}
+                </div>
+                <div className={isH ? "mt-2 text-center px-1" : ""}>
+                  <p style={{
+                    color: current ? c.text : done ? c.textMuted : c.textFaint,
+                    fontWeight: current ? 700 : 500, fontSize: size === "sm" ? 11 : 12.5,
+                    lineHeight: 1.3, maxWidth: isH ? 90 : "none",
+                  }}>{s.label || s}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    /* ---------------- Navbar ---------------- */
+    function Navbar({ c, theme, setTheme, view, setView, applied, onOpenAdmin }) {
+      return (
+        <div style={{ borderBottom: `1px solid ${c.border}`, background: c.surface + "F2", backdropFilter: "blur(10px)" }} className="sticky top-0 z-40">
+          <div className="max-w-6xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
+            <button onClick={() => setView("landing")} className="flex items-center gap-2.5">
+              <div style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.accent})` }} className="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm">
+                <Icon.Scale size={18} color="#fff" />
+              </div>
+              <div className="text-right">
+                <span style={{ fontFamily: "Sora", color: c.text, fontWeight: 800 }} className="text-base leading-tight block">المستشار للمحاماة</span>
+                <span style={{ color: c.textMuted }} className="text-[10px] font-semibold block">بوابة استقطاب الكفاءات</span>
+              </div>
+            </button>
+
+            <div className="hidden md:flex items-center gap-6">
+              <button onClick={() => setView("landing")} style={{ color: c.textMuted }} className="text-xs font-bold hover:opacity-80">الوظائف المتاحة</button>
+              <a href="#how" style={{ color: c.textMuted }} className="text-xs font-bold hover:opacity-80">كيف يعمل النظام</a>
+              <a href="#faq" style={{ color: c.textMuted }} className="text-xs font-bold hover:opacity-80">الأسئلة الشائعة</a>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+                style={{ border: `1px solid ${c.border}`, color: c.textMuted }}
+                className="w-9 h-9 rounded-full flex items-center justify-center hover:opacity-80"
+                aria-label="Toggle theme"
               >
-                <div className="w-9 h-9 rounded-xl bg-brand-800 text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-                  <Icon.Scale className="w-5 h-5 text-[#E1EFEA]" />
-                </div>
-                <div>
-                  <h1 className="font-extrabold text-sm text-slateText-title leading-tight">المستشار للمحاماة</h1>
-                  <p className="text-[11px] text-brand-700 font-semibold">بوابة استقطاب الكفاءات المالية</p>
-                </div>
-              </div>
+                {theme === "light" ? <Icon.Moon size={16} /> : <Icon.Sun size={16} />}
+              </button>
 
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setView('welcome')}
-                  className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${view === 'welcome' ? 'bg-brand-50 text-brand-800' : 'text-slateText-muted hover:bg-slate-100'}`}
-                >
-                  الرئيسية
-                </button>
-                <button
-                  onClick={() => setView('form')}
-                  className={`text-xs font-bold px-3.5 py-1.5 rounded-lg transition-colors ${view === 'form' ? 'bg-brand-800 text-white shadow-sm' : 'text-slateText-muted hover:bg-slate-100'}`}
-                >
-                  تقديم طلب
-                </button>
-                <button
-                  onClick={() => setView('track')}
-                  className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${view === 'track' ? 'bg-brand-50 text-brand-800' : 'text-slateText-muted hover:bg-slate-100'}`}
-                >
-                  استعلام عن طلب
-                </button>
-
-                {isAdminLoggedIn ? (
-                  <div className="flex items-center gap-1.5 mr-2">
-                    <button
-                      onClick={() => setView('admin')}
-                      className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${view === 'admin' ? 'bg-brand-800 text-white' : 'bg-slate-100 text-slateText-body'}`}
-                    >
-                      لوحة الإدارة
-                    </button>
-                    <button
-                      onClick={() => { setIsAdminLoggedIn(false); setView('welcome'); }}
-                      className="text-xs font-bold px-2 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
-                    >
-                      خروج
-                    </button>
-                  </div>
-                ) : null}
-              </div>
+              <button
+                onClick={() => setView("dashboard")}
+                style={{ background: c.primary, color: "#fff" }}
+                className="text-xs font-bold px-4 h-9 rounded-full flex items-center gap-1.5 shadow-sm hover:opacity-95"
+              >
+                <Icon.LayoutDashboard size={14} /> <span>لوحة المتقدم</span>
+              </button>
             </div>
-          </header>
-
-          {/* MAIN */}
-          <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6 md:py-8">
-            {view === 'welcome' && (
-              <WelcomeView 
-                onStartApply={() => setView('form')}
-                onStartTrack={() => setView('track')}
-              />
-            )}
-
-            {view === 'form' && (
-              <ApplicantForm 
-                onSubmit={handleFormSubmit} 
-                onBack={() => setView('welcome')}
-              />
-            )}
-
-            {view === 'success' && currentApplicant && (
-              <SuccessCard 
-                applicant={currentApplicant} 
-                onGoTrack={() => setView('track')}
-                onGoHome={() => setView('welcome')}
-              />
-            )}
-
-            {view === 'track' && (
-              <TrackView 
-                applicants={applicants}
-                activeApplicant={currentApplicant}
-                onGoApply={() => setView('form')}
-                onBack={() => setView('welcome')}
-              />
-            )}
-
-            {view === 'admin' && isAdminLoggedIn && (
-              <AdminSystem 
-                applicants={applicants}
-                selectedApplicant={currentApplicant}
-                setSelectedApplicant={setCurrentApplicant}
-                onUpdateStatus={updateApplicantStatus}
-                onScheduleInterview={handleScheduleInterview}
-                onResetAll={handleResetAll}
-              />
-            )}
-          </main>
-
-          {/* FOOTER */}
-          <footer className="mt-auto bg-white border-t border-[#E2E8F0] py-6 px-4 text-xs text-slateText-muted">
-            <div className="max-w-4xl mx-auto space-y-4">
-              
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-right">
-                <div className="flex items-center gap-2">
-                  <Icon.Scale className="w-4 h-4 text-brand-700" />
-                  <span className="font-bold text-slateText-body">مكتب المستشار للمحاماة والاستشارات القانونية — الرياض</span>
-                </div>
-
-                <div className="flex gap-4 text-xs font-semibold text-slateText-muted">
-                  <button onClick={() => setView('welcome')} className="hover:text-brand-800">الرئيسية</button>
-                  <button onClick={() => setView('form')} className="hover:text-brand-800">تقديم على وظيفة</button>
-                  <button onClick={() => setView('track')} className="hover:text-brand-800">استعلام عن طلب</button>
-                </div>
-              </div>
-
-              {/* Secret Admin Trigger */}
-              <div className="text-center sm:text-right pt-2 border-t border-slate-100 text-[11px]">
-                <span 
-                  onClick={() => setIsAdminAuthModalOpen(true)}
-                  className="text-slateText-light hover:text-slateText-muted transition-colors cursor-default select-none"
-                >
-                  © 2026 جميع الحقوق محفوظة لمكتب المستشار للمحاماة والاستشارات القانونية.
-                </span>
-              </div>
-
-            </div>
-          </footer>
-
-          {/* ADMIN AUTH MODAL */}
-          {isAdminAuthModalOpen && (
-            <AdminAuthModal 
-              onSuccess={() => {
-                setIsAdminLoggedIn(true);
-                setIsAdminAuthModalOpen(false);
-                setView('admin');
-              }}
-              onClose={() => setIsAdminAuthModalOpen(false)}
-            />
-          )}
-
+          </div>
         </div>
       );
     }
 
-    /* ---------------- 0. WELCOME VIEW ---------------- */
-    function WelcomeView({ onStartApply, onStartTrack }) {
+    /* ---------------- Landing ---------------- */
+    function Landing({ c, setView, openJob }) {
+      const [q, setQ] = useState("");
+      const filtered = JOBS.filter(j => (j.title + j.dept + j.location).toLowerCase().includes(q.toLowerCase()));
+
       return (
-        <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-          
-          <div className="bg-brand-800 text-white rounded-3xl p-7 md:p-10 shadow-sm relative overflow-hidden">
-            <div className="relative z-10 space-y-4 max-w-xl text-right">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-brand-100 text-xs font-bold border border-white/10">
-                <Icon.Building className="w-3.5 h-3.5" />
-                <span>المملكة العربية السعودية · الرياض</span>
+        <div className="animate-fade-in">
+          {/* Hero Banner with Floating Glass Badges */}
+          <div className="max-w-6xl mx-auto px-5 md:px-8 pt-8 pb-12">
+            <div
+              style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.accent})`, borderRadius: 36 }}
+              className="relative overflow-hidden px-6 md:px-12 pt-10 pb-14 md:pt-14 md:pb-20 shadow-md"
+            >
+              <div style={{ background: "rgba(255,255,255,0.16)" }} className="absolute -top-16 -left-16 w-64 h-64 rounded-full" />
+              <div style={{ background: "rgba(255,255,255,0.14)" }} className="absolute -bottom-24 -right-10 w-80 h-80 rounded-full" />
+
+              <div className="relative grid md:grid-cols-2 gap-8 items-center">
+                <div className="text-right">
+                  <div style={{ background: "rgba(255,255,255,0.22)", color: "#fff" }} className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full mb-4">
+                    <Icon.Sparkles size={13} /> توظيف أذكى · إجراءات أسرع
+                  </div>
+                  <h1 style={{ fontFamily: "Sora", color: "#fff", lineHeight: 1.15 }} className="text-3xl md:text-5xl font-extrabold tracking-tight">
+                    انضم إلى نخبة الكفاءات في مكتب المستشار
+                  </h1>
+                  <p style={{ color: "rgba(255,255,255,0.92)" }} className="mt-4 text-xs md:text-sm leading-relaxed max-w-md">
+                    استعرض الفرص الوظيفية المتاحة، قدّم طلبك في دقائق، وتابع كافة مراحل التوظيف والمقابلات الشخصية مباشرة عبر المنصة.
+                  </p>
+                  <div className="mt-7 flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={() => document.getElementById("jobs-list")?.scrollIntoView({ behavior: "smooth" })}
+                      style={{ background: "#fff", color: c.primaryText }}
+                      className="inline-flex items-center gap-2 text-xs font-extrabold px-5 h-11 rounded-full hover:opacity-90 shadow-sm transition-transform active:scale-95"
+                    >
+                      استعراض الوظائف الشاغرة <Icon.ArrowLeft size={16} />
+                    </button>
+                    <span style={{ color: "rgba(255,255,255,0.9)" }} className="text-xs font-semibold">{JOBS.length} وظائف متاحة الآن</span>
+                  </div>
+                </div>
+
+                {/* Floating Glass Badges */}
+                <div className="relative hidden md:flex items-center justify-center h-64">
+                  <div style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.35)" }} className="w-56 h-56 rounded-full flex items-center justify-center">
+                    <div style={{ background: "rgba(255,255,255,0.95)" }} className="w-36 h-36 rounded-full flex items-center justify-center shadow-inner">
+                      <Icon.Scale size={48} color={c.primaryText} />
+                    </div>
+                  </div>
+
+                  <div style={{ background: c.surface, boxShadow: c.shadow }} className="absolute top-2 right-0 rounded-2xl px-4 py-2.5 flex items-center gap-2.5">
+                    <div style={{ background: c.successSoft, color: c.successText }} className="w-8 h-8 rounded-full flex items-center justify-center">
+                      <Icon.CheckCircle2 size={16} />
+                    </div>
+                    <div className="text-right">
+                      <p style={{ color: c.text }} className="text-xs font-bold">في القائمة المختصرة</p>
+                      <p style={{ color: c.textFaint }} className="text-[10px]">محاسب مالي أول</p>
+                    </div>
+                  </div>
+
+                  <div style={{ background: c.surface, boxShadow: c.shadow }} className="absolute bottom-3 left-0 rounded-2xl px-4 py-2.5 flex items-center gap-2.5">
+                    <div style={{ background: c.accentSoft, color: c.accentText }} className="w-8 h-8 rounded-full flex items-center justify-center">
+                      <Icon.Video size={16} />
+                    </div>
+                    <div className="text-right">
+                      <p style={{ color: c.text }} className="text-xs font-bold">موعد المقابلة: 7:00 م</p>
+                      <p style={{ color: c.textFaint }} className="text-[10px]">Google Meet</p>
+                    </div>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <h2 className="text-2xl md:text-4xl font-extrabold leading-tight text-white">
-                بوابة استقطاب الكفاءات <br />
-                <span className="text-[#E1EFEA]">وظيفة محاسب مالي</span>
-              </h2>
-
-              <p className="text-xs md:text-sm text-white/85 leading-relaxed font-normal">
-                يسر مكتب المستشار للمحاماة استقبال طلبات الانضمام للكوادر المالية المؤهلة للعمل المالي والإداري.
-              </p>
-
-              <div className="flex flex-wrap gap-3 pt-2">
+            {/* Quick Actions Row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 -mt-8 relative px-2 sm:px-6">
+              {[
+                { t: "استعراض الوظائف", icon: Icon.Search, action: () => document.getElementById("jobs-list")?.scrollIntoView({ behavior: "smooth" }) },
+                { t: "تقديم طلب سريع", icon: Icon.Upload, action: () => openJob("accountant") },
+                { t: "متابعة حالة الطلب", icon: Icon.TrendingUp, action: () => setView("dashboard") },
+                { t: "الأسئلة الشائعة", icon: Icon.HelpCircle, action: () => document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" }) },
+              ].map(s => (
                 <button
-                  onClick={onStartApply}
-                  className="px-6 h-11 bg-white text-brand-900 hover:bg-brand-50 rounded-xl font-bold text-xs shadow-sm transition-transform active:scale-95 flex items-center gap-2"
+                  key={s.t}
+                  onClick={s.action}
+                  style={{ background: c.surface, boxShadow: c.shadow, border: `1px solid ${c.border}` }}
+                  className="rounded-2xl p-4 flex flex-col items-center gap-2 text-center hover:-translate-y-0.5 transition-transform"
                 >
-                  <Icon.Briefcase className="w-4 h-4 text-brand-800" />
-                  <span>تقديم طلب جديد ➔</span>
+                  <div style={{ background: c.primarySoft, color: c.primaryText }} className="w-10 h-10 rounded-full flex items-center justify-center">
+                    <s.icon size={18} />
+                  </div>
+                  <span style={{ color: c.text }} className="text-xs font-bold">{s.t}</span>
                 </button>
+              ))}
+            </div>
+
+            {/* Signature Journey Strip */}
+            <div style={{ background: c.surface, border: `1px solid ${c.border}`, boxShadow: c.shadow }} className="mt-8 rounded-3xl p-6 hidden sm:block">
+              <p style={{ color: c.textFaint }} className="text-[11px] font-bold uppercase tracking-wide mb-4 text-right">رحلة التوظيف والتقييم في مكتب المستشار</p>
+              <PipelineRail c={c} steps={["تقديم الطلب", "فحص السيرة", "المقابلة المرئية", "القرار النهائي"]} activeIndex={2} orientation="horizontal" />
+            </div>
+          </div>
+
+          {/* Jobs List */}
+          <div id="jobs-list" className="max-w-6xl mx-auto px-5 md:px-8 py-10">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-7">
+              <div className="text-right">
+                <h2 style={{ fontFamily: "Sora", color: c.text }} className="text-xl md:text-2xl font-bold">الوظائف المتاحة حالياً</h2>
+                <p style={{ color: c.textMuted }} className="text-xs mt-1">فرص وظيفية مفتوحة للتقديم الفوري بمقر المكتب بالرياض.</p>
+              </div>
+              <div style={{ border: `1px solid ${c.border}`, background: c.surface }} className="flex items-center gap-2 px-3.5 h-10 rounded-full w-full sm:w-72">
+                <Icon.Search size={16} color={c.textFaint} />
+                <input
+                  value={q} onChange={e => setQ(e.target.value)} placeholder="بحث بالوظيفة أو الموقع..."
+                  style={{ color: c.text, background: "transparent" }} className="text-xs outline-none w-full placeholder:opacity-60 text-right"
+                />
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              {filtered.map(job => (
                 <button
-                  onClick={onStartTrack}
-                  className="px-5 h-11 bg-white/15 hover:bg-white/25 text-white rounded-xl font-bold text-xs border border-white/20 transition-colors flex items-center gap-2"
+                  key={job.id}
+                  onClick={() => openJob(job.id)}
+                  style={{ background: c.surface, border: `1px solid ${c.border}`, boxShadow: c.shadow, borderRadius: 24 }}
+                  className="relative text-right p-5 hover:-translate-y-0.5 transition-transform"
                 >
-                  <Icon.Search className="w-4 h-4 text-[#E1EFEA]" />
-                  <span>استعلام عن حالة الطلب</span>
+                  <div className="flex items-start justify-between">
+                    <div style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.accent})`, color: "#fff" }} className="w-11 h-11 rounded-2xl flex items-center justify-center">
+                      <job.icon size={20} />
+                    </div>
+                    <span style={{ color: c.textFaint }} className="text-[11px] font-medium">{job.posted}</span>
+                  </div>
+                  <h3 style={{ color: c.text, fontFamily: "Sora" }} className="mt-3.5 text-base font-bold">{job.title}</h3>
+                  <p style={{ color: c.textMuted }} className="text-xs mt-1">{job.dept} · مكتب المستشار للمحاماة</p>
+                  
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    <span style={{ background: c.surfaceAlt, color: c.textMuted }} className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full"><Icon.MapPin size={11} />{job.location}</span>
+                    <span style={{ background: c.surfaceAlt, color: c.textMuted }} className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full"><Icon.Clock size={11} />{job.type}</span>
+                    <span style={{ background: c.surfaceAlt, color: c.textMuted }} className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full"><Icon.DollarSign size={11} />{job.salary}</span>
+                  </div>
+
+                  <div style={{ borderTop: `1px solid ${c.border}` }} className="mt-4 pt-3 flex items-center justify-between">
+                    <span style={{ color: c.textFaint }} className="inline-flex items-center gap-1 text-[11px]"><Icon.Users size={12} />{job.applicants} متقدم</span>
+                    <span style={{ color: "#fff", background: c.primary }} className="inline-flex items-center gap-1 text-xs font-bold px-3.5 py-1.5 rounded-full">
+                      تقديم الآن ➔
+                    </span>
+                  </div>
                 </button>
+              ))}
+            </div>
+          </div>
+
+          {/* How it Works Section */}
+          <div id="how" style={{ background: c.surfaceAlt }} className="py-14">
+            <div className="max-w-6xl mx-auto px-5 md:px-8 text-right">
+              <h2 style={{ fontFamily: "Sora", color: c.text }} className="text-xl md:text-2xl font-bold mb-2">كيف تعمل بوابة التوظيف؟</h2>
+              <p style={{ color: c.textMuted }} className="text-xs mb-8">إجراءات توظيف سريعة، رقمية وشفافة من التقديم حتى القبول.</p>
+              
+              <div className="grid sm:grid-cols-4 gap-4">
+                {[
+                  { t: "1. التقديم الإلكتروني", d: "تعبئة استمارة التقديم وإرفاق السيرة الذاتية والصورة.", icon: Icon.FileText },
+                  { t: "2. فحص السيرة الذاتية", d: "مراجعة ملفك من قبل مسؤولي الموارد البشرية والمالية.", icon: Icon.Search },
+                  { t: "3. المقابلة المرئية", d: "جدولة مقابلة مباشرة عبر Google Meet للمرشحين المختارين.", icon: Icon.Video },
+                  { t: "4. القرار النهائي", d: "إشعار فوري بحالة القبول وتفاصيل العرض الوظيفي.", icon: Icon.CheckCircle2 },
+                ].map((s, i) => (
+                  <div key={s.t} style={{ background: c.surface, border: `1px solid ${c.border}` }} className="rounded-2xl p-5 text-right">
+                    <div style={{ background: c.primarySoft, color: c.primaryText }} className="w-10 h-10 rounded-xl flex items-center justify-center mb-3">
+                      <s.icon size={18} />
+                    </div>
+                    <h4 style={{ color: c.text }} className="font-bold text-sm">{s.t}</h4>
+                    <p style={{ color: c.textMuted }} className="text-xs mt-1.5 leading-relaxed">{s.d}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="clean-card p-5 space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-800 flex items-center justify-center">
-                <Icon.Briefcase className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-sm text-slateText-title">طبيعة العمل</h3>
-              <p className="text-xs text-slateText-muted leading-relaxed">
-                دوام كامل (حضوري) بمقر المكتب بالرياض.
-              </p>
-            </div>
-
-            <div className="clean-card p-5 space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-800 flex items-center justify-center">
-                <Icon.FileText className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-sm text-slateText-title">المؤهل المطلوب</h3>
-              <p className="text-xs text-slateText-muted leading-relaxed">
-                بكالوريوس / دبلوم محاسبة أو مالية.
-              </p>
-            </div>
-
-            <div className="clean-card p-5 space-y-2">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-800 flex items-center justify-center">
-                <Icon.Video className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-sm text-slateText-title">المقابلات الشخصية</h3>
-              <p className="text-xs text-slateText-muted leading-relaxed">
-                مقابلات مرئية سريعة عبر Google Meet.
-              </p>
+          {/* FAQ */}
+          <div id="faq" className="max-w-3xl mx-auto px-5 md:px-8 py-14 text-right">
+            <h2 style={{ fontFamily: "Sora", color: c.text }} className="text-xl md:text-2xl font-bold mb-6">الأسئلة الشائعة</h2>
+            <div className="space-y-3">
+              {[
+                { q: "كم تستغرق مدة مراجعة الطلب؟", a: "تتم مراجعة الطلبات والرد على المتقدمين خلال 3 إلى 5 أيام عمل." },
+                { q: "كيف يتم تحديد موعد المقابلة الشخصية؟", a: "يتم تحديد الموعد وإرسال رابط Google Meet عبر المنصة والواتساب." },
+                { q: "هل يشترط وجود خبرة في ضريبة القيمة المضافة؟", a: "نعم، لوظيفة المحاسب يفضل الإلمام بالأنظمة الضريبية السعودية ZATCA." },
+              ].map(f => <FaqItem key={f.q} c={c} f={f} />)}
             </div>
           </div>
 
@@ -544,811 +672,686 @@
       );
     }
 
-    /* ---------------- 1. APPLICANT FORM ---------------- */
-    function ApplicantForm({ onSubmit, onBack }) {
-      const [formData, setFormData] = useState({
-        fullName: '', phone: '', email: '', age: '', nationality: '', maritalStatus: '',
-        city: '', qualification: '', major: '', yearsExperience: '', currentJob: '',
-        expectedSalary: '', accountingSoftware: '', excelLevel: '',
-        photoBase64: null, photoName: '', cvBase64: null, cvName: ''
-      });
+    function FaqItem({ c, f }) {
+      const [open, setOpen] = useState(false);
+      return (
+        <button onClick={() => setOpen(!open)} style={{ background: c.surface, border: `1px solid ${c.border}` }} className="w-full text-right rounded-2xl p-4 transition-all">
+          <div className="flex items-center justify-between">
+            <span style={{ color: c.text }} className="text-xs md:text-sm font-bold">{f.q}</span>
+            <Icon.ChevronDown size={16} color={c.textFaint} style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform .2s" }} />
+          </div>
+          {open && <p style={{ color: c.textMuted }} className="text-xs mt-2.5 leading-relaxed">{f.a}</p>}
+        </button>
+      );
+    }
 
-      const [errors, setErrors] = useState({});
-      const [isSubmitting, setIsSubmitting] = useState(false);
+    /* ---------------- Job Details ---------------- */
+    function JobDetails({ c, job, setView, startApply }) {
+      return (
+        <div className="max-w-4xl mx-auto px-5 md:px-8 py-8 animate-fade-in text-right">
+          <button onClick={() => setView("landing")} style={{ color: c.textMuted }} className="inline-flex items-center gap-1.5 text-xs font-bold mb-5 hover:opacity-80">
+            <Icon.ArrowRight size={14} /> العودة لقائمة الوظائف
+          </button>
+
+          <div style={{ background: c.surface, border: `1px solid ${c.border}`, boxShadow: c.shadow }} className="rounded-3xl p-6 md:p-8">
+            <div className="flex items-start gap-4">
+              <div style={{ background: c.primarySoft, color: c.primaryText }} className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0">
+                <job.icon size={26} />
+              </div>
+              <div className="flex-1">
+                <h1 style={{ fontFamily: "Sora", color: c.text }} className="text-xl md:text-2xl font-extrabold">{job.title}</h1>
+                <p style={{ color: c.textMuted }} className="text-xs mt-1">{job.dept} · مكتب المستشار للمحاماة والاستشارات القانونية</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {[
+                    [Icon.MapPin, job.location], [Icon.Clock, job.type], [Icon.GraduationCap, job.level], [Icon.DollarSign, job.salary],
+                  ].map(([IconC, label], i) => (
+                    <span key={i} style={{ background: c.surfaceAlt, color: c.textMuted }} className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 rounded-full">
+                      <IconC size={12} />{label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <p style={{ color: c.textMuted }} className="mt-6 text-xs md:text-sm leading-relaxed">{job.description}</p>
+
+            <div className="mt-6">
+              <h3 style={{ color: c.text }} className="text-xs md:text-sm font-bold mb-2">المسؤوليات الرئيسية</h3>
+              <ul className="space-y-1.5">
+                {job.responsibilities.map((r, i) => (
+                  <li key={i} style={{ color: c.textMuted }} className="flex items-center gap-2 text-xs">
+                    <span style={{ background: c.primary }} className="w-1.5 h-1.5 rounded-full shrink-0" />
+                    {r}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="mt-6">
+              <h3 style={{ color: c.text }} className="text-xs md:text-sm font-bold mb-2">المتطلبات والمؤهلات</h3>
+              <ul className="space-y-1.5">
+                {job.requirements.map((r, i) => (
+                  <li key={i} style={{ color: c.textMuted }} className="flex items-center gap-2 text-xs">
+                    <span style={{ background: c.success }} className="w-1.5 h-1.5 rounded-full shrink-0" />
+                    {r}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="mt-6">
+              <h3 style={{ color: c.text }} className="text-xs md:text-sm font-bold mb-2">المهارات المطلوبة</h3>
+              <div className="flex flex-wrap gap-1.5">
+                {job.skills.map(s => (
+                  <span key={s} style={{ background: c.primarySoft, color: c.primaryText }} className="text-xs font-bold px-3 py-1 rounded-full">{s}</span>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ borderTop: `1px solid ${c.border}` }} className="mt-8 pt-5 flex items-center justify-between flex-wrap gap-3">
+              <span style={{ color: c.textFaint }} className="text-xs font-semibold">{job.applicants} مرشحين تقدموا لهذه الوظيفة</span>
+              <button
+                onClick={startApply}
+                style={{ background: c.primary, color: "#fff" }}
+                className="inline-flex items-center gap-2 text-xs font-bold px-7 h-11 rounded-full hover:opacity-90 shadow-sm"
+              >
+                بدء التقديم على هذه الوظيفة ➔
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ---------------- 6-Step Application Form ---------------- */
+    const FORM_STEPS = ["المعلومات الشخصية", "المعلومات المهنية", "الخبرات والمهارات", "المستندات", "أسئلة الوظيفة", "المراجعة والإرسال"];
+
+    function ApplicationForm({ c, job, setView, onSubmit }) {
+      const [step, setStep] = useState(0);
+      const [data, setData] = useState({
+        fullName: "", phone: "", email: "", nationality: "", city: "", dob: "",
+        currentJob: "", yearsExperience: "", previousCompany: "", education: "بكالوريوس محاسبة",
+        skills: "", certifications: "", expectedSalary: "", noticePeriod: "",
+        photoBase64: null, cvFile: null, cvError: "", linkedin: "", portfolio: "",
+        answers: {},
+      });
+      const [stepError, setStepError] = useState("");
+
+      const set = (k, v) => setData(d => ({ ...d, [k]: v }));
+      const setAnswer = (id, v) => setData(d => ({ ...d, answers: { ...d.answers, [id]: v } }));
 
       const handlePhotoUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = (event) => {
-          setFormData(prev => ({ ...prev, photoBase64: event.target.result, photoName: file.name }));
-        };
+        reader.onload = (event) => set("photoBase64", event.target.result);
         reader.readAsDataURL(file);
       };
 
       const handleCvUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        setFormData(prev => ({ ...prev, cvName: file.name, cvBase64: 'demo_cv' }));
+        set("cvFile", { name: file.name, size: (file.size / 1024).toFixed(0) + " KB" });
       };
 
       const validate = () => {
-        const newErr = {};
-        if (!formData.fullName.trim()) newErr.fullName = 'الاسم الرباعي مطلوب';
-        if (!formData.phone.trim()) newErr.phone = 'رقم الهاتف مطلوب';
-        if (!formData.age.trim()) newErr.age = 'العمر مطلوب';
-        if (!formData.nationality.trim()) newErr.nationality = 'الجنسية مطلوبة';
-        if (!formData.city.trim()) newErr.city = 'المدينة مطلوبة';
-        if (!formData.qualification.trim()) newErr.qualification = 'المؤهل مطلوب';
-        if (!formData.yearsExperience.trim()) newErr.yearsExperience = 'سنوات الخبرة مطلوبة';
-
-        setErrors(newErr);
-        if (Object.keys(newErr).length > 0) {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          return false;
-        }
-        return true;
+        if (step === 0 && (!data.fullName || !data.phone)) return "الاسم ورقم الهاتف مطلوبان.";
+        if (step === 1 && !data.yearsExperience) return "يرجى كتابة سنوات الخبرة.";
+        return "";
       };
 
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!validate()) return;
-        setIsSubmitting(true);
-        setTimeout(() => {
-          onSubmit(formData);
-          setIsSubmitting(false);
-        }, 300);
+      const next = () => {
+        const e = validate();
+        if (e) { setStepError(e); return; }
+        setStepError("");
+        if (step < FORM_STEPS.length - 1) setStep(step + 1);
       };
+      const back = () => { setStepError(""); step > 0 ? setStep(step - 1) : setView("jobDetails"); };
 
       return (
-        <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
-          
-          <button 
-            type="button" 
-            onClick={onBack}
-            className="text-xs font-bold text-slateText-muted hover:text-slateText-title flex items-center gap-1 mb-1"
-          >
-            <span>➔</span>
-            <span>العودة للرئيسية</span>
-          </button>
-
-          <div className="clean-card p-5">
-            <h2 className="text-lg font-extrabold text-slateText-title">استمارة التقديم على وظيفة محاسب مالي</h2>
-            <p className="text-xs text-slateText-muted mt-1">يرجى تعبئة كافة بياناتك بدقة لتتمكن من متابعة حالة طلبك برقم هاتفك فوراً.</p>
+        <div className="max-w-3xl mx-auto px-5 md:px-8 py-8 animate-fade-in text-right">
+          <div className="flex items-center justify-between mb-2">
+            <span style={{ color: c.textMuted }} className="text-xs font-bold">التقديم على: {job.title}</span>
+            <span style={{ color: c.textFaint }} className="text-[11px]">حفظ تلقائي للمسودة</span>
           </div>
 
-          <div className="clean-card p-5 space-y-3.5">
-            <h3 className="font-bold text-xs text-brand-800 flex items-center gap-2 border-b border-slate-100 pb-2">
-              <Icon.User className="w-4 h-4" />
-              <span>المعلومات الشخصية</span>
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-slateText-body mb-1">الاسم الرباعي <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
-                  value={formData.fullName} 
-                  onChange={e => setFormData({ ...formData, fullName: e.target.value })}
-                  placeholder="اكتب اسمك كاملاً كما في الهوية..."
-                  className={`w-full h-11 px-3.5 rounded-xl border text-xs focus:outline-none ${errors.fullName ? 'border-red-400 bg-red-50/20' : 'border-slate-200 focus:border-brand-700 bg-slate-50/50'}`}
-                />
-                {errors.fullName && <p className="text-[11px] text-red-500 mt-1">{errors.fullName}</p>}
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">رقم الهاتف (واتساب) <span className="text-red-500">*</span></label>
-                <input 
-                  type="tel" 
-                  dir="ltr"
-                  value={formData.phone} 
-                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="05XXXXXXXX"
-                  className={`w-full h-11 px-3.5 rounded-xl border text-xs text-right focus:outline-none ${errors.phone ? 'border-red-400' : 'border-slate-200 focus:border-brand-700 bg-slate-50/50'}`}
-                />
-                {errors.phone && <p className="text-[11px] text-red-500 mt-1">{errors.phone}</p>}
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">البريد الإلكتروني</label>
-                <input 
-                  type="email" 
-                  dir="ltr"
-                  value={formData.email} 
-                  onChange={e => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="example@gmail.com"
-                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 focus:border-brand-700 text-xs text-right bg-slate-50/50 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">العمر <span className="text-red-500">*</span></label>
-                <input 
-                  type="number" 
-                  value={formData.age} 
-                  onChange={e => setFormData({ ...formData, age: e.target.value })}
-                  placeholder="مثال: 28"
-                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 focus:border-brand-700 text-xs bg-slate-50/50 focus:outline-none"
-                />
-                {errors.age && <p className="text-[11px] text-red-500 mt-1">{errors.age}</p>}
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">الجنسية <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
-                  value={formData.nationality} 
-                  onChange={e => setFormData({ ...formData, nationality: e.target.value })}
-                  placeholder="سعودي / مصري / أردني..."
-                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 focus:border-brand-700 text-xs bg-slate-50/50 focus:outline-none"
-                />
-                {errors.nationality && <p className="text-[11px] text-red-500 mt-1">{errors.nationality}</p>}
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">مدينة الإقامة الحالية <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
-                  value={formData.city} 
-                  onChange={e => setFormData({ ...formData, city: e.target.value })}
-                  placeholder="مثال: الرياض"
-                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 focus:border-brand-700 text-xs bg-slate-50/50 focus:outline-none"
-                />
-                {errors.city && <p className="text-[11px] text-red-500 mt-1">{errors.city}</p>}
-              </div>
-            </div>
+          <div className="my-6">
+            <PipelineRail c={c} steps={FORM_STEPS.map((t, i) => ({ key: i, label: t }))} activeIndex={step} orientation="horizontal" size="sm" />
           </div>
 
-          <div className="clean-card p-5 space-y-3.5">
-            <h3 className="font-bold text-xs text-brand-800 flex items-center gap-2 border-b border-slate-100 pb-2">
-              <Icon.Briefcase className="w-4 h-4" />
-              <span>المعلومات المهنية</span>
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">المؤهل العلمي <span className="text-red-500">*</span></label>
-                <select 
-                  value={formData.qualification} 
-                  onChange={e => setFormData({ ...formData, qualification: e.target.value })}
-                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 focus:border-brand-700 text-xs bg-slate-50/50 focus:outline-none"
-                >
-                  <option value="">اختر المؤهل...</option>
-                  <option value="بكالوريوس محاسبة">بكالوريوس محاسبة</option>
-                  <option value="بكالوريوس مالية">بكالوريوس مالية</option>
-                  <option value="دبلوم محاسبة">دبلوم محاسبة</option>
-                  <option value="تخصص آخر">تخصص آخر</option>
-                </select>
-                {errors.qualification && <p className="text-[11px] text-red-500 mt-1">{errors.qualification}</p>}
+          <div style={{ background: c.surface, border: `1px solid ${c.border}`, boxShadow: c.shadow }} className="rounded-3xl p-6 md:p-8">
+            {step === 0 && (
+              <div className="grid sm:grid-cols-2 gap-3.5">
+                <Field c={c} label="الاسم الكامل *" value={data.fullName} onChange={v => set("fullName", v)} placeholder="اكتب اسمك كاملاً" />
+                <Field c={c} label="رقم الهاتف (واتساب) *" value={data.phone} onChange={v => set("phone", v)} placeholder="05XXXXXXXX" />
+                <Field c={c} label="البريد الإلكتروني" value={data.email} onChange={v => set("email", v)} placeholder="example@email.com" />
+                <Field c={c} label="الجنسية" value={data.nationality} onChange={v => set("nationality", v)} placeholder="سعودي / مصري / أردني..." />
+                <Field c={c} label="مدينة الإقامة" value={data.city} onChange={v => set("city", v)} placeholder="الرياض" />
+                <Field c={c} label="العمر" type="number" value={data.dob} onChange={v => set("dob", v)} placeholder="28" />
               </div>
+            )}
 
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">سنوات الخبرة <span className="text-red-500">*</span></label>
-                <input 
-                  type="number" 
-                  value={formData.yearsExperience} 
-                  onChange={e => setFormData({ ...formData, yearsExperience: e.target.value })}
-                  placeholder="مثال: 3"
-                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 focus:border-brand-700 text-xs bg-slate-50/50 focus:outline-none"
-                />
-                {errors.yearsExperience && <p className="text-[11px] text-red-500 mt-1">{errors.yearsExperience}</p>}
+            {step === 1 && (
+              <div className="grid sm:grid-cols-2 gap-3.5">
+                <Field c={c} label="المسمى الوظيفي الحالي" value={data.currentJob} onChange={v => set("currentJob", v)} placeholder="محاسب عام" />
+                <Field c={c} label="سنوات الخبرة *" type="number" value={data.yearsExperience} onChange={v => set("yearsExperience", v)} placeholder="3" />
+                <Field c={c} label="المؤهل العلمي" value={data.education} onChange={v => set("education", v)} placeholder="بكالوريوس محاسبة" />
+                <Field c={c} label="الراتب المتوقع (ريال)" value={data.expectedSalary} onChange={v => set("expectedSalary", v)} placeholder="8,500 ريال" />
               </div>
+            )}
 
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">المسمى الوظيفي الحالي / الأخير</label>
-                <input 
-                  type="text" 
-                  value={formData.currentJob} 
-                  onChange={e => setFormData({ ...formData, currentJob: e.target.value })}
-                  placeholder="محاسب عام"
-                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 focus:border-brand-700 text-xs bg-slate-50/50 focus:outline-none"
-                />
+            {step === 2 && (
+              <div className="space-y-3.5">
+                <Field c={c} label="البرامج المحاسبية والأنظمة التي تجيدها" value={data.skills} onChange={v => set("skills", v)} placeholder="Odoo, SAP, Excel, سماك, دفترة..." />
+                <Field c={c} label="الشهادات المهنية إن وجدت (SOCPA, CMA, IFRS)" value={data.certifications} onChange={v => set("certifications", v)} placeholder="شهادات معتمدة..." />
               </div>
+            )}
 
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">الراتب المتوقع (ريال)</label>
-                <input 
-                  type="text" 
-                  value={formData.expectedSalary} 
-                  onChange={e => setFormData({ ...formData, expectedSalary: e.target.value })}
-                  placeholder="مثال: 8,000 ريال"
-                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 focus:border-brand-700 text-xs bg-slate-50/50 focus:outline-none"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="clean-card p-5 space-y-3.5">
-            <h3 className="font-bold text-xs text-brand-800 flex items-center gap-2 border-b border-slate-100 pb-2">
-              <Icon.FileText className="w-4 h-4" />
-              <span>المرفقات</span>
-            </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              
-              <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 text-center">
-                <label className="block text-xs font-bold text-slateText-body mb-2">الصورة الشخصية</label>
-                {formData.photoBase64 ? (
-                  <div className="inline-block relative">
-                    <img src={formData.photoBase64} alt="" className="w-20 h-20 rounded-xl object-cover border border-slate-300 mx-auto" />
-                    <button type="button" onClick={() => setFormData({ ...formData, photoBase64: null })} className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs">✕</button>
-                  </div>
-                ) : (
-                  <div>
-                    <label className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slateText-body cursor-pointer hover:bg-slate-50 shadow-sm">
-                      <Icon.Camera className="w-4 h-4 text-brand-700" />
-                      <span>اختيار صورة</span>
+            {step === 3 && (
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div style={{ border: `1.5px dashed ${c.borderStrong}`, background: c.surfaceAlt }} className="rounded-2xl p-4 text-center">
+                  <label className="block text-xs font-bold mb-2">الصورة الشخصية</label>
+                  {data.photoBase64 ? (
+                    <img src={data.photoBase64} alt="" className="w-16 h-16 rounded-xl object-cover mx-auto" />
+                  ) : (
+                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl text-xs font-bold cursor-pointer border">
+                      <Icon.Upload size={14} /> <span>رفع صورة</span>
                       <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                     </label>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
 
-              <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 text-center">
-                <label className="block text-xs font-bold text-slateText-body mb-2">السيرة الذاتية (CV)</label>
-                {formData.cvName ? (
-                  <div className="text-xs font-bold text-green-700 py-2">
-                    ✓ تم إرفاق: {formData.cvName}
-                  </div>
-                ) : (
-                  <div>
-                    <label className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slateText-body cursor-pointer hover:bg-slate-50 shadow-sm">
-                      <Icon.UploadCloud className="w-4 h-4 text-brand-700" />
-                      <span>رفع ملف الـ CV</span>
+                <div style={{ border: `1.5px dashed ${c.borderStrong}`, background: c.surfaceAlt }} className="rounded-2xl p-4 text-center">
+                  <label className="block text-xs font-bold mb-2">السيرة الذاتية (CV)</label>
+                  {data.cvFile ? (
+                    <span className="text-xs font-bold text-green-600 block py-2">✓ {data.cvFile.name}</span>
+                  ) : (
+                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl text-xs font-bold cursor-pointer border">
+                      <Icon.Upload size={14} /> <span>رفع ملف CV</span>
                       <input type="file" accept=".pdf,.doc,.docx" onChange={handleCvUpload} className="hidden" />
                     </label>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
+            )}
 
-            </div>
-          </div>
-
-          <div className="clean-card p-4 flex justify-end">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full sm:w-auto px-8 h-11 bg-brand-800 hover:bg-brand-900 text-white font-bold text-xs rounded-xl shadow-sm transition-transform active:scale-95 disabled:opacity-50"
-            >
-              {isSubmitting ? 'جاري إرسال الطلب...' : 'إرسال طلب التوظيف الآن ➔'}
-            </button>
-          </div>
-
-        </form>
-      );
-    }
-
-    /* ---------------- 2. SUCCESS CARD ---------------- */
-    function SuccessCard({ applicant, onGoTrack, onGoHome }) {
-      return (
-        <div className="max-w-md mx-auto my-6 clean-card p-8 text-center space-y-5 animate-fade-in">
-          <div className="w-16 h-16 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mx-auto border border-green-200">
-            <Icon.Check className="w-8 h-8" />
-          </div>
-
-          <div>
-            <h2 className="text-xl font-bold text-slateText-title">تم استلام طلبك بنجاح!</h2>
-            <p className="text-xs text-slateText-muted mt-1">مرحباً <strong>{applicant.fullName}</strong>، تم حفظ طلبك لوظيفة محاسب مالي.</p>
-          </div>
-
-          <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
-            <span className="text-[11px] text-slateText-muted block mb-0.5">رقم طلب التوظيف المرجعي:</span>
-            <strong className="font-mono text-xl font-bold text-brand-800 select-all">{applicant.code}</strong>
-          </div>
-
-          <div className="space-y-2 pt-2">
-            <button onClick={onGoTrack} className="w-full h-11 bg-brand-800 text-white rounded-xl font-bold text-xs shadow-sm hover:bg-brand-900">
-              عرض ومتابعة حالة طلبي الآن ➔
-            </button>
-            <button onClick={onGoHome} className="w-full h-10 border border-slate-200 text-slateText-body rounded-xl font-bold text-xs hover:bg-slate-50">
-              العودة للرئيسية
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    /* ---------------- 3. TRACK VIEW (Simple, Clear & Instant) ---------------- */
-    function TrackView({ applicants, activeApplicant, onGoApply, onBack }) {
-      const [query, setQuery] = useState(activeApplicant ? activeApplicant.code : '');
-      const [found, setFound] = useState(activeApplicant || null);
-      const [hasSearched, setHasSearched] = useState(Boolean(activeApplicant));
-
-      const handleSearch = (e) => {
-        if (e) e.preventDefault();
-        const trimmed = query.trim();
-        if (!trimmed) return;
-        setHasSearched(true);
-        const res = applicants.find(a => matchApplicant(a, trimmed));
-        setFound(res || null);
-      };
-
-      const stages = [
-        { key: 'SUBMITTED', label: 'تم الاستلام' },
-        { key: 'CV_VIEWED', label: 'فحص الـ CV' },
-        { key: 'SHORTLISTED', label: 'القائمة المختصرة' },
-        { key: 'INTERVIEW_SCHEDULED', label: 'مقابلة مجدولة' },
-        { key: 'DECISION', label: 'القرار النهائي' },
-      ];
-
-      const getStageIdx = (status) => {
-        if (status === 'SUBMITTED') return 0;
-        if (status === 'UNDER_REVIEW' || status === 'CV_VIEWED') return 1;
-        if (status === 'SHORTLISTED') return 2;
-        if (status === 'INTERVIEW_SCHEDULED') return 3;
-        if (status === 'ACCEPTED' || status === 'REJECTED') return 4;
-        return 0;
-      };
-
-      return (
-        <div className="max-w-xl mx-auto space-y-4 animate-fade-in">
-          <button onClick={onBack} className="text-xs font-bold text-slateText-muted hover:text-slateText-title flex items-center gap-1 mb-1">
-            <span>➔</span>
-            <span>العودة للرئيسية</span>
-          </button>
-
-          {/* Search Card */}
-          <div className="clean-card p-5">
-            <h2 className="font-bold text-sm text-slateText-title mb-1">استعلام ومتابعة حالة الطلب</h2>
-            <p className="text-xs text-slateText-muted mb-3">أدخل رقم هاتفك المسجل (05XXXXXXXX) أو رقم الطلب (APP-0001)</p>
-
-            <form onSubmit={handleSearch} className="flex gap-2">
-              <input 
-                type="text" 
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="رقم الهاتف أو رقم الطلب..."
-                className="flex-1 h-11 px-3.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-700 bg-slate-50/50 text-right"
-              />
-              <button type="submit" className="px-5 h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm">
-                استعلام
-              </button>
-            </form>
-          </div>
-
-          {/* Result Card */}
-          {hasSearched ? (
-            found ? (
-              <div className="clean-card p-6 space-y-5 animate-fade-in">
-                
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slateText-muted">
-                      <Icon.User className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-sm text-slateText-title">{found.fullName}</h3>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="font-mono text-[11px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded border border-brand-100 inline-block">
-                          {found.code}
-                        </span>
-                        <span className="text-[11px] text-slateText-muted font-medium" dir="ltr">{found.phone}</span>
+            {step === 4 && (
+              <div className="space-y-4">
+                {job.questions.map(q => (
+                  <div key={q.id}>
+                    <span style={{ color: c.textMuted }} className="text-xs font-bold block mb-1">{q.label}</span>
+                    {q.type === "text" && (
+                      <input value={data.answers[q.id] || ""} onChange={e => setAnswer(q.id, e.target.value)} style={{ border: `1px solid ${c.border}`, background: c.surfaceAlt, color: c.text }} className="w-full h-10 rounded-xl px-3 text-xs outline-none text-right" />
+                    )}
+                    {q.type === "select" && (
+                      <select value={data.answers[q.id] || ""} onChange={e => setAnswer(q.id, e.target.value)} style={{ border: `1px solid ${c.border}`, background: c.surfaceAlt, color: c.text }} className="w-full h-10 rounded-xl px-3 text-xs outline-none">
+                        <option value="">اختر...</option>
+                        {q.options.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    )}
+                    {q.type === "yesno" && (
+                      <div className="flex gap-2">
+                        {["نعم", "لا"].map(opt => (
+                          <button key={opt} type="button" onClick={() => setAnswer(q.id, opt)} style={{
+                            border: `1px solid ${data.answers[q.id] === opt ? c.primary : c.border}`,
+                            background: data.answers[q.id] === opt ? c.primarySoft : c.surfaceAlt,
+                            color: data.answers[q.id] === opt ? c.primaryText : c.textMuted,
+                          }} className="px-5 h-9 rounded-full text-xs font-bold">{opt}</button>
+                        ))}
                       </div>
-                    </div>
-                  </div>
-
-                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                    found.status === 'ACCEPTED' ? 'bg-green-50 text-green-800 border border-green-200' :
-                    found.status === 'INTERVIEW_SCHEDULED' ? 'bg-purple-50 text-purple-800 border border-purple-200' :
-                    'bg-brand-50 text-brand-800 border border-brand-200'
-                  }`}>
-                    {found.status}
-                  </span>
-                </div>
-
-                {/* Timeline */}
-                <div>
-                  <h4 className="text-xs font-bold text-slateText-muted mb-3">مسار الطلب:</h4>
-                  <div className="flex justify-between relative">
-                    <div className="absolute top-3.5 right-2 left-2 h-0.5 bg-slate-200 z-0"></div>
-                    {stages.map((st, i) => {
-                      const currentIdx = getStageIdx(found.status);
-                      const isDone = i <= currentIdx;
-                      return (
-                        <div key={st.key} className="flex flex-col items-center relative z-10 text-center">
-                          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                            isDone ? 'bg-brand-800 text-white shadow-sm' : 'bg-white border border-slate-300 text-slateText-muted'
-                          }`}>
-                            {isDone ? <Icon.Check className="w-3.5 h-3.5" /> : i + 1}
-                          </div>
-                          <span className="text-[10px] font-medium text-slateText-body mt-1">{st.label}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Interview card */}
-                {found.interview && (
-                  <div className="p-4 bg-purple-50/80 border border-purple-200 rounded-2xl space-y-2 text-xs text-purple-950">
-                    <div className="flex items-center justify-between">
-                      <strong className="block font-bold">📅 موعد المقابلة الشخصية (Google Meet):</strong>
-                      <span className="bg-white px-2 py-0.5 rounded text-[10px] font-bold text-purple-800 border border-purple-200">Online</span>
-                    </div>
-                    <p>التاريخ: <strong>{found.interview.date}</strong> | الوقت: <strong>{found.interview.time}</strong></p>
-                    {found.interview.meetLink && (
-                      <a 
-                        href={found.interview.meetLink} 
-                        target="_blank" 
-                        className="block text-center py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl mt-2 text-xs shadow-sm"
-                      >
-                        الانضمام إلى المقابلة عبر Google Meet ➔
-                      </a>
                     )}
                   </div>
-                )}
-
-                {/* CV viewed note */}
-                {found.cvViewed && (
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slateText-body flex items-center gap-2">
-                    <Icon.FileText className="w-4 h-4 text-brand-700" />
-                    <span>تم فحص السيرة الذاتية ومراجعتها من قبل مسؤول التوظيف.</span>
-                  </div>
-                )}
-
+                ))}
               </div>
-            ) : (
-              <div className="clean-card p-8 text-center space-y-3">
-                <p className="text-xs text-slateText-muted">
-                  لم يتم العثور على طلب مطابق للرقم المدخل. إذا لم تقدم طلبك بعد، يمكنك التقديم الآن:
-                </p>
-                <button
-                  onClick={onGoApply}
-                  className="px-6 py-2.5 bg-brand-800 text-white text-xs font-bold rounded-xl shadow-sm hover:bg-brand-900"
-                >
-                  تقديم طلب توظيف الآن ➔
-                </button>
+            )}
+
+            {step === 5 && (
+              <div className="space-y-3 text-xs">
+                <div style={{ background: c.surfaceAlt, border: `1px solid ${c.border}` }} className="rounded-xl p-3 space-y-1.5">
+                  <div className="flex justify-between"><span>الاسم:</span><strong>{data.fullName}</strong></div>
+                  <div className="flex justify-between"><span>الهاتف:</span><strong dir="ltr">{data.phone}</strong></div>
+                  <div className="flex justify-between"><span>الخبرة:</span><strong>{data.yearsExperience} سنوات</strong></div>
+                  <div className="flex justify-between"><span>الراتب المتوقع:</span><strong>{data.expectedSalary || "غير محدد"}</strong></div>
+                </div>
+                <p style={{ color: c.textFaint }} className="text-[11px]">بالضغط على إرسال، تؤكد صحة البيانات المدخلة وموافقتك على مراجعتها من لجنة التوظيف.</p>
               </div>
-            )
-          ) : null}
+            )}
+
+            {stepError && <p style={{ color: c.dangerText }} className="text-xs mt-3 flex items-center gap-1.5"><Icon.AlertCircle size={13} />{stepError}</p>}
+
+            <div style={{ borderTop: `1px solid ${c.border}` }} className="mt-6 pt-5 flex items-center justify-between">
+              <button type="button" onClick={back} style={{ color: c.textMuted }} className="inline-flex items-center gap-1 text-xs font-bold">➔ السابق</button>
+              {step < FORM_STEPS.length - 1 ? (
+                <button type="button" onClick={next} style={{ background: c.primary, color: "#fff" }} className="inline-flex items-center gap-1 text-xs font-bold px-6 h-10 rounded-full hover:opacity-90">المتابعة ➔</button>
+              ) : (
+                <button type="button" onClick={() => onSubmit(data)} style={{ background: c.primary, color: "#fff" }} className="inline-flex items-center gap-1 text-xs font-bold px-7 h-10 rounded-full hover:opacity-90 shadow-sm">إرسال الطلب نهائياً ✓</button>
+              )}
+            </div>
+          </div>
         </div>
       );
     }
 
-    /* ---------------- 4. ADMIN AUTH MODAL ---------------- */
-    function AdminAuthModal({ onSuccess, onClose }) {
+    function Field({ c, label, value, onChange, placeholder, type = "text" }) {
+      return (
+        <label className="block text-right">
+          <span style={{ color: c.textMuted }} className="text-[11px] font-bold block mb-1">{label}</span>
+          <div style={{ border: `1px solid ${c.border}`, background: c.surfaceAlt }} className="flex items-center px-3 h-10 rounded-xl">
+            <input
+              type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+              style={{ color: c.text, background: "transparent" }} className="text-xs outline-none w-full placeholder:opacity-50 text-right"
+            />
+          </div>
+        </label>
+      );
+    }
+
+    /* ---------------- Success Screen ---------------- */
+    function SuccessScreen({ c, applicationId, job, goDashboard }) {
+      return (
+        <div className="max-w-md mx-auto px-5 py-16 text-center animate-fade-in space-y-4">
+          <div style={{ background: c.successSoft }} className="w-16 h-16 rounded-full flex items-center justify-center mx-auto border border-green-200">
+            <Icon.CheckCircle2 size={32} color={c.success} />
+          </div>
+          <h1 style={{ fontFamily: "Sora", color: c.text }} className="text-2xl font-extrabold">تم استلام طلبك بنجاح!</h1>
+          <p style={{ color: c.textMuted }} className="text-xs leading-relaxed">
+            تم استلام ملفك للتقديم على وظيفة <strong style={{ color: c.text }}>{job.title}</strong> في مكتب المستشار للمحاماة.
+          </p>
+          <div style={{ background: c.surfaceAlt, border: `1px solid ${c.border}`, fontFamily: "JetBrains Mono" }} className="inline-block px-5 py-2 rounded-full text-xs font-bold">
+            <span style={{ color: c.textFaint }}>رقم الطلب: </span>
+            <span style={{ color: c.primaryText }}>#{applicationId}</span>
+          </div>
+          <div className="pt-3">
+            <button onClick={goDashboard} style={{ background: c.primary, color: "#fff" }} className="inline-flex items-center gap-2 text-xs font-bold px-7 h-11 rounded-full shadow-sm hover:opacity-90">
+              الدخول للوحة متابعة الطلب والمقابلة ➔
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    /* ---------------- Full Applicant Dashboard ---------------- */
+    function Dashboard({ c, theme, setTheme, job, applicationId, stageIndex, tab, setTab, setView, simOffset, setSimOffset, attendance, setAttendance, interviewTime, now, applicantData }) {
+      const nav = [
+        { id: "overview", label: "نظرة عامة والمسار", icon: Icon.LayoutDashboard },
+        { id: "interviews", label: "غرفة المقابلة المرئية", icon: Icon.Video },
+        { id: "applications", label: "طلباتي المسجلة", icon: Icon.FileText },
+        { id: "notifications", label: "التنبيهات", icon: Icon.Bell },
+        { id: "profile", label: "ملفي الشخصي", icon: Icon.User },
+        { id: "settings", label: "الإعدادات والمظهر", icon: Icon.Settings },
+      ];
+
+      const status = STAGES[stageIndex].key;
+      const sc = statusColors(c, status);
+
+      return (
+        <div className="max-w-6xl mx-auto px-5 md:px-8 py-8 flex flex-col md:flex-row gap-6 animate-fade-in text-right">
+          
+          {/* Sidebar */}
+          <div style={{ borderLeft: `1px solid ${c.border}` }} className="hidden md:flex flex-col w-56 shrink-0 pl-5">
+            {nav.map(n => (
+              <button key={n.id} onClick={() => setTab(n.id)} style={{
+                background: tab === n.id ? c.primarySoft : "transparent",
+                color: tab === n.id ? c.primaryText : c.textMuted,
+              }} className="flex items-center gap-2 px-3.5 h-10 rounded-xl text-xs font-bold mb-1 transition-colors">
+                <n.icon size={16} /> <span>{n.label}</span>
+              </button>
+            ))}
+            <button onClick={() => setView("landing")} style={{ color: c.textFaint }} className="flex items-center gap-2 px-3.5 h-10 rounded-xl text-xs font-medium mt-6">
+              <Icon.LogOut size={15} /> <span>الرئيسية</span>
+            </button>
+          </div>
+
+          {/* Mobile Tabs */}
+          <div className="flex md:hidden gap-1.5 overflow-x-auto pb-2 no-scrollbar">
+            {nav.map(n => (
+              <button key={n.id} onClick={() => setTab(n.id)} style={{
+                background: tab === n.id ? c.primarySoft : c.surfaceAlt, color: tab === n.id ? c.primaryText : c.textMuted,
+              }} className="shrink-0 flex items-center gap-1 px-3 h-8 rounded-full text-[11px] font-bold">
+                <n.icon size={12} /> {n.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Main Tab Content */}
+          <div className="flex-1 min-w-0 space-y-5">
+            
+            {tab === "overview" && (
+              <div className="space-y-4">
+                <div>
+                  <h1 style={{ fontFamily: "Sora", color: c.text }} className="text-xl font-extrabold">مرحباً بك في لوحة المتقدم</h1>
+                  <p style={{ color: c.textMuted }} className="text-xs mt-0.5">تفاصيل حالة طلبك المباشرة ومراحل المراجعة.</p>
+                </div>
+
+                <div style={{ background: c.surface, border: `1px solid ${c.border}`, boxShadow: c.shadow }} className="rounded-3xl p-6">
+                  <div className="flex items-start justify-between flex-wrap gap-2">
+                    <div>
+                      <p style={{ color: c.textFaint }} className="text-[11px] font-mono font-bold">رقم الطلب: #{applicationId}</p>
+                      <h3 style={{ color: c.text, fontFamily: "Sora" }} className="text-base font-bold mt-0.5">{job.title}</h3>
+                    </div>
+                    <span style={{ background: sc.bg, color: sc.text }} className="text-xs font-bold px-3 py-1 rounded-full">{STAGES[stageIndex].label}</span>
+                  </div>
+
+                  <div className="mt-6 overflow-x-auto no-scrollbar">
+                    <div style={{ minWidth: 600 }}>
+                      <PipelineRail c={c} steps={STAGES} activeIndex={stageIndex} orientation="horizontal" size="sm" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Interview Card if scheduled */}
+                <InterviewCard c={c} job={job} interviewTime={interviewTime} now={now} attendance={attendance} setAttendance={setAttendance} simOffset={simOffset} setSimOffset={setSimOffset} />
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div style={{ background: c.surfaceAlt, border: `1px solid ${c.border}` }} className="rounded-2xl p-4 text-center">
+                    <span style={{ color: c.textFaint }} className="text-[11px] font-bold block">حالة الـ CV</span>
+                    <strong style={{ color: c.text }} className="text-xs block mt-1">تم الفحص ✓</strong>
+                  </div>
+                  <div style={{ background: c.surfaceAlt, border: `1px solid ${c.border}` }} className="rounded-2xl p-4 text-center">
+                    <span style={{ color: c.textFaint }} className="text-[11px] font-bold block">نوع المقابلة</span>
+                    <strong style={{ color: c.text }} className="text-xs block mt-1">Google Meet</strong>
+                  </div>
+                  <div style={{ background: c.surfaceAlt, border: `1px solid ${c.border}` }} className="rounded-2xl p-4 text-center">
+                    <span style={{ color: c.textFaint }} className="text-[11px] font-bold block">التنبيهات</span>
+                    <strong style={{ color: c.text }} className="text-xs block mt-1">2 جديد</strong>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {tab === "interviews" && (
+              <div className="space-y-4">
+                <h1 style={{ fontFamily: "Sora", color: c.text }} className="text-xl font-extrabold">غرفة المقابلات الشخصية</h1>
+                <InterviewCard c={c} job={job} interviewTime={interviewTime} now={now} attendance={attendance} setAttendance={setAttendance} simOffset={simOffset} setSimOffset={setSimOffset} expanded />
+              </div>
+            )}
+
+            {tab === "applications" && (
+              <div className="space-y-3">
+                <h1 style={{ fontFamily: "Sora", color: c.text }} className="text-xl font-extrabold mb-3">طلبات التوظيف المسجلة</h1>
+                <div style={{ background: c.surface, border: `1px solid ${c.border}` }} className="rounded-2xl p-4 flex items-center justify-between">
+                  <div>
+                    <strong style={{ color: c.text }} className="text-xs font-bold block">{job.title}</strong>
+                    <span style={{ color: c.textFaint }} className="text-[11px] font-mono font-semibold">#{applicationId} · مسجل حديثاً</span>
+                  </div>
+                  <span style={{ background: sc.bg, color: sc.text }} className="text-xs font-bold px-3 py-1 rounded-full">{STAGES[stageIndex].label}</span>
+                </div>
+              </div>
+            )}
+
+            {tab === "notifications" && (
+              <div className="space-y-2.5">
+                <h1 style={{ fontFamily: "Sora", color: c.text }} className="text-xl font-extrabold mb-3">مركز التنبيهات</h1>
+                {[
+                  { t: "تمت جدولة المقابلة المرئية", d: "تم تحديد موعد المقابلة عبر Google Meet.", time: "منذ ساعتين", icon: Icon.Video, unread: true },
+                  { t: "ترشيح للقائمة المختصرة", d: "تم قبول ملفك للمرحلة المتقدمة.", time: "منذ يوم", icon: Icon.CheckCircle2, unread: true },
+                  { t: "تم فحص السيرة الذاتية", d: "اطلع مسؤول التوظيف على ملفك.", time: "منذ يومين", icon: Icon.FileText, unread: false },
+                ].map((n, i) => (
+                  <div key={i} style={{ background: n.unread ? c.primarySoft : c.surface, border: `1px solid ${c.border}` }} className="rounded-2xl p-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div style={{ background: c.surfaceAlt, color: c.primaryText }} className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0">
+                        <n.icon size={16} />
+                      </div>
+                      <div>
+                        <strong style={{ color: c.text }} className="text-xs font-bold block">{n.t}</strong>
+                        <span style={{ color: c.textMuted }} className="text-[11px] block mt-0.5">{n.d}</span>
+                      </div>
+                    </div>
+                    <span style={{ color: c.textFaint }} className="text-[10px] shrink-0 font-medium">{n.time}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {tab === "profile" && (
+              <div className="space-y-3">
+                <h1 style={{ fontFamily: "Sora", color: c.text }} className="text-xl font-extrabold mb-3">الملف الشخصي للمتقدم</h1>
+                <div style={{ background: c.surface, border: `1px solid ${c.border}` }} className="rounded-3xl p-5 grid sm:grid-cols-2 gap-3 text-xs">
+                  <div><span style={{ color: c.textFaint }} className="block">الاسم الكامل:</span> <strong>{applicantData?.fullName || "أحمد علي"}</strong></div>
+                  <div><span style={{ color: c.textFaint }} className="block">رقم الهاتف:</span> <strong dir="ltr">{applicantData?.phone || "0501234567"}</strong></div>
+                  <div><span style={{ color: c.textFaint }} className="block">المؤهل:</span> <strong>{applicantData?.education || "بكالوريوس محاسبة"}</strong></div>
+                  <div><span style={{ color: c.textFaint }} className="block">المدينة:</span> <strong>{applicantData?.city || "الرياض"}</strong></div>
+                </div>
+              </div>
+            )}
+
+            {tab === "settings" && (
+              <div className="space-y-3">
+                <h1 style={{ fontFamily: "Sora", color: c.text }} className="text-xl font-extrabold mb-3">الإعدادات والمظهر</h1>
+                <div style={{ background: c.surface, border: `1px solid ${c.border}` }} className="rounded-2xl p-4 flex items-center justify-between">
+                  <div>
+                    <strong style={{ color: c.text }} className="text-xs font-bold block">مظهر المنصة</strong>
+                    <span style={{ color: c.textMuted }} className="text-[11px]">التبديل بين الوضع الليلي والنهاري.</span>
+                  </div>
+                  <button onClick={() => setTheme(theme === "light" ? "dark" : "light")} style={{ border: `1px solid ${c.borderStrong}`, color: c.text }} className="text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                    {theme === "light" ? <Icon.Moon size={14} /> : <Icon.Sun size={14} />} {theme === "light" ? "الوضع الليلي" : "الوضع النهاري"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      );
+    }
+
+    /* ---------------- Interview Card with Live Countdown & Simulator ---------------- */
+    function InterviewCard({ c, job, interviewTime, now, attendance, setAttendance, simOffset, setSimOffset }) {
+      const diff = interviewTime - now;
+      const joinWindowMs = 10 * 60 * 1000;
+      const graceMs = 15 * 60 * 1000;
+      const canJoin = diff <= joinWindowMs && diff > -graceMs && attendance !== "COMPLETED" && attendance !== "NO_SHOW";
+      const missed = diff <= -graceMs;
+
+      useEffect(() => {
+        if (missed && attendance === "WAITING") setAttendance("NO_SHOW");
+      }, [missed, attendance]);
+
+      return (
+        <div style={{ background: c.surface, border: `1px solid ${c.border}`, boxShadow: c.shadow }} className="rounded-3xl p-6 text-right space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-3">
+              <div style={{ background: c.accentSoft, color: c.accentText }} className="w-10 h-10 rounded-xl flex items-center justify-center">
+                <Icon.Video size={18} />
+              </div>
+              <div>
+                <strong style={{ color: c.text }} className="text-sm font-bold block">مقابلة مرئية مجدولة (Google Meet)</strong>
+                <span style={{ color: c.textMuted }} className="text-xs">{job.title}</span>
+              </div>
+            </div>
+            <AttendanceBadge c={c} attendance={attendance} />
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
+            <div style={{ background: c.surfaceAlt }} className="p-3 rounded-xl"><span style={{ color: c.textFaint }} className="text-[10px] font-bold block">التاريخ</span><strong style={{ color: c.text }} className="text-xs">25 أغسطس 2026</strong></div>
+            <div style={{ background: c.surfaceAlt }} className="p-3 rounded-xl"><span style={{ color: c.textFaint }} className="text-[10px] font-bold block">الوقت</span><strong style={{ color: c.text }} className="text-xs">07:00 مساءً</strong></div>
+            <div style={{ background: c.surfaceAlt }} className="p-3 rounded-xl"><span style={{ color: c.textFaint }} className="text-[10px] font-bold block">المدة</span><strong style={{ color: c.text }} className="text-xs">30 دقيقة</strong></div>
+            <div style={{ background: c.surfaceAlt }} className="p-3 rounded-xl"><span style={{ color: c.textFaint }} className="text-[10px] font-bold block">المنصة</span><strong style={{ color: c.text }} className="text-xs">Google Meet</strong></div>
+          </div>
+
+          <div style={{ background: c.surfaceAlt, border: `1px solid ${c.border}` }} className="rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p style={{ color: c.textFaint }} className="text-[11px] font-bold">
+                {diff > joinWindowMs ? "الوقت المتبقي حتى بدء المقابلة:" : missed ? "حالة نافذة المقابلة:" : "يمكنك الانضمام الآن:"}
+              </p>
+              <p style={{ color: c.text, fontFamily: "JetBrains Mono" }} className="text-xl font-bold mt-0.5" dir="ltr">
+                {missed ? "انتهت الجلسة" : diff > joinWindowMs ? fmtHMS(diff) : "متاح للانضمام"}
+              </p>
+            </div>
+
+            {!missed && attendance !== "COMPLETED" ? (
+              <a
+                href="https://meet.google.com/xyz-lawfirm-hr"
+                target="_blank"
+                onClick={() => setAttendance("JOINED")}
+                style={{ background: canJoin ? c.primary : c.border, color: canJoin ? "#fff" : c.textFaint, pointerEvents: canJoin ? "auto" : "none" }}
+                className="inline-flex items-center gap-2 text-xs font-bold px-6 h-10 rounded-full shadow-sm"
+              >
+                <Icon.PlayCircle size={16} /> <span>دخول المقابلة الآن</span>
+              </a>
+            ) : null}
+          </div>
+
+          {/* Prototype Time Accelerator */}
+          <div style={{ borderTop: `1px solid ${c.border}` }} className="pt-3 flex items-center justify-between flex-wrap gap-2 text-xs">
+            <span style={{ color: c.textFaint }} className="text-[11px] flex items-center gap-1"><Icon.HelpCircle size={13} /> تسريع المؤقت للاختبار (مهلة 15 دقيقة):</span>
+            <div className="flex gap-1.5">
+              <button onClick={() => setSimOffset(s => s + 5)} style={{ border: `1px solid ${c.border}`, color: c.textMuted }} className="px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1"><Icon.FastForward size={11} /> +5 د</button>
+              <button onClick={() => setSimOffset(s => s + 20)} style={{ border: `1px solid ${c.border}`, color: c.textMuted }} className="px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1"><Icon.FastForward size={11} /> +20 د</button>
+              <button onClick={() => { setSimOffset(0); setAttendance("WAITING"); }} style={{ border: `1px solid ${c.border}`, color: c.textMuted }} className="px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1"><Icon.RotateCcw size={11} /> إعادة</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function AttendanceBadge({ c, attendance }) {
+      const map = {
+        WAITING: { bg: c.infoSoft, text: c.infoText, label: "بانتظار الموعد" },
+        JOINED: { bg: c.successSoft, text: c.successText, label: "تم الانضمام ✓" },
+        COMPLETED: { bg: c.primarySoft, text: c.primaryText, label: "اكتملت المقابلة" },
+        NO_SHOW: { bg: c.dangerSoft, text: c.dangerText, label: "لم يتم الحضور" },
+      }[attendance] || { bg: c.infoSoft, text: c.infoText, label: "قيد الانتظار" };
+      return <span style={{ background: map.bg, color: map.text }} className="text-[11px] font-bold px-3 py-1 rounded-full">{map.label}</span>;
+    }
+
+    /* ---------------- Secret Admin Auth Modal ---------------- */
+    function AdminAuthModal({ onSuccess, onClose, c }) {
       const [email, setEmail] = useState('');
       const [password, setPassword] = useState('');
       const [errorMsg, setErrorMsg] = useState('');
 
-      const handleLoginSubmit = (e) => {
+      const handleLogin = (e) => {
         e.preventDefault();
-        setErrorMsg('');
-
         const validEmails = ['bodasalem0098@gmail.com', 'moabdo038@gmail.com', 'admin@almustashar.com'];
-        const trimmedEmail = email.trim().toLowerCase();
-        const trimmedPassword = password.trim();
-
-        if (!validEmails.includes(trimmedEmail)) {
+        if (!validEmails.includes(email.trim().toLowerCase())) {
           setErrorMsg('البريد الإلكتروني غير مصرح له بالدخول.');
           return;
         }
-
-        if (trimmedPassword !== '102044') {
+        if (password.trim() !== '102044') {
           setErrorMsg('كلمة المرور غير صحيحة.');
           return;
         }
-
         onSuccess();
       };
 
       return (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full border border-slate-200 shadow-xl space-y-4">
-            
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in text-right">
+          <div style={{ background: c.surface, border: `1px solid ${c.border}`, boxShadow: c.shadow }} className="rounded-3xl p-6 max-w-sm w-full space-y-4">
             <div className="text-center">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-800 flex items-center justify-center mx-auto mb-2">
-                <Icon.Shield className="w-5 h-5" />
+              <div style={{ background: c.primarySoft, color: c.primaryText }} className="w-11 h-11 rounded-2xl flex items-center justify-center mx-auto mb-2">
+                <Icon.ShieldCheck size={22} />
               </div>
-              <h3 className="font-bold text-base text-slateText-title">دخول المشرفين</h3>
+              <h3 style={{ color: c.text }} className="font-bold text-base">دخول نظام إدارة التوظيف</h3>
             </div>
 
-            {errorMsg && <div className="p-2.5 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs font-bold text-center">{errorMsg}</div>}
+            {errorMsg && <div className="p-2 bg-red-50 text-red-600 text-xs font-bold rounded-xl text-center">{errorMsg}</div>}
 
-            <form onSubmit={handleLoginSubmit} className="space-y-3">
+            <form onSubmit={handleLogin} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">البريد الإلكتروني</label>
-                <input 
-                  type="email" 
-                  dir="ltr"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="bodasalem0098@gmail.com"
-                  className="w-full h-10 px-3 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-700 bg-slate-50/50 text-right"
-                  required
-                />
+                <label className="block text-[11px] font-bold mb-1">البريد الإلكتروني</label>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="bodasalem0098@gmail.com" required style={{ border: `1px solid ${c.border}`, background: c.surfaceAlt, color: c.text }} className="w-full h-10 px-3 rounded-xl text-xs outline-none text-right" />
               </div>
-
               <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1">كلمة المرور</label>
-                <input 
-                  type="password" 
-                  dir="ltr"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••"
-                  className="w-full h-10 px-3 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-700 bg-slate-50/50 text-center font-mono tracking-widest text-sm"
-                  required
-                />
+                <label className="block text-[11px] font-bold mb-1">كلمة المرور</label>
+                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••" required style={{ border: `1px solid ${c.border}`, background: c.surfaceAlt, color: c.text }} className="w-full h-10 px-3 rounded-xl text-xs outline-none text-center font-mono" />
               </div>
-
               <div className="flex gap-2 pt-1">
-                <button type="submit" className="flex-1 h-10 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs font-bold shadow-sm">دخول</button>
-                <button type="button" onClick={onClose} className="px-4 h-10 border border-slate-200 text-slateText-body rounded-xl text-xs font-bold hover:bg-slate-50">إلغاء</button>
+                <button type="submit" style={{ background: c.primary, color: "#fff" }} className="flex-1 h-10 rounded-xl text-xs font-bold shadow-sm">دخول</button>
+                <button type="button" onClick={onClose} style={{ border: `1px solid ${c.border}`, color: c.text }} className="px-4 h-10 rounded-xl text-xs font-bold">إلغاء</button>
               </div>
             </form>
-
           </div>
         </div>
       );
     }
 
-    /* ---------------- 5. ADMIN SYSTEM DASHBOARD ---------------- */
-    function AdminSystem({ 
-      applicants, selectedApplicant, setSelectedApplicant,
-      onUpdateStatus, onScheduleInterview, onResetAll
-    }) {
-      const [filterStatus, setFilterStatus] = useState('ALL');
-      const [searchQuery, setSearchQuery] = useState('');
-      const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
-      const [interviewDate, setInterviewDate] = useState('2026-08-25');
-      const [interviewTime, setInterviewTime] = useState('19:00');
-      const [meetLink, setMeetLink] = useState('https://meet.google.com/xyz-lawfirm-hr');
+    /* ---------------- Main Root App ---------------- */
+    function App() {
+      const [theme, setTheme] = useState("light");
+      const c = palette[theme];
+      const [view, setView] = useState("landing");
+      const [jobId, setJobId] = useState(JOBS[0].id);
+      const job = JOBS.find(j => j.id === jobId) || JOBS[0];
+      const [applied, setApplied] = useState(false);
+      const [applicationId, setApplicationId] = useState("APP-10482");
+      const [applicantData, setApplicantData] = useState(null);
+      const [dashboardTab, setDashboardTab] = useState("overview");
+      const [stageIndex, setStageIndex] = useState(4);
+      const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
 
-      const filtered = applicants.filter(app => {
-        const matchesStatus = filterStatus === 'ALL' || app.status === filterStatus;
-        const matchesSearch = !searchQuery || matchApplicant(app, searchQuery);
-        return matchesStatus && matchesSearch;
-      });
+      const baseNow = useRef(Date.now()).current;
+      const interviewTime = baseNow + 8 * 60 * 1000;
+      const [simOffset, setSimOffset] = useState(0);
+      const [attendance, setAttendance] = useState("WAITING");
+      const [tick, setTick] = useState(0);
+      useEffect(() => { const t = setInterval(() => setTick(x => x + 1), 1000); return () => clearInterval(t); }, []);
+      const now = baseNow + tick * 1000 + simOffset * 60 * 1000;
+
+      const openJob = (id) => { setJobId(id); setView("jobDetails"); };
+      const startApply = () => setView("apply");
+
+      const handleFormSubmit = (data) => {
+        const id = "APP-" + (10000 + Math.floor(Math.random() * 89999));
+        setApplicationId(id);
+        setApplicantData(data);
+        setApplied(true);
+        setView("success");
+      };
 
       return (
-        <div className="space-y-4 animate-fade-in">
-          
-          <div className="clean-card p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="text-base font-extrabold text-slateText-title flex items-center gap-2">
-                <Icon.Shield className="w-4 h-4 text-brand-700" />
-                <span>لوحة تحكم التوظيف — إدارة الطلبات</span>
-              </h2>
-              <p className="text-[11px] text-slateText-muted mt-0.5">مكتب المستشار للمحاماة والاستشارات القانونية</p>
-            </div>
+        <div style={{ background: c.bg, color: c.text, minHeight: "100vh" }} className="flex flex-col">
+          <Navbar c={c} theme={theme} setTheme={setTheme} view={view} setView={setView} applied={applied} onOpenAdmin={() => setIsAdminModalOpen(true)} />
 
-            <button
-              onClick={onResetAll}
-              className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 flex items-center gap-1"
-            >
-              <Icon.Trash className="w-3.5 h-3.5" />
-              <span>تصفير النظام</span>
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="clean-card p-4">
-              <span className="text-[11px] font-semibold text-slateText-muted block">إجمالي المتقدمين</span>
-              <strong className="text-2xl font-black text-slateText-title">{applicants.length}</strong>
-            </div>
-            <div className="clean-card p-4">
-              <span className="text-[11px] font-semibold text-slateText-muted block">طلبات جديدة</span>
-              <strong className="text-2xl font-black text-amber-600">
-                {applicants.filter(a => a.status === 'SUBMITTED' || a.status === 'CV_VIEWED').length}
-              </strong>
-            </div>
-            <div className="clean-card p-4">
-              <span className="text-[11px] font-semibold text-slateText-muted block">مقابلات محددة</span>
-              <strong className="text-2xl font-black text-purple-600">
-                {applicants.filter(a => a.status === 'SHORTLISTED' || a.status === 'INTERVIEW_SCHEDULED').length}
-              </strong>
-            </div>
-            <div className="clean-card p-4">
-              <span className="text-[11px] font-semibold text-slateText-muted block">مقبولين</span>
-              <strong className="text-2xl font-black text-green-600">
-                {applicants.filter(a => a.status === 'ACCEPTED').length}
-              </strong>
-            </div>
-          </div>
-
-          <div className="clean-card p-3 flex flex-col sm:flex-row gap-2">
-            <div className="flex-1 relative">
-              <input 
-                type="text" 
-                placeholder="بحث بالاسم أو الهاتف أو الرمز..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full h-9 pr-8 pl-3 rounded-lg border border-slate-200 text-xs focus:outline-none focus:border-brand-700 bg-slate-50/50"
+          <main className="flex-1">
+            {view === "landing" && <Landing c={c} setView={setView} openJob={openJob} />}
+            {view === "jobDetails" && <JobDetails c={c} job={job} setView={setView} startApply={startApply} />}
+            {view === "apply" && <ApplicationForm c={c} job={job} setView={setView} onSubmit={handleFormSubmit} />}
+            {view === "success" && <SuccessScreen c={c} applicationId={applicationId} job={job} goDashboard={() => setView("dashboard")} />}
+            {view === "dashboard" && (
+              <Dashboard
+                c={c} theme={theme} setTheme={setTheme} job={job} applicationId={applicationId}
+                stageIndex={stageIndex} tab={dashboardTab} setTab={setDashboardTab} setView={setView}
+                simOffset={simOffset} setSimOffset={setSimOffset} attendance={attendance} setAttendance={setAttendance}
+                interviewTime={interviewTime} now={now} applicantData={applicantData}
               />
-              <div className="absolute right-2.5 top-2.5 text-slateText-light pointer-events-none">
-                <Icon.Search className="w-3.5 h-3.5" />
+            )}
+          </main>
+
+          {/* Footer */}
+          <footer style={{ borderTop: `1px solid ${c.border}`, background: c.surface }} className="py-8 px-5 md:px-8 text-xs text-center text-slate-500">
+            <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Icon.Scale size={16} color={c.primaryText} />
+                <span className="font-bold" style={{ color: c.text }}>مكتب المستشار للمحاماة والاستشارات القانونية</span>
+              </div>
+              <div 
+                onClick={() => setIsAdminModalOpen(true)} 
+                className="cursor-pointer select-none text-[11px] hover:opacity-80"
+                style={{ color: c.textFaint }}
+              >
+                © 2026 جميع الحقوق محفوظة لمكتب المستشار للمحاماة · بوابة التوظيف الذكية
               </div>
             </div>
+          </footer>
 
-            <div className="flex gap-1 overflow-x-auto no-scrollbar">
-              {[
-                { id: 'ALL', label: 'الكل' },
-                { id: 'SUBMITTED', label: 'جديد' },
-                { id: 'SHORTLISTED', label: 'مختصر' },
-                { id: 'INTERVIEW_SCHEDULED', label: 'مقابلات' },
-                { id: 'ACCEPTED', label: 'مقبول' },
-              ].map(f => (
-                <button
-                  key={f.id}
-                  onClick={() => setFilterStatus(f.id)}
-                  className={`px-3 h-9 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
-                    filterStatus === f.id ? 'bg-brand-800 text-white' : 'bg-slate-100 text-slateText-body hover:bg-slate-200'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            
-            <div className="md:col-span-1 space-y-2">
-              {filtered.length === 0 ? (
-                <div className="clean-card p-6 text-center text-xs text-slateText-muted">
-                  لا توجد طلبات في هذا القسم حالياً.
-                </div>
-              ) : (
-                filtered.map(app => (
-                  <div
-                    key={app.code}
-                    onClick={() => {
-                      setSelectedApplicant(app);
-                      onUpdateStatus(app.code, 'CV_VIEWED');
-                    }}
-                    className={`clean-card p-3.5 cursor-pointer transition-all ${
-                      selectedApplicant?.code === app.code ? 'border-brand-800 ring-2 ring-brand-100' : 'hover:border-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      {app.photoBase64 ? (
-                        <img src={app.photoBase64} alt="" className="w-10 h-10 rounded-lg object-cover border border-slate-200" />
-                      ) : (
-                        <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-slateText-muted"><Icon.User className="w-4 h-4" /></div>
-                      )}
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-center">
-                          <strong className="text-xs font-bold text-slateText-title truncate">{app.fullName}</strong>
-                          <span className="font-mono text-[10px] font-bold text-brand-700 bg-brand-50 px-1 rounded">{app.code}</span>
-                        </div>
-                        <p className="text-[11px] text-slateText-muted">{app.qualification} · {app.yearsExperience} سنوات خبرة</p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="md:col-span-2">
-              {selectedApplicant ? (
-                <div className="clean-card p-5 space-y-4 sticky top-16">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-3">
-                      {selectedApplicant.photoBase64 ? (
-                        <img src={selectedApplicant.photoBase64} alt="" className="w-14 h-14 rounded-xl object-cover border border-slate-200" />
-                      ) : (
-                        <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slateText-muted"><Icon.User className="w-6 h-6" /></div>
-                      )}
-                      <div>
-                        <h3 className="font-bold text-base text-slateText-title">{selectedApplicant.fullName}</h3>
-                        <p className="text-xs text-slateText-muted">{selectedApplicant.phone} {selectedApplicant.email && `· ${selectedApplicant.email}`}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-1.5">
-                      <select
-                        value={selectedApplicant.status}
-                        onChange={e => onUpdateStatus(selectedApplicant.code, e.target.value)}
-                        className="h-9 px-2.5 rounded-lg border border-slate-200 text-xs font-bold bg-slate-50 focus:outline-none"
-                      >
-                        <option value="SUBMITTED">جديد</option>
-                        <option value="CV_VIEWED">تم الفحص</option>
-                        <option value="SHORTLISTED">مختصر</option>
-                        <option value="INTERVIEW_SCHEDULED">مقابلة</option>
-                        <option value="ACCEPTED">مقبول ✓</option>
-                        <option value="REJECTED">مرفوض ✕</option>
-                      </select>
-                      <button onClick={() => setScheduleModalOpen(true)} className="h-9 px-3 bg-brand-800 text-white rounded-lg text-xs font-bold">
-                        مقابلة
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <a href={`https://wa.me/${selectedApplicant.phone.replace(/[^0-9]/g, '')}`} target="_blank" className="flex-1 h-9 rounded-lg bg-green-50 text-green-700 border border-green-200 text-xs font-bold flex items-center justify-center gap-1">
-                      <Icon.MessageSquare className="w-3.5 h-3.5" />
-                      <span>واتساب</span>
-                    </a>
-                    <a href={`tel:${selectedApplicant.phone}`} className="flex-1 h-9 rounded-lg bg-slate-100 text-slateText-body text-xs font-bold flex items-center justify-center gap-1">
-                      <Icon.Phone className="w-3.5 h-3.5" />
-                      <span>اتصال</span>
-                    </a>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs bg-slate-50/70 p-3.5 rounded-xl border border-slate-200/60">
-                    <div><span className="text-slateText-muted block">العمر:</span> <strong>{selectedApplicant.age} سنة</strong></div>
-                    <div><span className="text-slateText-muted block">الجنسية:</span> <strong>{selectedApplicant.nationality}</strong></div>
-                    <div><span className="text-slateText-muted block">المدينة:</span> <strong>{selectedApplicant.city}</strong></div>
-                    <div><span className="text-slateText-muted block">المؤهل:</span> <strong>{selectedApplicant.qualification}</strong></div>
-                    <div><span className="text-slateText-muted block">سنوات الخبرة:</span> <strong>{selectedApplicant.yearsExperience} سنوات</strong></div>
-                    <div><span className="text-slateText-muted block">الراتب المتوقع:</span> <strong>{selectedApplicant.expectedSalary || 'لم يحدد'}</strong></div>
-                  </div>
-
-                  {selectedApplicant.interview && (
-                    <div className="p-3.5 bg-purple-50 border border-purple-200 rounded-xl text-xs space-y-1 text-purple-950">
-                      <strong className="block font-bold">📅 تم تحديد موعد مقابلة شخصية:</strong>
-                      <p>التاريخ: <strong>{selectedApplicant.interview.date}</strong> | الوقت: <strong>{selectedApplicant.interview.time}</strong></p>
-                      <a href={selectedApplicant.interview.meetLink} target="_blank" className="text-purple-700 font-bold underline block mt-1">
-                        رابط Google Meet: {selectedApplicant.interview.meetLink}
-                      </a>
-                    </div>
-                  )}
-
-                  <div className="p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs">
-                      <Icon.FileText className="w-4 h-4 text-brand-700" />
-                      <strong className="text-slateText-title">ملف السيرة الذاتية (CV)</strong>
-                    </div>
-                    <span className="text-xs text-brand-800 font-bold">
-                      {selectedApplicant.cvName || 'CV_Applicant.pdf'}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="clean-card p-10 text-center text-xs text-slateText-muted">
-                  اختر مرشحاً من القائمة الجانبية لعرض كافة تفاصيل طلبه ومستنداته.
-                </div>
-              )}
-            </div>
-
-          </div>
-
-          {scheduleModalOpen && (
-            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-              <div className="bg-white rounded-2xl p-5 max-w-sm w-full border border-slate-200 shadow-xl space-y-3.5">
-                <h3 className="font-bold text-sm text-slateText-title">جدولة مقابلة لـ: {selectedApplicant?.fullName}</h3>
-                
-                <div>
-                  <label className="block text-xs font-bold text-slateText-body mb-1">تاريخ المقابلة</label>
-                  <input type="date" value={interviewDate} onChange={e => setInterviewDate(e.target.value)} className="w-full h-9 px-3 rounded-lg border border-slate-200 text-xs" />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slateText-body mb-1">وقت المقابلة</label>
-                  <input type="time" value={interviewTime} onChange={e => setInterviewTime(e.target.value)} className="w-full h-9 px-3 rounded-lg border border-slate-200 text-xs" />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slateText-body mb-1">رابط Google Meet</label>
-                  <input type="text" value={meetLink} onChange={e => setMeetLink(e.target.value)} className="w-full h-9 px-3 rounded-lg border border-slate-200 text-xs" />
-                </div>
-
-                <div className="flex gap-2 pt-1">
-                  <button
-                    onClick={() => {
-                      onScheduleInterview(selectedApplicant.code, { date: interviewDate, time: interviewTime, meetLink: meetLink });
-                      setScheduleModalOpen(false);
-                      alert('تم حفظ وتحديد موعد المقابلة بنجاح!');
-                    }}
-                    className="flex-1 h-9 bg-brand-800 text-white font-bold rounded-lg text-xs"
-                  >
-                    حفظ وتأكيد الموعد
-                  </button>
-                  <button onClick={() => setScheduleModalOpen(false)} className="px-3 h-9 border border-slate-200 text-slateText-body rounded-lg text-xs font-bold">
-                    إلغاء
-                  </button>
-                </div>
-              </div>
-            </div>
+          {isAdminModalOpen && (
+            <AdminAuthModal 
+              c={c}
+              onSuccess={() => {
+                setIsAdminModalOpen(false);
+                setStageIndex(4);
+                setView("dashboard");
+                alert("تم تسجيل الدخول بنجاح.");
+              }}
+              onClose={() => setIsAdminModalOpen(false)}
+            />
           )}
-
         </div>
       );
     }
 
-    // Mount Root
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
   </script>
