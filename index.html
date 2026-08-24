@@ -387,9 +387,9 @@
             </div>
 
             <div className="flex flex-wrap items-center gap-2 pt-2">
-              <span className="text-[11px] font-bold bg-slate-100 text-slateText-body px-3 py-1 rounded-lg">📍 مدينة الرياض</span>
               <span className="text-[11px] font-bold bg-slate-100 text-slateText-body px-3 py-1 rounded-lg">💼 دوام كامل</span>
               <span className="text-[11px] font-bold bg-slate-100 text-slateText-body px-3 py-1 rounded-lg">📊 الإدارة المالية والحسابات</span>
+              <span className="text-[11px] font-bold bg-brand-50 text-brand-800 px-3 py-1 rounded-lg border border-brand-200">✨ فرصة وظيفية</span>
             </div>
 
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-slateText-muted">
@@ -476,7 +476,7 @@
                     type="text"
                     value={data.city}
                     onChange={e => set("city", e.target.value)}
-                    placeholder="الرياض / جدة / الدمام..."
+                    placeholder="اكتب المدينة الحالية..."
                     className="w-full h-12 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/60 outline-none text-right transition-all focus:border-brand-800 focus:bg-white"
                   />
                 </div>
@@ -875,7 +875,7 @@
               <div className="g-card p-4 grid grid-cols-2 gap-3 text-xs">
                 <div><span className="text-slateText-muted block">المؤهل:</span> <strong>{selectedApplicant.education}</strong></div>
                 <div><span className="text-slateText-muted block">الخبرة:</span> <strong>{selectedApplicant.yearsExperience}</strong></div>
-                <div><span className="text-slateText-muted block">المدينة:</span> <strong>{selectedApplicant.city || 'الرياض'}</strong></div>
+                <div><span className="text-slateText-muted block">المدينة:</span> <strong>{selectedApplicant.city || 'غير محدد'}</strong></div>
                 <div><span className="text-slateText-muted block">الراتب المتوقع:</span> <strong>{selectedApplicant.expectedSalary || 'غير محدد'}</strong></div>
               </div>
             </div>
