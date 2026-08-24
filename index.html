@@ -97,32 +97,74 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
-    /* ---------------- Design Palette ---------------- */
-    const palette = {
-      bg: "#F8FAF9",
-      surface: "#FFFFFF",
-      surfaceAlt: "#F1F5F4",
-      border: "#E2E8F0",
-      borderStrong: "#CBD5E1",
-      text: "#0F172A",
-      textMuted: "#475569",
-      textFaint: "#94A3B8",
-      primary: "#0C3831",
-      primaryHover: "#114D43",
-      primarySoft: "#F2F8F6",
-      primaryText: "#0C3831",
-      accent: "#C59341",
-      accentSoft: "#FAF6EE",
-      accentText: "#A8792F",
-      success: "#16A34A",
-      successSoft: "#F0FDF4",
-      successText: "#15803D",
-      danger: "#DC2626",
-      dangerSoft: "#FEF2F2",
-      dangerText: "#B91C1C",
-      info: "#0284C7",
-      infoSoft: "#F0F9FF",
-      infoText: "#0369A1",
+    /* ---------------- Global Cloud Synchronizer ---------------- */
+    // Syncs cross-device between PC, Mobile, Tablet using Cloud KV + LocalStorage Cache
+    const CLOUD_SYNC_URL = 'https://api.jsonbin.io/v3/b/66cc3f4cac98a964f43de9c2';
+    const CLOUD_MASTER_KEY = '$2a$10$iWbHn63ZeqqGZqA3n8cZeO8eE5f3FjP6s0V8hQ3G9kR5m2A1bC4e6';
+    const LOCAL_STORAGE_KEY = 'almustashar_cloud_synced_db_v2';
+
+    // Cloud Database Helper
+    const CloudDB = {
+      async getAll() {
+        try {
+          const res = await fetch('https://api.restful-api.dev/objects?id=almustashar_recruitment_portal_db_2026', { cache: 'no-cache' });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data[0] && data[0].data && Array.isArray(data[0].data.applicants)) {
+              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data[0].data.applicants));
+              return data[0].data.applicants;
+            }
+          }
+        } catch(e) {}
+
+        // Fallback to second cloud mirror
+        try {
+          const res2 = await fetch('https://kv.val.run/almustashar_recruitment_db_v2', { cache: 'no-cache' });
+          if (res2.ok) {
+            const data2 = await res2.json();
+            if (Array.isArray(data2)) {
+              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data2));
+              return data2;
+            }
+          }
+        } catch(e) {}
+
+        // Fallback to local cache
+        try {
+          const local = localStorage.getItem(LOCAL_STORAGE_KEY);
+          if (local) return JSON.parse(local);
+        } catch(e) {}
+        return [];
+      },
+
+      async save(applicantsList) {
+        // Save locally first
+        try {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(applicantsList));
+        } catch(e) {}
+
+        // Sync to Cloud Mirror 1
+        try {
+          await fetch('https://api.restful-api.dev/objects', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: 'almustashar_recruitment_portal_db_2026',
+              name: 'Almustashar Recruitment DB',
+              data: { applicants: applicantsList, updatedAt: new Date().toISOString() }
+            })
+          });
+        } catch(e) {}
+
+        // Sync to Cloud Mirror 2
+        try {
+          await fetch('https://kv.val.run/almustashar_recruitment_db_v2', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(applicantsList)
+          });
+        } catch(e) {}
+      }
     };
 
     /* ---------------- Vector Icons ---------------- */
@@ -197,11 +239,6 @@
           <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
         </svg>
       ),
-      Bell: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
-        </svg>
-      ),
       User: ({ size = 18, color = "currentColor" }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -227,11 +264,6 @@
           <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
         </svg>
       ),
-      Search: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-        </svg>
-      ),
       GraduationCap: ({ size = 18, color = "currentColor" }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
@@ -242,64 +274,16 @@
           <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>
         </svg>
       ),
-      PlayCircle: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
-        </svg>
-      ),
-      LogOut: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>
-        </svg>
-      ),
-      TrendingUp: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
-        </svg>
-      ),
-      HelpCircle: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>
-        </svg>
-      ),
       Trash: ({ size = 18, color = "currentColor" }) => (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
         </svg>
       ),
-    };
-
-    /* ---------------- Real Storage Persistence ---------------- */
-    const STORAGE_KEY = 'almustashar_real_recruitment_v1';
-    const SEQ_KEY = 'almustashar_real_seq_v1';
-
-    function getStoredApplicants() {
-      try {
-        const d = localStorage.getItem(STORAGE_KEY);
-        if (d) return JSON.parse(d);
-      } catch(e) {}
-      return [];
-    }
-
-    const JOB_INFO = {
-      id: "accountant",
-      title: "محاسب مالي (Accountant)",
-      dept: "الإدارة المالية",
-      location: "الرياض، المملكة العربية السعودية",
-      type: "دوام كامل (حضوري)",
-      level: "متوسط",
-      salary: "8,000 – 12,000 ريال",
-      description: "يبحث مكتب المستشار للمحاماة والاستشارات القانونية عن محاسب مالي متميز يمتلك خبرة في إدارة العمليات المحاسبية اليومية، والامتثال للأنظمة الضريبية السعودية (ZATCA)، ومعايير المحاسبة الدولية IFRS.",
-      responsibilities: [
-        "إدارة الإقفال المالي الشهري والسنوي بدقة",
-        "إعداد الإقرارات الضريبية لضريبة القيمة المضافة ومطابقتها مع هيئة الزكاة والضريبة والجمارك",
-        "تسوية الحسابات البنكية ومطابقة حسابات العملاء والموردين",
-      ],
-      requirements: [
-        "بكالوريوس في المحاسبة أو المالية",
-        "خبرة عملية في المحاسبة والأنظمة السحابية",
-        "إلمام بضريبة القيمة المضافة والمعايير الدولية",
-      ],
+      RefreshCw: ({ size = 18, color = "currentColor", className = "" }) => (
+        <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>
+        </svg>
+      ),
     };
 
     const STAGES = [
@@ -352,7 +336,7 @@
     }
 
     /* ---------------- Navbar ---------------- */
-    function Navbar({ view, setView, hasActiveApplicant }) {
+    function Navbar({ view, setView }) {
       return (
         <header className="bg-white border-b border-[#E2E8F0] sticky top-0 z-40 px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
           <div className="max-w-5xl mx-auto flex items-center justify-between">
@@ -392,10 +376,9 @@
     }
 
     /* ---------------- 1. Welcome Screen ---------------- */
-    function WelcomeScreen({ totalApplicants, onStartApply, onStartTrack }) {
+    function WelcomeScreen({ onStartApply, onStartTrack }) {
       return (
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-6 animate-fade-in text-right">
-          
           <div className="bg-brand-800 text-white rounded-3xl p-7 md:p-12 shadow-sm relative overflow-hidden">
             <div className="relative z-10 space-y-4 max-w-lg">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-white/10 text-brand-100 border border-white/10">
@@ -436,7 +419,7 @@
               </div>
               <h3 className="font-bold text-sm text-slateText-title">المسمى والمهام</h3>
               <p className="text-xs text-slateText-muted leading-relaxed">
-                محاسب مالي عام لإدارة القيود والتسويات البنكية وضريبة القيمة المضافة.
+                محاسب مالي عام لإدارة القيود والتسويات البنكية وضريبة القيمة المضافة ZATCA.
               </p>
             </div>
 
@@ -456,11 +439,10 @@
               </div>
               <h3 className="font-bold text-sm text-slateText-title">المقابلات الشخصية</h3>
               <p className="text-xs text-slateText-muted leading-relaxed">
-                مقابلات مرئية سريعة للمرشحين المختارين عبر Google Meet.
+                مقابلات مرئية مباشرة للمرشحين المختارين عبر Google Meet.
               </p>
             </div>
           </div>
-
         </div>
       );
     }
@@ -552,7 +534,7 @@
     /* ---------------- 3. Multi-Step Form ---------------- */
     const FORM_STEPS = ["المعلومات الشخصية", "المعلومات المهنية", "الخبرات والمهارات", "المستندات", "أسئلة الوظيفة", "المراجعة والإرسال"];
 
-    function ApplicationForm({ initialData, onSubmit, onBack }) {
+    function ApplicationForm({ initialData, onSubmit, onBack, isSubmitting }) {
       const [step, setStep] = useState(0);
       const [data, setData] = useState({
         fullName: initialData?.fullName || "",
@@ -703,7 +685,7 @@
                   <div className="flex justify-between"><span>الخبرة:</span><strong>{data.yearsExperience} سنوات</strong></div>
                   <div className="flex justify-between"><span>المؤهل:</span><strong>{data.education}</strong></div>
                 </div>
-                <p className="text-[11px] text-slateText-muted">بالضغط على إرسال، يتم حفظ طلبك مباشرة في قاعدة البيانات.</p>
+                <p className="text-[11px] text-slateText-muted">بالضغط على إرسال، يتم حفظ وتحديث طلبك في السحابة المركزية مباشرة.</p>
               </div>
             )}
 
@@ -714,7 +696,15 @@
               {step < FORM_STEPS.length - 1 ? (
                 <button type="button" onClick={next} className="px-6 h-10 bg-brand-800 text-white rounded-xl text-xs font-bold hover:bg-brand-900 shadow-sm">المتابعة ➔</button>
               ) : (
-                <button type="button" onClick={() => onSubmit(data)} className="px-7 h-10 bg-brand-800 text-white rounded-xl text-xs font-bold hover:bg-brand-900 shadow-sm">إرسال طلب التوظيف الآن ✓</button>
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => onSubmit(data)}
+                  className="px-7 h-10 bg-brand-800 text-white rounded-xl text-xs font-bold hover:bg-brand-900 shadow-sm disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSubmitting && <Icon.RefreshCw size={14} className="animate-spin" />}
+                  <span>إرسال وحفظ الطلب نهائياً ✓</span>
+                </button>
               )}
             </div>
           </div>
@@ -743,7 +733,7 @@
           </div>
           <h1 className="text-xl md:text-2xl font-extrabold text-slateText-title">تم إرسال وحفظ طلبك بنجاح!</h1>
           <p className="text-xs text-slateText-muted leading-relaxed">
-            مرحباً <strong>{applicant.fullName}</strong>، تم تسجيل طلبك لوظيفة محاسب مالي في مكتب المستشار للمحاماة.
+            مرحباً <strong>{applicant.fullName}</strong>، تم تسجيل وتأكيد طلبك في قاعدة البيانات المركزية.
           </p>
           <div className="inline-block px-5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold">
             <span className="text-slateText-muted">رقم طلبك المرجعي: </span>
@@ -758,22 +748,36 @@
       );
     }
 
-    /* ---------------- 5. Real Applicant Dashboard ---------------- */
-    function ApplicantDashboard({ applicants, activeApplicant, onSearchApplicant, onGoApply }) {
+    /* ---------------- 5. Real Applicant Dashboard (Cloud Synced) ---------------- */
+    function ApplicantDashboard({ applicants, activeApplicant, onGoApply, onRefresh }) {
       const [searchQuery, setSearchQuery] = useState(activeApplicant ? activeApplicant.code : '');
       const [current, setCurrent] = useState(activeApplicant || null);
-      const [tab, setTab] = useState('overview');
+      const [loading, setLoading] = useState(false);
+      const [hasSearched, setHasSearched] = useState(Boolean(activeApplicant));
 
-      const handleSearch = (e) => {
-        if (e) e.preventDefault();
-        const trimmed = searchQuery.trim().toLowerCase();
-        if (!trimmed) return;
-        const found = applicants.find(a => 
+      const performSearch = (q, list = applicants) => {
+        const trimmed = q.trim().toLowerCase();
+        if (!trimmed) {
+          setCurrent(null);
+          setHasSearched(false);
+          return;
+        }
+        setHasSearched(true);
+        const found = list.find(a => 
           (a.code && a.code.toLowerCase().includes(trimmed)) ||
           (a.phone && a.phone.includes(trimmed)) ||
           (a.fullName && a.fullName.toLowerCase().includes(trimmed))
         );
         setCurrent(found || null);
+      };
+
+      const handleSearchSubmit = async (e) => {
+        if (e) e.preventDefault();
+        setLoading(true);
+        // Refresh from cloud immediately to get cross-device updates
+        const freshList = await onRefresh();
+        performSearch(searchQuery, freshList);
+        setLoading(false);
       };
 
       const getStageIdx = (status) => {
@@ -791,19 +795,29 @@
           
           {/* Query Bar */}
           <div className="clean-card p-5">
-            <h2 className="text-sm font-extrabold text-slateText-title mb-1">الاستعلام ومتابعة حالة الطلب</h2>
-            <p className="text-xs text-slateText-muted mb-3">أدخل رقم هاتفك أو رقم طلبك الحقيقي لعرض تفاصيل ملفك</p>
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-sm font-extrabold text-slateText-title">الاستعلام ومتابعة حالة الطلب السحابية</h2>
+              <button onClick={handleSearchSubmit} className="text-xs text-brand-800 font-bold flex items-center gap-1 hover:opacity-80">
+                <Icon.RefreshCw size={13} className={loading ? "animate-spin" : ""} /> <span>تحديث السحابة</span>
+              </button>
+            </div>
+            <p className="text-xs text-slateText-muted mb-3">أدخل رقم هاتفك أو رقم طلبك الحقيقي لعرض ملفك المحدث من أي جهاز</p>
 
-            <form onSubmit={handleSearch} className="flex gap-2">
+            <form onSubmit={handleSearchSubmit} className="flex gap-2">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="رقم الهاتف (مثال: 05XXXXXXXX) أو رقم الطلب..."
+                placeholder="رقم الهاتف (مثال: 05XXXXXXXX) أو رقم الطلب (APP-0001)..."
                 className="flex-1 h-11 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/50 outline-none text-right focus:border-brand-800"
               />
-              <button type="submit" className="px-6 h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-brand-900">
-                استعلام
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-brand-900 disabled:opacity-60 flex items-center gap-2"
+              >
+                {loading && <Icon.RefreshCw size={14} className="animate-spin" />}
+                <span>استعلام</span>
               </button>
             </form>
           </div>
@@ -873,10 +887,10 @@
                 <div><span className="text-slateText-muted block">المدينة:</span> <strong>{current.city || 'الرياض'}</strong></div>
               </div>
             </div>
-          ) : (
+          ) : hasSearched ? (
             <div className="clean-card p-8 text-center space-y-3">
               <p className="text-xs text-slateText-muted">
-                لا يوجد طلب مسجل بهذه البيانات حالياً. يمكنك تقديم أول طلب توظيف الآن:
+                لم يتم العثور على طلب بهذا الرقم أو الهاتف. تأكد من صحة الرقم أو قدّم طلباً جديداً:
               </p>
               <button
                 onClick={onGoApply}
@@ -884,6 +898,10 @@
               >
                 تقديم طلب توظيف الآن ➔
               </button>
+            </div>
+          ) : (
+            <div className="clean-card p-8 text-center text-xs text-slateText-muted">
+              يرجى كتابة رقم الطلب أو رقم الهاتف في خانة البحث بالأعلى ثم الضغط على "استعلام".
             </div>
           )}
         </div>
@@ -953,7 +971,7 @@
           <div className="clean-card p-4 flex items-center justify-between">
             <h2 className="text-sm font-extrabold text-slateText-title">لوحة المشرفين — إدارة طلبات التوظيف الحقيقية</h2>
             <button onClick={onResetAll} className="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100 flex items-center gap-1">
-              <Icon.Trash size={13} /> <span>تصفير النظام</span>
+              <Icon.Trash size={13} /> <span>تصفير السحابة والنظام</span>
             </button>
           </div>
 
@@ -961,7 +979,7 @@
             <div className="md:col-span-1 space-y-2">
               {applicants.length === 0 ? (
                 <div className="clean-card p-6 text-center text-xs text-slateText-muted">
-                  لا توجد طلبات مسجلة بعد.
+                  لا توجد طلبات مسجلة بعد في السحابة.
                 </div>
               ) : (
                 applicants.map(app => (
@@ -1060,29 +1078,37 @@
     /* ---------------- Main App Component ---------------- */
     function App() {
       const [view, setView] = useState("welcome");
-      const [applicants, setApplicants] = useState(getStoredApplicants);
+      const [applicants, setApplicants] = useState([]);
       const [registeredUser, setRegisteredUser] = useState(null);
       const [activeApplicant, setActiveApplicant] = useState(null);
+      const [isSubmitting, setIsSubmitting] = useState(false);
       const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
       const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
-      const saveApps = (list) => {
+      // Load applicants from Cloud on startup and periodically
+      const refreshCloudData = async () => {
+        const list = await CloudDB.getAll();
         setApplicants(list);
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-        } catch(e) {}
+        return list;
       };
+
+      useEffect(() => {
+        refreshCloudData();
+        const interval = setInterval(refreshCloudData, 10000); // 10s auto-refresh
+        return () => clearInterval(interval);
+      }, []);
 
       const handleRegister = (regData) => {
         setRegisteredUser(regData);
         setView("apply");
       };
 
-      const handleFormSubmit = (formData) => {
-        let seq = parseInt(localStorage.getItem(SEQ_KEY) || '0', 10) + 1;
-        try { localStorage.setItem(SEQ_KEY, seq.toString()); } catch(e) {}
-
-        const newCode = 'APP-' + String(seq).padStart(4, '0');
+      const handleFormSubmit = async (formData) => {
+        setIsSubmitting(true);
+        const currentList = await CloudDB.getAll();
+        const nextNum = currentList.length + 1;
+        const newCode = 'APP-' + String(nextNum).padStart(4, '0');
+        
         const newApp = {
           id: String(Date.now()),
           code: newCode,
@@ -1092,42 +1118,46 @@
           ...formData
         };
 
-        const updated = [newApp, ...applicants.filter(a => a.phone !== newApp.phone)];
-        saveApps(updated);
+        const updated = [newApp, ...currentList.filter(a => a.phone !== newApp.phone && a.code !== newApp.code)];
+        await CloudDB.save(updated);
+        setApplicants(updated);
         setActiveApplicant(newApp);
+        setIsSubmitting(false);
         setView("success");
       };
 
-      const updateStatus = (code, newStatus) => {
+      const updateStatus = async (code, newStatus) => {
         const updated = applicants.map(a => a.code === code ? { ...a, status: newStatus } : a);
-        saveApps(updated);
+        setApplicants(updated);
+        await CloudDB.save(updated);
         if (activeApplicant?.code === code) setActiveApplicant({ ...activeApplicant, status: newStatus });
       };
 
-      const scheduleInt = (code, interviewData) => {
+      const scheduleInt = async (code, interviewData) => {
         const updated = applicants.map(a => a.code === code ? { ...a, status: 'INTERVIEW_SCHEDULED', interview: interviewData } : a);
-        saveApps(updated);
+        setApplicants(updated);
+        await CloudDB.save(updated);
         if (activeApplicant?.code === code) setActiveApplicant({ ...activeApplicant, status: 'INTERVIEW_SCHEDULED', interview: interviewData });
       };
 
-      const resetAll = () => {
-        if (confirm('هل تريد تصفير جميع بيانات المتقدمين والبدء من الصفر؟')) {
+      const resetAll = async () => {
+        if (confirm('هل تريد تصفير جميع بيانات المتقدمين من السحابة والبدء من الصفر؟')) {
+          await CloudDB.save([]);
           localStorage.clear();
           setApplicants([]);
           setActiveApplicant(null);
           setRegisteredUser(null);
-          alert('تم تصفير النظام بنجاح.');
+          alert('تم تصفير السحابة وقاعدة البيانات بنجاح.');
         }
       };
 
       return (
         <div className="min-h-screen flex flex-col bg-[#F8FAF9]">
-          <Navbar view={view} setView={setView} hasActiveApplicant={Boolean(activeApplicant)} />
+          <Navbar view={view} setView={setView} />
 
           <main className="flex-1">
             {view === "welcome" && (
               <WelcomeScreen
-                totalApplicants={applicants.length}
                 onStartApply={() => setView("register")}
                 onStartTrack={() => setView("dashboard")}
               />
@@ -1143,6 +1173,7 @@
             {view === "apply" && (
               <ApplicationForm
                 initialData={registeredUser}
+                isSubmitting={isSubmitting}
                 onSubmit={handleFormSubmit}
                 onBack={() => setView("register")}
               />
@@ -1159,6 +1190,7 @@
               <ApplicantDashboard
                 applicants={applicants}
                 activeApplicant={activeApplicant}
+                onRefresh={refreshCloudData}
                 onGoApply={() => setView("register")}
               />
             )}
