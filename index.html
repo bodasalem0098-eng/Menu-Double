@@ -908,11 +908,17 @@
     }
 
     /* ---------------- Query Dashboard ---------------- */
-    function ApplicantDashboard({ applicants, activeApplicant, onRefresh, onGoApply }) {
+    function ApplicantDashboard({ applicants: propApplicants, activeApplicant, onRefresh, onGoApply }) {
       const [searchQuery, setSearchQuery] = useState(activeApplicant ? activeApplicant.code : '');
       const [selectedApplicant, setSelectedApplicant] = useState(activeApplicant || null);
       const [loading, setLoading] = useState(false);
       const [hasSearched, setHasSearched] = useState(Boolean(activeApplicant));
+      const [applicants, setApplicants] = useState(propApplicants || []);
+
+      // Synchronize internal state with prop
+      useEffect(() => {
+        setApplicants(propApplicants || []);
+      }, [propApplicants]);
 
       // Refresh data on mount
       useEffect(() => {
@@ -920,12 +926,15 @@
           setLoading(true);
           const fresh = await onRefresh();
           setLoading(false);
-          if (searchQuery.trim()) {
-            const match = findMatchingApplicant(fresh, searchQuery);
-            if (match) setSelectedApplicant(match);
-          } else if (activeApplicant) {
-            const match = findMatchingApplicant(fresh, activeApplicant.code);
-            if (match) setSelectedApplicant(match);
+          if (fresh && Array.isArray(fresh)) {
+            setApplicants(fresh);
+            if (searchQuery.trim()) {
+              const match = findMatchingApplicant(fresh, searchQuery);
+              if (match) setSelectedApplicant(match);
+            } else if (activeApplicant) {
+              const match = findMatchingApplicant(fresh, activeApplicant.code);
+              if (match) setSelectedApplicant(match);
+            }
           }
         };
         loadFresh();
@@ -933,8 +942,7 @@
 
       function findMatchingApplicant(list, query) {
         if (!query || !query.trim() || !Array.isArray(list)) return null;
-        const rawQ = query.trim();
-        const q = normalizeStr(rawQ);
+        const q = normalizeStr(query);
         const qCleanPhone = q.replace(/^(\+?966|00966|0)/, '');
 
         return list.find(a => {
@@ -942,19 +950,24 @@
           const phoneNorm = normalizeStr(a.phone || '');
           const phoneClean = phoneNorm.replace(/^(\+?966|00966|0)/, '');
           const nameNorm = normalizeStr(a.fullName || '');
+          const emailNorm = (a.email || '').toLowerCase().trim();
 
-          // 1. Exact or Full Code Match (e.g. "APP-0001", "APP-0002", "0001", "0002")
-          if (codeNorm === q) return true;
-          const codeDigits = codeNorm.replace(/\D/g, '');
-          const qDigits = q.replace(/\D/g, '');
-          if (qDigits && codeDigits && (codeDigits === qDigits || (q.startsWith('app') && codeNorm === q))) return true;
+          // 1. Code match (supports partial: "0002" or "app-0002" or "2")
+          if (codeNorm.includes(q) || q.includes(codeNorm)) return true;
+          const codeDigits = codeNorm.replace(/app/g, '').replace(/-/g, '');
+          const qDigits = q.replace(/app/g, '').replace(/-/g, '');
+          if (codeDigits && qDigits && (codeDigits.includes(qDigits) || qDigits.includes(codeDigits))) return true;
 
-          // 2. Full Phone Match (Must enter complete phone number: at least 8 digits or exact match)
-          if (phoneNorm === q) return true;
-          if (qCleanPhone.length >= 8 && (phoneClean === qCleanPhone || phoneClean.endsWith(qCleanPhone) || qCleanPhone.endsWith(phoneClean))) return true;
+          // 2. Phone match
+          if (phoneNorm.includes(q) || q.includes(phoneNorm)) return true;
+          if (qCleanPhone.length >= 6 && phoneClean.includes(qCleanPhone)) return true;
+          if (phoneClean.length >= 6 && qCleanPhone.includes(phoneClean)) return true;
 
-          // 3. Full Name Match
-          if (nameNorm === q || (q.length >= 6 && nameNorm.includes(q))) return true;
+          // 3. Name match
+          if (nameNorm.includes(q) || q.includes(nameNorm)) return true;
+
+          // 4. Email match
+          if (emailNorm && emailNorm.includes(query.toLowerCase().trim())) return true;
 
           return false;
         });
@@ -967,15 +980,19 @@
         setHasSearched(true);
         const fresh = await onRefresh();
         setLoading(false);
-        const found = findMatchingApplicant(fresh, searchQuery);
+        if (fresh && Array.isArray(fresh)) setApplicants(fresh);
+        const found = findMatchingApplicant(fresh || applicants, searchQuery);
         setSelectedApplicant(found || null);
       };
 
       const handleInputChange = (e) => {
         const val = e.target.value;
         setSearchQuery(val);
-        // Clear results if search input is emptied
-        if (!val.trim()) {
+        if (val.trim()) {
+          setHasSearched(true);
+          const found = findMatchingApplicant(applicants, val);
+          if (found) setSelectedApplicant(found);
+        } else {
           setHasSearched(false);
           setSelectedApplicant(null);
         }
