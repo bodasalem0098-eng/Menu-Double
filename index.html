@@ -1252,17 +1252,28 @@
       const [previewCv, setPreviewCv] = useState(null);
       const [isRefreshing, setIsRefreshing] = useState(false);
 
-      // Auto-refresh when entering admin view + periodic background sync every 12s
+      // Auto-refresh immediately upon entering admin view + periodic background sync every 5s
       useEffect(() => {
-        if (onRefresh) {
+        const fetchLatest = async () => {
           setIsRefreshing(true);
-          onRefresh().finally(() => setIsRefreshing(false));
+          try {
+            if (onRefresh) {
+              const fresh = await onRefresh();
+              if (Array.isArray(fresh) && fresh.length > 0) {
+                setSelected(prev => prev ? (fresh.find(f => f.code === prev.code) || fresh[0]) : fresh[0]);
+              }
+            }
+          } catch(e) {}
+          finally {
+            setIsRefreshing(false);
+          }
+        };
+        fetchLatest();
 
-          const interval = setInterval(() => {
-            onRefresh().catch(() => {});
-          }, 12000);
-          return () => clearInterval(interval);
-        }
+        const interval = setInterval(() => {
+          if (onRefresh) onRefresh().catch(() => {});
+        }, 5000);
+        return () => clearInterval(interval);
       }, []);
 
       useEffect(() => {
@@ -1275,8 +1286,13 @@
 
       const handleManualRefresh = async () => {
         setIsRefreshing(true);
-        if (onRefresh) await onRefresh();
-        setTimeout(() => setIsRefreshing(false), 400);
+        if (onRefresh) {
+          const fresh = await onRefresh();
+          if (Array.isArray(fresh) && fresh.length > 0 && !selected) {
+            setSelected(fresh[0]);
+          }
+        }
+        setTimeout(() => setIsRefreshing(false), 300);
       };
 
       const statusLabel = (s) => {
@@ -1322,19 +1338,16 @@
           <div className="g-card p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
             <div>
               <h2 className="text-sm md:text-base font-black text-slateText-title">لوحة إدارة المتقدمين والتوظيف</h2>
-              <p className="text-[11px] text-slateText-muted">إجمالي المتقدمين في النظام: <strong className="text-brand-800">{applicants.length}</strong> متقدم</p>
+              <p className="text-[11px] text-slateText-muted">إجمالي المتقدمين في النظام: <strong className="text-brand-800 text-sm font-black">{applicants.length}</strong> متقدم</p>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleManualRefresh}
                 disabled={isRefreshing}
-                className="px-3.5 py-1.5 rounded-xl bg-brand-800 hover:bg-brand-900 text-white text-xs font-black shadow-sm flex items-center gap-1.5 transition-transform active:scale-95 disabled:opacity-75"
+                className="px-4 py-2 rounded-xl bg-brand-800 hover:bg-brand-900 text-white text-xs font-black shadow-sm flex items-center gap-2 transition-transform active:scale-95 disabled:opacity-75"
               >
-                <Icon.RefreshCw size={13} className={isRefreshing ? "animate-spin" : ""} />
-                <span>{isRefreshing ? "جارٍ التحديث..." : "تحديث الطلبات 🔄"}</span>
-              </button>
-              <button onClick={onResetAll} className="px-3 py-1.5 rounded-xl bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100 flex items-center gap-1.5 transition-colors">
-                <Icon.Trash size={13} /> <span>تصفير</span>
+                <Icon.RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
+                <span>{isRefreshing ? "جارٍ التحديث..." : `تحديث الطلبات (${applicants.length}) 🔄`}</span>
               </button>
             </div>
           </div>
