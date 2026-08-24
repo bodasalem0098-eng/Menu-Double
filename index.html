@@ -134,14 +134,14 @@
     const NEON_CONN_STR = "postgresql://neondb_owner:npg_bNqO2SZ6BeDX@ep-restless-water-ax1cfols.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require";
     const LOCAL_STORAGE_KEY = 'almustashar_neon_synced_v2';
 
-    function fetchWithTimeout(url, options, timeoutMs = 4000) {
+    function fetchWithTimeout(url, options, timeoutMs = 15000) {
       return Promise.race([
         fetch(url, options),
         new Promise((_, reject) => setTimeout(() => reject(new Error('Request timeout')), timeoutMs))
       ]);
     }
 
-    async function executeNeonSql(sql, params = []) {
+    async function executeNeonSql(sql, params = [], timeoutMs = 25000) {
       try {
         const res = await fetchWithTimeout(NEON_SQL_ENDPOINT, {
           method: 'POST',
@@ -150,7 +150,7 @@
             'Neon-Connection-String': NEON_CONN_STR
           },
           body: JSON.stringify({ query: sql, params })
-        }, 4000);
+        }, timeoutMs);
         if (res.ok) {
           const json = await res.json();
           return json;
@@ -484,8 +484,6 @@
         if (!data.phone.trim()) { setError("يرجى كتابة رقم الهاتف (واتساب)."); return; }
         if (!data.education.trim()) { setError("يرجى تحديد أو كتابة المؤهل العلمي."); return; }
         if (!data.yearsExperience.trim()) { setError("يرجى تحديد سنوات الخبرة."); return; }
-        if (!data.photoBase64) { setError("يرجى إرفاق الصورة الشخصية لإتمام الطلب (مطلوبة *)."); return; }
-        if (!data.cvFile) { setError("يرجى إرفاق ملف السيرة الذاتية CV لإتمام الطلب (مطلوب *)."); return; }
         setError("");
         onSubmit(data);
       };
