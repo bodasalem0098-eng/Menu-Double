@@ -217,42 +217,57 @@
         return [];
       },
 
-      async save(applicant) {
-        // 1. If code not assigned or marked as new, query Neon for the atomic max code
-        if (!applicant.code || applicant.isNew) {
+      async save(applicant, isUpdate = false) {
+        // Case 1: Admin status or interview update
+        if (isUpdate) {
           try {
-            const liveRes = await executeNeonSql("SELECT code FROM applicants WHERE code LIKE 'APP-%';");
-            let maxNum = 0;
-            if (liveRes && Array.isArray(liveRes.rows)) {
-              liveRes.rows.forEach(r => {
-                const num = parseInt((r.code || '').replace(/\D/g, ''), 10);
-                if (!isNaN(num) && num > maxNum) maxNum = num;
-              });
-            }
-            applicant.code = `APP-${String(maxNum + 1).padStart(4, '0')}`;
+            await executeNeonSql(`
+              UPDATE applicants SET
+                status = $1,
+                interview = $2
+              WHERE code = $3;
+            `, [
+              applicant.status || 'SUBMITTED',
+              applicant.interview ? JSON.stringify(applicant.interview) : null,
+              applicant.code
+            ]);
           } catch(e) {}
+
+          try {
+            fetchWithTimeout(`/api/db?_t=${Date.now()}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'UPDATE_STATUS', applicant })
+            }, 4000).catch(()=>{});
+          } catch(e) {}
+
+          return applicant;
         }
 
-        // 2. Direct Upsert to Neon Postgres
+        // Case 2: Pure New Application (ALWAYS INSERT WITH UNIQUE CODE)
+        try {
+          const liveRes = await executeNeonSql("SELECT code FROM applicants WHERE code LIKE 'APP-%';");
+          let maxNum = 0;
+          if (liveRes && Array.isArray(liveRes.rows)) {
+            liveRes.rows.forEach(r => {
+              const num = parseInt((r.code || '').replace(/\D/g, ''), 10);
+              if (!isNaN(num) && num > maxNum) maxNum = num;
+            });
+          }
+          applicant.code = `APP-${String(maxNum + 1).padStart(4, '0')}`;
+          applicant.id = String(Date.now()) + '-' + Math.floor(Math.random() * 1000);
+        } catch(e) {}
+
+        // Direct pure INSERT to Neon Postgres
         try {
           await executeNeonSql(`
             INSERT INTO applicants (
               id, code, full_name, phone, email, nationality, city, age, 
               education, current_job, years_experience, expected_salary, skills, 
               vat_experience, status, submitted_at, interview, photo_base64, cv_file
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
-            ON CONFLICT (code) DO UPDATE SET
-              status = EXCLUDED.status,
-              interview = EXCLUDED.interview,
-              full_name = EXCLUDED.full_name,
-              phone = EXCLUDED.phone,
-              expected_salary = EXCLUDED.expected_salary,
-              education = EXCLUDED.education,
-              years_experience = EXCLUDED.years_experience,
-              photo_base64 = EXCLUDED.photo_base64,
-              cv_file = EXCLUDED.cv_file;
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19);
           `, [
-            applicant.id || String(Date.now()),
+            applicant.id,
             applicant.code,
             applicant.fullName || '',
             applicant.phone || '',
@@ -274,7 +289,7 @@
           ]);
         } catch(e) {}
 
-        // 3. Post to /api/db endpoint with cache-buster
+        // Post to /api/db endpoint with cache-buster
         try {
           const apiRes = await fetchWithTimeout(`/api/db?_t=${Date.now()}`, {
             method: 'POST',
@@ -287,13 +302,6 @@
               applicant.code = json.applicant.code;
             }
           }
-        } catch(e) {}
-
-        // 4. Update Local Cache
-        try {
-          const list = await this.getAll();
-          const updated = [applicant, ...list.filter(a => a.code !== applicant.code && normalizeStr(a.phone) !== normalizeStr(applicant.phone))];
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
         } catch(e) {}
 
         return applicant;
@@ -1894,7 +1902,7 @@
         const target = applicants.find(a => a.code === code);
         if (target) {
           const updatedTarget = { ...target, status: newStatus };
-          await DB.save(updatedTarget);
+          await DB.save(updatedTarget, true);
           const updated = applicants.map(a => a.code === code ? updatedTarget : a);
           setApplicants(updated);
           if (activeApplicant?.code === code) setActiveApplicant(updatedTarget);
@@ -1905,7 +1913,7 @@
         const target = applicants.find(a => a.code === code);
         if (target) {
           const updatedTarget = { ...target, status: 'INTERVIEW_SCHEDULED', interview: interviewData };
-          await DB.save(updatedTarget);
+          await DB.save(updatedTarget, true);
           const updated = applicants.map(a => a.code === code ? updatedTarget : a);
           setApplicants(updated);
           if (activeApplicant?.code === code) setActiveApplicant(updatedTarget);

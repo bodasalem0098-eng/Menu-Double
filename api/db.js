@@ -87,84 +87,69 @@ export default async function handler(req, res) {
     return res.status(200).json({ source: 'empty', applicants: [] });
   }
 
-  // Handle POST (Insert / Upsert applicant)
+  // Handle POST (Insert new applicant / Update existing)
   if (req.method === 'POST') {
     try {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const applicant = body.applicant || body;
 
-      if (applicant) {
-        // Generate atomic sequential code if not provided or marked as new
-        if (!applicant.code || applicant.isNew) {
-          const maxRes = await queryNeon("SELECT code FROM applicants WHERE code LIKE 'APP-%';");
-          let maxNum = 0;
-          if (maxRes && Array.isArray(maxRes.rows)) {
-            maxRes.rows.forEach(r => {
-              const num = parseInt((r.code || '').replace(/\D/g, ''), 10);
-              if (!isNaN(num) && num > maxNum) maxNum = num;
-            });
-          }
-          applicant.code = `APP-${String(maxNum + 1).padStart(4, '0')}`;
-        }
+      if (!applicant) return res.status(400).json({ error: 'No applicant data' });
 
+      // Case 1: Admin status or interview update on an existing applicant
+      if (body.action === 'UPDATE_STATUS' || body.action === 'SCHEDULE_INTERVIEW' || applicant.action === 'UPDATE') {
         await queryNeon(`
-          INSERT INTO applicants (
-            id, code, full_name, phone, email, nationality, city, age, 
-            education, current_job, years_experience, expected_salary, skills, 
-            vat_experience, status, submitted_at, interview, photo_base64, cv_file
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
-          ON CONFLICT (code) DO UPDATE SET
-            status = EXCLUDED.status,
-            interview = EXCLUDED.interview,
-            full_name = EXCLUDED.full_name,
-            phone = EXCLUDED.phone,
-            expected_salary = EXCLUDED.expected_salary,
-            education = EXCLUDED.education,
-            years_experience = EXCLUDED.years_experience,
-            photo_base64 = EXCLUDED.photo_base64,
-            cv_file = EXCLUDED.cv_file;
+          UPDATE applicants SET
+            status = $1,
+            interview = $2
+          WHERE code = $3;
         `, [
-          applicant.id || String(Date.now()),
-          applicant.code,
-          applicant.fullName || '',
-          applicant.phone || '',
-          applicant.email || '',
-          applicant.nationality || '',
-          applicant.city || '',
-          applicant.age || '',
-          applicant.education || '',
-          applicant.currentJob || '',
-          applicant.yearsExperience || '',
-          applicant.expectedSalary || '',
-          applicant.skills || '',
-          applicant.vatExperience || '',
           applicant.status || 'SUBMITTED',
-          applicant.submittedAt || new Date().toLocaleDateString('ar-SA'),
           applicant.interview ? JSON.stringify(applicant.interview) : null,
-          applicant.photoBase64 || null,
-          applicant.cvFile ? JSON.stringify(applicant.cvFile) : null
+          applicant.code
         ]);
+        return res.status(200).json({ success: true, applicant });
       }
 
-      // Also mirror to cloud backup
-      try {
-        let currentList = [];
-        const cloudGet = await fetch('https://api.restful-api.dev/objects/ff8081819ff5b11001a0329c847c0a24', { cache: 'no-cache' });
-        if (cloudGet.ok) {
-          const json = await cloudGet.json();
-          if (json && json.data && Array.isArray(json.data.applicants)) currentList = json.data.applicants;
-        }
-
-        const updated = [applicant, ...currentList.filter(a => a.code !== applicant.code && a.phone !== applicant.phone)];
-        await fetch('https://api.restful-api.dev/objects/ff8081819ff5b11001a0329c847c0a24', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: 'Almustashar Portal Database',
-            data: { applicants: updated, updatedAt: new Date().toISOString() }
-          })
+      // Case 2: Pure new applicant submission (ALWAYS INSERT WITH UNIQUE NEXT CODE)
+      const maxRes = await queryNeon("SELECT code FROM applicants WHERE code LIKE 'APP-%';");
+      let maxNum = 0;
+      if (maxRes && Array.isArray(maxRes.rows)) {
+        maxRes.rows.forEach(r => {
+          const num = parseInt((r.code || '').replace(/\D/g, ''), 10);
+          if (!isNaN(num) && num > maxNum) maxNum = num;
         });
-      } catch (e) {}
+      }
+      const uniqueCode = `APP-${String(maxNum + 1).padStart(4, '0')}`;
+      applicant.code = uniqueCode;
+      applicant.id = String(Date.now()) + '-' + Math.floor(Math.random() * 1000);
+
+      await queryNeon(`
+        INSERT INTO applicants (
+          id, code, full_name, phone, email, nationality, city, age, 
+          education, current_job, years_experience, expected_salary, skills, 
+          vat_experience, status, submitted_at, interview, photo_base64, cv_file
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19);
+      `, [
+        applicant.id,
+        applicant.code,
+        applicant.fullName || '',
+        applicant.phone || '',
+        applicant.email || '',
+        applicant.nationality || '',
+        applicant.city || '',
+        applicant.age || '',
+        applicant.education || '',
+        applicant.currentJob || '',
+        applicant.yearsExperience || '',
+        applicant.expectedSalary || '',
+        applicant.skills || '',
+        applicant.vatExperience || '',
+        applicant.status || 'SUBMITTED',
+        applicant.submittedAt || new Date().toLocaleDateString('ar-SA'),
+        applicant.interview ? JSON.stringify(applicant.interview) : null,
+        applicant.photoBase64 || null,
+        applicant.cvFile ? JSON.stringify(applicant.cvFile) : null
+      ]);
 
       return res.status(200).json({ success: true, source: 'neon_postgres', applicant });
     } catch (e) {
