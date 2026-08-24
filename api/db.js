@@ -126,20 +126,6 @@ export default async function handler(req, res) {
     }
   }
 
-    // Fallback to cloud mirror if neon query failed
-    try {
-      const cloudRes = await fetch('https://api.restful-api.dev/objects/ff8081819ff5b11001a0329c847c0a24', { cache: 'no-cache' });
-      if (cloudRes.ok) {
-        const cloudData = await cloudRes.json();
-        if (cloudData && cloudData.data && Array.isArray(cloudData.data.applicants)) {
-          return res.status(200).json({ source: 'cloud_fallback', applicants: cloudData.data.applicants });
-        }
-      }
-    } catch (e) {}
-
-    return res.status(200).json({ source: 'empty', applicants: [] });
-  }
-
   // Handle POST (Insert new applicant / Update existing)
   if (req.method === 'POST') {
     try {
