@@ -129,39 +129,78 @@
       return s.toLowerCase().replace(/[\s\-\+\(\)\_]/g, '');
     }
 
-    /* ---------------- Neon Postgres & Cloud Storage Client ---------------- */
-    const LOCAL_STORAGE_KEY = 'almustashar_neon_synced_v1';
-    const CLOUD_FALLBACK_URL = 'https://api.restful-api.dev/objects/ff8081819ff5b11001a0329c847c0a24';
+    /* ---------------- Neon Postgres Direct & Fast Client ---------------- */
+    const NEON_SQL_ENDPOINT = "https://ep-restless-water-ax1cfols.c-4.us-east-2.aws.neon.tech/sql";
+    const NEON_CONN_STR = "postgresql://neondb_owner:npg_bNqO2SZ6BeDX@ep-restless-water-ax1cfols.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require";
+    const LOCAL_STORAGE_KEY = 'almustashar_neon_synced_v2';
+
+    async function executeNeonSql(sql, params = []) {
+      try {
+        const res = await fetch(NEON_SQL_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Neon-Connection-String': NEON_CONN_STR
+          },
+          body: JSON.stringify({ query: sql, params })
+        });
+        if (res.ok) {
+          const json = await res.json();
+          return json;
+        }
+      } catch(e) {
+        console.warn('Direct Neon SQL Error:', e);
+      }
+      return null;
+    }
 
     const DB = {
       async getAll() {
-        // 1. Try Vercel + Neon Postgres API
+        // 1. Query Neon Postgres Directly
+        try {
+          const neonRes = await executeNeonSql('SELECT * FROM applicants ORDER BY id DESC;');
+          if (neonRes && Array.isArray(neonRes.rows) && neonRes.rows.length > 0) {
+            const mapped = neonRes.rows.map(r => ({
+              id: r.id,
+              code: r.code,
+              fullName: r.full_name,
+              phone: r.phone,
+              email: r.email,
+              nationality: r.nationality,
+              city: r.city,
+              age: r.age,
+              education: r.education,
+              currentJob: r.current_job,
+              yearsExperience: r.years_experience,
+              expectedSalary: r.expected_salary,
+              skills: r.skills,
+              vatExperience: r.vat_experience,
+              status: r.status,
+              submittedAt: r.submitted_at,
+              interview: typeof r.interview === 'string' ? JSON.parse(r.interview) : r.interview,
+              photoBase64: r.photo_base64 || null,
+              cvFile: typeof r.cv_file === 'string' ? JSON.parse(r.cv_file) : (r.cv_file || null)
+            }));
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
+            return mapped;
+          }
+        } catch(e) {}
+
+        // 2. Query /api/db serverless endpoint
         try {
           const res = await fetch('/api/db', { cache: 'no-cache' });
           if (res.ok) {
             const data = await res.json();
-            if (data && Array.isArray(data.applicants)) {
+            if (data && Array.isArray(data.applicants) && data.applicants.length > 0) {
               localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data.applicants));
               return data.applicants;
             }
           }
         } catch(e) {}
 
-        // 2. Direct Cloud Storage
+        // 3. Query Local Cache
         try {
-          const res = await fetch(CLOUD_FALLBACK_URL, { cache: 'no-cache' });
-          if (res.ok) {
-            const json = await res.json();
-            if (json && json.data && Array.isArray(json.data.applicants)) {
-              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(json.data.applicants));
-              return json.data.applicants;
-            }
-          }
-        } catch(e) {}
-
-        // 3. Local Cache
-        try {
-          const local = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('almustashar_synced_data_v6');
+          const local = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('almustashar_neon_synced_v1');
           if (local) return JSON.parse(local);
         } catch(e) {}
 
@@ -169,40 +208,74 @@
       },
 
       async save(applicant) {
-        // 1. Save to Local Cache
+        // 1. Update Local Cache immediately for instant response
         try {
           const list = await this.getAll();
           const updated = [applicant, ...list.filter(a => a.code !== applicant.code && normalizeStr(a.phone) !== normalizeStr(applicant.phone))];
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
         } catch(e) {}
 
-        // 2. Push to Neon Postgres API
+        // 2. Direct Upsert to Neon Postgres
         try {
-          await fetch('/api/db', {
+          await executeNeonSql(`
+            INSERT INTO applicants (
+              id, code, full_name, phone, email, nationality, city, age, 
+              education, current_job, years_experience, expected_salary, skills, 
+              vat_experience, status, submitted_at, interview, photo_base64, cv_file
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+            ON CONFLICT (code) DO UPDATE SET
+              status = EXCLUDED.status,
+              interview = EXCLUDED.interview,
+              full_name = EXCLUDED.full_name,
+              phone = EXCLUDED.phone,
+              expected_salary = EXCLUDED.expected_salary,
+              education = EXCLUDED.education,
+              years_experience = EXCLUDED.years_experience,
+              photo_base64 = EXCLUDED.photo_base64,
+              cv_file = EXCLUDED.cv_file;
+          `, [
+            applicant.id || String(Date.now()),
+            applicant.code,
+            applicant.fullName || '',
+            applicant.phone || '',
+            applicant.email || '',
+            applicant.nationality || '',
+            applicant.city || '',
+            applicant.age || '',
+            applicant.education || '',
+            applicant.currentJob || '',
+            applicant.yearsExperience || '',
+            applicant.expectedSalary || '',
+            applicant.skills || '',
+            applicant.vatExperience || '',
+            applicant.status || 'SUBMITTED',
+            applicant.submittedAt || new Date().toLocaleDateString('ar-SA'),
+            applicant.interview ? JSON.stringify(applicant.interview) : null,
+            applicant.photoBase64 || null,
+            applicant.cvFile ? JSON.stringify(applicant.cvFile) : null
+          ]);
+        } catch(e) {}
+
+        // 3. Push to /api/db endpoint if serverless is active
+        try {
+          fetch('/api/db', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ applicant })
-          });
-        } catch(e) {}
-
-        // 3. Push to Cloud Storage Mirror
-        try {
-          const list = await this.getAll();
-          const updated = [applicant, ...list.filter(a => a.code !== applicant.code && normalizeStr(a.phone) !== normalizeStr(applicant.phone))];
-          await fetch(CLOUD_FALLBACK_URL, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name: 'Almustashar Portal Database',
-              data: { applicants: updated, updatedAt: new Date().toISOString() }
-            })
-          });
+          }).catch(() => {});
         } catch(e) {}
       },
 
       async delete(code) {
         try {
-          await fetch(`/api/db?code=${encodeURIComponent(code)}`, { method: 'DELETE' });
+          if (code) {
+            await executeNeonSql('DELETE FROM applicants WHERE code = $1;', [code]);
+          } else {
+            await executeNeonSql('DELETE FROM applicants;');
+          }
+        } catch(e) {}
+        try {
+          fetch(`/api/db?code=${encodeURIComponent(code)}`, { method: 'DELETE' }).catch(() => {});
         } catch(e) {}
       }
     };
@@ -1699,7 +1772,12 @@
       const handleFormSubmit = async (formData) => {
         setIsSubmitting(true);
         const currentList = await DB.getAll();
-        const nextNum = currentList.length + 1;
+        const existingNums = currentList.map(a => {
+          const num = parseInt((a.code || '').replace(/\D/g, ''), 10);
+          return isNaN(num) ? 0 : num;
+        });
+        const maxNum = existingNums.length > 0 ? Math.max(...existingNums) : 0;
+        const nextNum = maxNum + 1;
         const code = `APP-${String(nextNum).padStart(4, '0')}`;
 
         const newApplicant = {
@@ -1725,7 +1803,7 @@
         };
 
         await DB.save(newApplicant);
-        setApplicants([newApplicant, ...currentList]);
+        setApplicants([newApplicant, ...currentList.filter(a => a.code !== code)]);
         setActiveApplicant(newApplicant);
         setIsSubmitting(false);
         setView("success");
