@@ -870,7 +870,8 @@
 
       function findMatchingApplicant(list, query) {
         if (!query || !query.trim() || !Array.isArray(list)) return null;
-        const q = normalizeStr(query);
+        const rawQ = query.trim();
+        const q = normalizeStr(rawQ);
         const qCleanPhone = q.replace(/^(\+?966|00966|0)/, '');
 
         return list.find(a => {
@@ -878,22 +879,19 @@
           const phoneNorm = normalizeStr(a.phone || '');
           const phoneClean = phoneNorm.replace(/^(\+?966|00966|0)/, '');
           const nameNorm = normalizeStr(a.fullName || '');
-          const emailNorm = (a.email || '').toLowerCase().trim();
 
-          // 1. Code match
-          if (codeNorm.includes(q) || q.includes(codeNorm)) return true;
-          if (codeNorm.replace('app', '').replace('-', '').includes(q.replace('app', '').replace('-', ''))) return true;
+          // 1. Exact or Full Code Match (e.g. "APP-0001", "APP-0002", "0001", "0002")
+          if (codeNorm === q) return true;
+          const codeDigits = codeNorm.replace(/\D/g, '');
+          const qDigits = q.replace(/\D/g, '');
+          if (qDigits && codeDigits && (codeDigits === qDigits || (q.startsWith('app') && codeNorm === q))) return true;
 
-          // 2. Phone match
-          if (phoneNorm.includes(q) || q.includes(phoneNorm)) return true;
-          if (qCleanPhone.length >= 6 && phoneClean.includes(qCleanPhone)) return true;
-          if (phoneClean.length >= 6 && qCleanPhone.includes(phoneClean)) return true;
+          // 2. Full Phone Match (Must enter complete phone number: at least 8 digits or exact match)
+          if (phoneNorm === q) return true;
+          if (qCleanPhone.length >= 8 && (phoneClean === qCleanPhone || phoneClean.endsWith(qCleanPhone) || qCleanPhone.endsWith(phoneClean))) return true;
 
-          // 3. Name match
-          if (nameNorm.includes(q) || q.includes(nameNorm)) return true;
-
-          // 4. Email match
-          if (emailNorm && emailNorm.includes(query.toLowerCase().trim())) return true;
+          // 3. Full Name Match
+          if (nameNorm === q || (q.length >= 6 && nameNorm.includes(q))) return true;
 
           return false;
         });
@@ -913,10 +911,10 @@
       const handleInputChange = (e) => {
         const val = e.target.value;
         setSearchQuery(val);
-        if (val.trim()) {
-          setHasSearched(true);
-          const found = findMatchingApplicant(applicants, val);
-          if (found) setSelectedApplicant(found);
+        // Clear results if search input is emptied
+        if (!val.trim()) {
+          setHasSearched(false);
+          setSelectedApplicant(null);
         }
       };
 
