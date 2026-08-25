@@ -207,9 +207,9 @@
 
     const DB = {
       async getAll() {
-        // 1. Try serverless /api/db first
+        // 1. Try serverless /api/db first (15s timeout to handle Vercel cold starts)
         try {
-          const res = await fetchWithTimeout(`/api/db?_t=${Date.now()}`, { cache: 'no-store' }, 5000);
+          const res = await fetchWithTimeout(`/api/db?_t=${Date.now()}`, { cache: 'no-store' }, 15000);
           if (res.ok) {
             const data = await res.json();
             if (data && Array.isArray(data.applicants) && data.applicants.length > 0) {
@@ -217,11 +217,21 @@
               return data.applicants;
             }
           }
-        } catch(e) {}
+        } catch(e) {
+          console.warn('[DB.getAll] /api/db fetch notice:', e.message || e);
+        }
 
-        // 2. Query Neon Postgres Directly
+        // 2. Direct Query Neon Postgres as lightweight query (under 500KB)
         try {
-          const neonRes = await executeNeonSql('SELECT * FROM applicants ORDER BY id DESC;');
+          const neonRes = await executeNeonSql(`
+            SELECT 
+              id, code, full_name, phone, email, nationality, city, age, 
+              education, current_job, years_experience, expected_salary, skills, 
+              vat_experience, status, submitted_at, interview, photo_base64, 
+              (cv_file IS NOT NULL) as has_cv 
+            FROM applicants 
+            ORDER BY id DESC;
+          `);
           if (neonRes && Array.isArray(neonRes.rows) && neonRes.rows.length > 0) {
             const mapped = neonRes.rows.map(r => ({
               id: r.id,
@@ -242,16 +252,17 @@
               submittedAt: r.submitted_at,
               interview: typeof r.interview === 'string' ? JSON.parse(r.interview) : r.interview,
               photoBase64: r.photo_base64 || null,
-              cvFile: typeof r.cv_file === 'string' ? JSON.parse(r.cv_file) : (r.cv_file || null)
+              hasCv: Boolean(r.has_cv),
+              cvFile: r.has_cv ? { name: 'السيرة الذاتية (CV)', size: 'PDF' } : null
             }));
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
             return mapped;
           }
         } catch(e) {
-          console.error('[DB.getAll] Neon failed:', e);
+          console.error('[DB.getAll] Neon direct fallback failed:', e);
         }
 
-        // 3. Query Local Cache
+        // 3. Fallback to Local Cache only if network completely unavailable
         try {
           const local = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('almustashar_neon_synced_v1');
           if (local) {
