@@ -1,49 +1,44 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>بوابة التوظيف الإلكترونية | استمارة التقديم على وظيفة</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💼</text></svg>" />
+  <title>مطعم دبل | DOUBEL Menu</title>
+  <link rel="icon" href="https://res.cloudinary.com/do0u3he16/image/upload/v1778623162/94e560b7-648d-4293-8f92-292d31693ea1_-----01-2-01_nqreth.jpg" />
+  
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- React & ReactDOM -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  
-  <!-- Babel -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Alpine.js -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: {
-            cairo: ['Cairo', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          },
           colors: {
             brand: {
-              50: '#F2F8F6',
-              100: '#E1EFEA',
-              200: '#C2DFD6',
-              500: '#1B6B5D',
-              700: '#114D43',
-              800: '#0C3831',
-              900: '#082823',
-            },
-            slateText: {
-              title: '#0F172A',
-              body: '#334155',
-              muted: '#64748B',
-              light: '#94A3B8',
+              gold: '#F59E0B',
+              goldLight: '#FEF3C7',
+              goldDark: '#D97706',
+              amber: '#B45309',
+              darkBg: '#0B1120',
+              darkCard: '#1E293B',
+              darkBorder: '#334155',
+              crimson: '#E11D48',
             }
+          },
+          fontFamily: {
+            sans: ['Cairo', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
           }
         }
       }
@@ -51,2035 +46,881 @@
   </script>
 
   <style>
-    * { 
-      font-family: 'Cairo', sans-serif; 
+    * {
+      font-family: 'Cairo', sans-serif;
       -webkit-tap-highlight-color: transparent;
       box-sizing: border-box;
     }
-    body {
-      background-color: #F8FAF9;
-      color: #0F172A;
-    }
-    .g-card {
-      background: #FFFFFF;
-      border: 1px solid #E2E8F0;
-      border-radius: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-    }
-    .g-header {
-      border-top: 8px solid #0C3831;
-    }
-    .pulse-dot { animation: pulseDot 1.6s ease-in-out infinite; }
-    @keyframes pulseDot { 
-      0%, 100% { opacity: 1; transform: scale(1); } 
-      50% { opacity: .4; transform: scale(1.3); } 
-    }
+    [x-cloak] { display: none !important; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .gold-glow {
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.35);
+    }
+    .card-shine {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-shine:active {
+      transform: scale(0.985);
+    }
   </style>
 </head>
-<body class="bg-[#F8FAF9] text-[#0F172A] min-h-screen flex flex-col">
 
-  <div id="root" class="flex-1 flex flex-col"></div>
+<body x-data="doubleStoreApp()" x-cloak class="bg-slate-100 dark:bg-[#070D18] text-slate-900 dark:text-slate-100 min-h-screen pb-28 selection:bg-brand-gold selection:text-black">
 
-  <script type="text/babel">
-    const { useState, useEffect } = React;
+  <!-- Top Announcement Bar -->
+  <div class="bg-gradient-to-r from-amber-600 via-brand-gold to-yellow-500 text-slate-950 text-center py-2 px-3 font-black text-xs tracking-wide shadow-md flex items-center justify-center gap-2">
+    <span>🛵</span>
+    <span>عـرض خـاص: التوصيـل مـجـانـاً لجميع الطلبات</span>
+    <span>🔥</span>
+  </div>
 
-    /* ---------------- Mobile Safe CV Blob Opener ---------------- */
-    async function openCvInBrowser(cvFile, applicantCode = '') {
-      if (!cvFile && !applicantCode) return;
+  <!-- Notification Toast -->
+  <div class="fixed top-12 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm px-4 pointer-events-none">
+    <template x-if="notification.show">
+      <div class="bg-slate-900/95 dark:bg-black/95 text-white py-3.5 px-5 rounded-2xl shadow-2xl border border-brand-gold/40 flex items-center gap-3 backdrop-blur-md animate__animated animate__fadeInDown pointer-events-auto">
+        <div class="w-8 h-8 rounded-xl bg-brand-gold text-black flex items-center justify-center font-black text-sm flex-shrink-0">
+          ✓
+        </div>
+        <div class="flex-1 text-right">
+          <p class="font-bold text-xs" x-text="notification.message"></p>
+        </div>
+      </div>
+    </template>
+  </div>
 
-      if (cvFile && cvFile.dataUrl) {
-        openRawCvDataUrl(cvFile.dataUrl);
-        return;
-      }
+  <!-- Main Container -->
+  <div class="max-w-xl mx-auto min-h-screen bg-white dark:bg-[#0F172A] shadow-2xl border-x border-slate-200 dark:border-slate-800/80 relative">
 
-      // On-demand fetch from /api/db or Neon
-      try {
-        const codeToFetch = applicantCode || (cvFile && cvFile.code);
-        if (codeToFetch) {
-          const res = await fetchWithTimeout(`/api/db?cv=true&code=${encodeURIComponent(codeToFetch)}&_t=${Date.now()}`, {}, 10000);
-          if (res.ok) {
-            const json = await res.json();
-            if (json.cvFile && json.cvFile.dataUrl) {
-              openRawCvDataUrl(json.cvFile.dataUrl);
-              return;
-            }
-          }
-        }
-      } catch(e) {}
+    <!-- Top Navigation Header -->
+    <div class="sticky top-0 z-40 bg-white/95 dark:bg-[#0F172A]/95 backdrop-blur-md px-4 py-2.5 flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800/80">
+      
+      <!-- Theme & Language Switchers -->
+      <div class="flex items-center gap-2">
+        <button @click="toggleTheme()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-brand-gold text-base transition-transform active:scale-95 shadow-sm border border-slate-200 dark:border-slate-700" :title="darkMode ? 'تفعيل الوضع النهاري' : 'تفعيل الوضع الليلي'">
+          <span x-show="darkMode">☀️</span>
+          <span x-show="!darkMode">🌙</span>
+        </button>
 
-      // Fallback: direct Neon SQL
-      if (applicantCode) {
-        try {
-          const direct = await executeNeonSql('SELECT cv_file FROM applicants WHERE code = $1;', [applicantCode]);
-          if (direct?.rows?.[0]?.cv_file) {
-            const parsed = typeof direct.rows[0].cv_file === 'string' ? JSON.parse(direct.rows[0].cv_file) : direct.rows[0].cv_file;
-            if (parsed && parsed.dataUrl) {
-              openRawCvDataUrl(parsed.dataUrl);
-              return;
-            }
-          }
-        } catch(e) {}
-      }
+        <div class="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
+          <span>🇸🇦</span>
+          <span>AR</span>
+        </div>
+      </div>
 
-      alert('ملف السيرة الذاتية غير متوفر أو لم يتم إرفاقه.');
-    }
+      <!-- Center Store Title -->
+      <div class="flex items-center gap-1.5 font-black text-sm text-slate-800 dark:text-white">
+        <span class="text-brand-gold">🍽️</span>
+        <span>مطعم دبل | DOUBEL</span>
+      </div>
 
-    function openRawCvDataUrl(dataUrl) {
-      if (!dataUrl) return;
-      try {
-        const parts = dataUrl.split(',');
-        const mime = parts[0].match(/:(.*?);/)[1] || 'application/pdf';
-        const byteString = atob(parts[1]);
-        const ab = new ArrayBuffer(byteString.length);
-        const ia = new Uint8Array(ab);
-        for (let i = 0; i < byteString.length; i++) {
-          ia[i] = byteString.charCodeAt(i);
-        }
-        const blob = new Blob([ab], { type: mime });
-        const blobUrl = URL.createObjectURL(blob);
-        const win = window.open(blobUrl, '_blank');
-        if (!win) {
-          const link = document.createElement('a');
-          link.href = blobUrl;
-          link.target = '_blank';
-          link.click();
-        }
-      } catch(e) {
-        window.open(dataUrl, '_blank');
-      }
-    }
+      <!-- Working Hours Trigger -->
+      <button @click="showHoursModal = true" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 text-sm transition-transform active:scale-95 shadow-sm border border-slate-200 dark:border-slate-700" title="ساعات العمل">
+        🕒
+      </button>
+    </div>
 
-    /* ---------------- Normalize String Helper ---------------- */
-    function normalizeStr(str) {
-      if (!str) return '';
-      let s = String(str);
-      const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
-      for (let i = 0; i < 10; i++) {
-        s = s.split(arabicDigits[i]).join(String(i));
-      }
-      s = s.replace(/[أإآ]/g, 'ا')
-           .replace(/[ة]/g, 'ه')
-           .replace(/[ى]/g, 'ي')
-           .replace(/[\u064B-\u065F]/g, '');
-      return s.toLowerCase().replace(/[\s\-\+\(\)\_]/g, '');
-    }
-
-    /* ---------------- Neon Postgres Direct & Fast Client ---------------- */
-    const NEON_SQL_ENDPOINT = "https://ep-restless-water-ax1cfols.c-4.us-east-2.aws.neon.tech/sql";
-    const NEON_CONN_STR = "postgresql://neondb_owner:npg_bNqO2SZ6BeDX@ep-restless-water-ax1cfols.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require";
-    const LOCAL_STORAGE_KEY = 'almustashar_neon_synced_v2';
-
-    function fetchWithTimeout(url, options, timeoutMs = 15000) {
-      return Promise.race([
-        fetch(url, options),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Request timeout')), timeoutMs))
-      ]);
-    }
-
-    async function executeNeonSql(sql, params = []) {
-      try {
-        console.log('[Neon] Executing:', sql.substring(0, 50) + '...');
-        const res = await fetch(NEON_SQL_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Neon-Connection-String': NEON_CONN_STR
-          },
-          body: JSON.stringify({ query: sql, params })
-        });
+    <!-- Instagram Store Profile Section -->
+    <div class="relative">
+      
+      <!-- Uploaded Official Double Cover Banner -->
+      <div class="h-48 sm:h-56 w-full relative overflow-hidden bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+        <img 
+          src="./double_banner.jpg" 
+          alt="مطعم دبل DOUBEL" 
+          class="w-full h-full object-cover object-center"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
         
-        if (!res.ok) {
-          const errorText = await res.text();
-          console.error('[Neon] HTTP Error:', res.status, errorText);
-          return null;
-        }
+        <!-- Slogan overlay on banner -->
+        <div class="absolute bottom-3 right-4 z-10">
+          <span class="px-3 py-1 rounded-xl bg-black/70 backdrop-blur-md text-yellow-400 text-[11px] font-black border border-yellow-400/30 shadow-lg">
+            ✨ كل اللي بتحبه في مكان واحد
+          </span>
+        </div>
+      </div>
+
+      <!-- Floating WhatsApp Quick Button on Cover -->
+      <a 
+        href="https://wa.me/966555107546?text=مرحباً%20مطعم%20دبل،%20أود%20الطلب%20من%20المنيو" 
+        target="_blank"
+        class="absolute top-4 left-4 w-11 h-11 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-10 border-2 border-white dark:border-slate-900"
+        title="تواصل واتساب"
+      >
+        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+          <path d="M12.031 0C5.385 0 0 5.386 0 12.031c0 2.127.553 4.185 1.6 6.002L.202 23.364l5.485-1.439a12.022 12.022 0 0 0 6.344 1.777c6.646 0 12.031-5.386 12.031-12.032S18.677 0 12.031 0zm0 21.671a9.98 9.98 0 0 1-5.1-1.391l-.365-.217-3.791.995.998-3.696-.238-.378a9.957 9.957 0 0 1-1.536-5.323C2.001 6.136 6.505 1.632 12.031 1.632s10.03 4.504 10.03 10.03-4.504 10.03-10.03 10.03z"/>
+        </svg>
+      </a>
+
+      <!-- Profile Header Body -->
+      <div class="px-5 pt-0 pb-4 relative -mt-12 sm:-mt-14">
         
-        const json = await res.json();
-        console.log('[Neon] Success, rows:', json.rows?.length || 0);
-        return json;
-      } catch(e) {
-        console.error('[Neon] Network Error:', e.message);
-        return null;
-      }
-    }
+        <div class="flex items-end justify-between gap-4 mb-3">
+          
+          <!-- Social Icons on Left (Instagram style) -->
+          <div class="flex items-center gap-2 mb-1">
+            <!-- Instagram -->
+            <a href="https://www.instagram.com/shawarma.doubel?igsh=M2lxeGRkMjl4MXJk" target="_blank" class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 flex items-center justify-center hover:bg-gradient-to-tr hover:from-[#f09433] hover:via-[#dc2743] hover:to-[#bc1888] hover:text-white transition-all shadow-sm" title="Instagram">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <!-- TikTok -->
+            <a href="https://www.tiktok.com/@shawarma.doubel" target="_blank" class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 flex items-center justify-center hover:bg-black hover:text-white transition-all shadow-sm" title="TikTok">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.89-.6-4.13-1.47V15.5a8.074 8.074 0 0 1-3.21 6.53 8.12 8.12 0 0 1-1089-1.12A8.135 8.135 0 0 1 10.44 7.6c.45-.06.91-.07 1.36-.01V11.8a4.13 4.13 0 0 0-3.32 3.6c-.34 2.24 1.33 4.41 3.58 4.75a4.136 4.136 0 0 0 4.67-4.12V.02h-4.21z"/></svg>
+            </a>
+            <!-- Snapchat -->
+            <a href="https://www.snapchat.com/add/shawarma.doubel" target="_blank" class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 flex items-center justify-center hover:bg-[#FFFC00] hover:text-black transition-all shadow-sm" title="Snapchat">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.4c-4.1 0-7 3-7 6.1 0 .6.3 1.2.6 1.8.3.6.4 1.1.4 1.7 0 1.2-.8 1.8-1.7 1.8-.1 0-.3 0-.4-.1-.1-.7-.8-1.2-1.5-1.2-.8 0-1.5.7-1.5 1.5 0 .2 0 .4.1.6 1.1.5 1.7 1.4 1.7 2.4 0 2.2 2.1 3.5 4.5 3.5.3 0 .6 0 .8-.1.7.9 1.9 1.5 3.2 1.5 1.3 0 2.4-.6 3.2-1.5.3.1.6.1.8.1 2.4 0 4.5-1.3 4.5-3.5 0-1 .6-1.9 1.7-2.4.1-.2.1-.4.1-.6 0-.8-.7-1.5-1.5-1.5-.7 0-1.4.5-1.5 1.2-.1 0-.3.1-.4.1-.9 0-1.7-.6-1.7-1.8 0-.6.1-1.1.4-1.7.3-.6.6-1.2.6-1.8 0-3.1-2.9-6.1-7-6.1z"/></svg>
+            </a>
+          </div>
 
-    const DB = {
-      async getAll() {
-        // 1. Try serverless /api/db first (15s timeout to handle Vercel cold starts)
-        try {
-          const res = await fetchWithTimeout(`/api/db?_t=${Date.now()}`, { cache: 'no-store' }, 15000);
-          if (res.ok) {
-            const data = await res.json();
-            if (data && Array.isArray(data.applicants) && data.applicants.length > 0) {
-              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data.applicants));
-              return data.applicants;
-            }
+          <!-- Circular Profile Photo (Overlapping banner) -->
+          <div class="relative">
+            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 bg-gradient-to-tr from-amber-500 via-brand-gold to-yellow-300 gold-glow shadow-2xl overflow-hidden">
+              <img 
+                src="https://res.cloudinary.com/do0u3he16/image/upload/v1778623162/94e560b7-648d-4293-8f92-292d31693ea1_-----01-2-01_nqreth.jpg" 
+                alt="مطعم دبل DOUBEL" 
+                class="w-full h-full object-cover rounded-full bg-white dark:bg-slate-900 border-2 border-white dark:border-slate-900"
+              />
+            </div>
+            <div class="absolute bottom-1 right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900 flex items-center justify-center text-[10px] text-white font-bold" title="مفتوح الآن">
+              ✓
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Restaurant Title & Bio -->
+        <div class="text-right space-y-1.5">
+          <div class="flex items-center justify-start gap-2">
+            <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">مطعم دبل <span class="text-brand-gold font-mono">DOUBEL</span></h1>
+            <span class="px-2.5 py-0.5 rounded-full bg-brand-gold/15 text-brand-goldDark dark:text-brand-gold text-[10px] font-black border border-brand-gold/30">
+              مطعم معتمد ⭐
+            </span>
+          </div>
+
+          <p class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 leading-relaxed">
+            أشهى الشاورما، المشويات، البروستد، البرجر، البيتزا، الفطائر والمقبلات طازجة يومياً 🔥
+          </p>
+
+          <!-- Location with Maps link -->
+          <div class="flex items-center justify-start gap-2 pt-1">
+            <a 
+              href="https://maps.app.goo.gl/iQPoxnSL24Umq9rR6?g_st=ac" 
+              target="_blank" 
+              class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-brand-gold transition-colors"
+            >
+              <span class="text-brand-gold text-sm">📍</span>
+              <span class="underline decoration-dotted underline-offset-4 font-bold">موقعنا على الخريطة (Google Maps)</span>
+              <span class="text-[10px] text-brand-gold font-mono font-black">Open Maps ➔</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div class="grid grid-cols-2 gap-2.5 mt-4">
+          <a 
+            href="tel:0555107546" 
+            class="h-11 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-brand-gold hover:text-black dark:hover:bg-brand-gold dark:hover:text-black text-slate-800 dark:text-slate-100 font-black text-xs flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 active:scale-98 transition-all shadow-sm"
+          >
+            <span>📞</span>
+            <span>اتصال بالدليفري (0555107546)</span>
+          </a>
+
+          <button 
+            @click="showHoursModal = true" 
+            class="h-11 rounded-2xl bg-brand-gold/10 text-brand-goldDark dark:text-brand-gold font-black text-xs flex items-center justify-center gap-2 border border-brand-gold/30 active:scale-98 transition-all hover:bg-brand-gold/20"
+          >
+            <span>🕒</span>
+            <span>أوقات العمل (3م – 2:30ص)</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Search Input -->
+    <div class="px-4 mb-3">
+      <div class="relative">
+        <input 
+          type="text" 
+          x-model="searchQuery" 
+          placeholder="🔍 ابحث في المنيو (شاورما، بروستد، برجر، بيتزا...)" 
+          class="w-full h-11 pr-10 pl-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-xs sm:text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 transition-all placeholder:text-slate-400 text-right shadow-sm"
+        />
+        <div class="absolute right-3.5 top-3 text-slate-400">
+          <svg class="w-4 h-4 fill-none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <button 
+          x-show="searchQuery" 
+          @click="searchQuery = ''" 
+          class="absolute left-3 top-3 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-white"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Sticky Category Pills Bar (Horizontal Scroll) -->
+    <div class="sticky top-[53px] z-30 bg-white/95 dark:bg-[#0F172A]/95 backdrop-blur-md py-2.5 px-4 border-y border-slate-200/80 dark:border-slate-800/80 shadow-sm overflow-x-auto no-scrollbar">
+      <div class="flex items-center gap-2 min-w-max pb-0.5">
+        
+        <!-- All category -->
+        <button 
+          @click="activeCategory = 'all'"
+          class="px-4 py-2 rounded-2xl text-xs font-black transition-all flex items-center gap-1.5 whitespace-nowrap"
+          :class="activeCategory === 'all' ? 'bg-brand-gold text-slate-950 shadow-md font-black ring-2 ring-brand-gold/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'"
+        >
+          <span>🔥</span>
+          <span>الكل</span>
+        </button>
+
+        <template x-for="cat in categories" :key="cat.id">
+          <button 
+            @click="activeCategory = cat.id"
+            class="px-4 py-2 rounded-2xl text-xs font-black transition-all flex items-center gap-1.5 whitespace-nowrap"
+            :class="activeCategory === cat.id ? 'bg-brand-gold text-slate-950 shadow-md font-black ring-2 ring-brand-gold/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'"
+          >
+            <span x-text="cat.icon"></span>
+            <span x-text="cat.name"></span>
+          </button>
+        </template>
+      </div>
+    </div>
+
+    <!-- Clean Menu Items List with Authentic Photos -->
+    <div class="p-4 space-y-4">
+      
+      <!-- Category Header & Items Count -->
+      <div class="flex items-center justify-between px-1 mb-1">
+        <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-brand-gold"></span>
+          <span x-text="activeCategory === 'all' ? 'قائمة الطعام الكاملة' : categories.find(c => c.id === activeCategory)?.name"></span>
+        </h2>
+        <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 font-mono" x-text="`(${filteredItems().length} صنف)`"></span>
+      </div>
+
+      <!-- 2-Columns Food Photo Grid (Original Loved Layout) -->
+      <div class="grid grid-cols-2 gap-3 sm:gap-4">
+        
+        <template x-for="item in filteredItems()" :key="item.id">
+          <div 
+            @click="openItemModal(item)"
+            class="card-shine bg-white dark:bg-[#1E293B] rounded-3xl p-2.5 sm:p-3 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-brand-gold/50 flex flex-col justify-between cursor-pointer group relative overflow-hidden"
+          >
+            
+            <!-- Food Image Box -->
+            <div class="relative w-full aspect-square rounded-2xl overflow-hidden mb-2 bg-slate-900 border border-slate-200 dark:border-slate-700">
+              <img 
+                :src="item.image" 
+                :alt="item.name"
+                class="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
+                loading="lazy"
+              />
+              
+              <!-- Quick Add Button (+) overlay -->
+              <button 
+                type="button"
+                @click.stop="quickAdd(item)"
+                class="absolute bottom-2 left-2 w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-brand-gold hover:bg-brand-goldDark text-slate-950 font-black flex items-center justify-center shadow-lg transition-transform active:scale-90 z-10 border border-white/20"
+                title="إضافة للسلة"
+              >
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+              </button>
+
+              <!-- Category Tag Pill -->
+              <span 
+                x-show="item.badge" 
+                class="absolute top-2 right-2 px-2 py-0.5 rounded-lg bg-red-600/90 backdrop-blur-xs text-white text-[9px] font-black shadow-sm"
+                x-text="item.badge"
+              ></span>
+            </div>
+
+            <!-- Meal Information -->
+            <div class="space-y-1 text-right flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white line-clamp-1 group-hover:text-brand-gold transition-colors" x-text="item.name"></h3>
+                <p class="text-[10px] text-slate-400 font-bold" x-text="getCategoryName(item.category)"></p>
+              </div>
+
+              <!-- Price Tag -->
+              <div class="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/80 mt-1.5">
+                <div class="flex items-baseline gap-1 font-mono">
+                  <span class="text-xs sm:text-sm font-black text-amber-600 dark:text-brand-gold" x-text="item.price"></span>
+                  <span class="text-[9px] font-bold text-slate-500">ر.س</span>
+                </div>
+                <span class="text-[9px] font-extrabold text-brand-goldDark dark:text-brand-gold">طلب سريع ➔</span>
+              </div>
+            </div>
+
+          </div>
+        </template>
+
+      </div>
+
+      <!-- Empty Search State -->
+      <div x-show="filteredItems().length === 0" class="py-16 text-center space-y-3">
+        <div class="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto text-2xl border border-slate-200 dark:border-slate-700">
+          🔍
+        </div>
+        <h4 class="text-sm font-black text-slate-800 dark:text-white">لم نجد نتائج مطابقة لبحثك</h4>
+        <p class="text-xs text-slate-500">جرّب البحث بكلمة أخرى أو اختر قسماً من القائمة أعلاه</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Floating Bottom Navigation Bar -->
+  <div class="fixed bottom-0 left-0 right-0 z-50 p-3 pointer-events-none">
+    <div class="max-w-md mx-auto bg-slate-900/95 dark:bg-black/95 text-white backdrop-blur-lg rounded-3xl p-2 px-4 shadow-2xl border border-slate-800 dark:border-brand-gold/30 flex items-center justify-between pointer-events-auto">
+      
+      <!-- Menu Link -->
+      <button 
+        @click="activeCategory = 'all'; window.scrollTo({top: 0, behavior: 'smooth'})" 
+        class="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl text-slate-400 hover:text-brand-gold transition-colors flex-1"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+        <span class="text-[10px] font-black">المنيو</span>
+      </button>
+
+      <!-- Center Floating Cart Button (Elevated) -->
+      <div class="relative -top-5 flex flex-col items-center">
+        <button 
+          @click="showCart = true" 
+          class="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 via-brand-gold to-yellow-300 text-slate-950 flex items-center justify-center shadow-xl hover:scale-108 active:scale-95 transition-all border-4 border-white dark:border-[#0F172A] gold-glow"
+        >
+          <div class="relative">
+            <svg class="w-6 h-6 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" />
+              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+            </svg>
+            <span 
+              x-show="cartItemsCount() > 0" 
+              class="absolute -top-2 -right-2 bg-red-600 text-white font-black text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-black shadow-md animate__animated animate__bounceIn"
+              x-text="cartItemsCount()"
+            ></span>
+          </div>
+        </button>
+        <span class="text-[10px] font-black text-brand-gold mt-1 font-mono" x-show="cartItemsCount() > 0" x-text="`${calculateTotal()} ر.س`"></span>
+        <span class="text-[10px] font-black text-slate-300 mt-1" x-show="cartItemsCount() === 0">السلة</span>
+      </div>
+
+      <!-- About Store Link -->
+      <button 
+        @click="showHoursModal = true" 
+        class="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl text-slate-400 hover:text-brand-gold transition-colors flex-1"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span class="text-[10px] font-black">عن المطعم</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- Item Details Modal -->
+  <div 
+    x-show="selectedItem" 
+    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md" 
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+  >
+    <div 
+      class="w-full max-w-md bg-white dark:bg-[#1E293B] rounded-t-[32px] sm:rounded-3xl p-6 relative shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto no-scrollbar text-right"
+      @click.away="selectedItem = null"
+    >
+      <button 
+        @click="selectedItem = null" 
+        class="absolute top-4 left-4 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center text-sm font-bold shadow-sm z-10"
+      >
+        ✕
+      </button>
+
+      <template x-if="selectedItem">
+        <div class="space-y-4">
+          
+          <div class="w-full h-48 rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-md">
+            <img :src="selectedItem.image" class="w-full h-full object-cover" />
+          </div>
+
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-black text-slate-900 dark:text-white" x-text="selectedItem.name"></h3>
+            <span class="text-base font-black text-amber-600 dark:text-brand-gold font-mono" x-text="`${selectedItem.price} ر.س`"></span>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
+            <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-2xl p-1 border border-slate-200 dark:border-slate-700">
+              <button @click="modalQty = Math.max(1, modalQty - 1)" class="w-9 h-9 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-black text-base shadow-sm">
+                -
+              </button>
+              <span class="w-10 text-center font-black font-mono text-sm" x-text="modalQty"></span>
+              <button @click="modalQty++" class="w-9 h-9 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-black text-base shadow-sm">
+                +
+              </button>
+            </div>
+
+            <button 
+              @click="addModalItemToCart()" 
+              class="flex-1 h-12 rounded-2xl bg-gradient-to-r from-amber-500 to-brand-gold text-slate-950 font-black text-sm shadow-xl flex items-center justify-center gap-2 active:scale-98 transition-all"
+            >
+              <span>إضافة للسلة</span>
+              <span class="font-mono" x-text="`(${selectedItem.price * modalQty} ر.س)`"></span>
+            </button>
+          </div>
+
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- Cart Slide-out Drawer -->
+  <div 
+    x-show="showCart" 
+    class="fixed inset-0 z-50 overflow-hidden" 
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+  >
+    <div class="absolute inset-0 bg-black/75 backdrop-blur-md" @click="showCart = false"></div>
+
+    <div 
+      class="absolute top-0 bottom-0 left-0 max-w-md w-full bg-white dark:bg-[#0F172A] shadow-2xl flex flex-col border-r border-slate-200 dark:border-slate-800 text-right"
+      x-transition:enter="transition ease-out duration-300"
+      x-transition:enter-start="-translate-x-full"
+      x-transition:enter-end="translate-x-0"
+      x-transition:leave="transition ease-in duration-200"
+      x-transition:leave-start="translate-x-0"
+      x-transition:leave-end="-translate-x-full"
+    >
+      
+      <!-- Cart Header -->
+      <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🛒</span>
+          <h2 class="text-lg font-black text-slate-900 dark:text-white">سلة الطلبات</h2>
+          <span class="px-2 py-0.5 rounded-full bg-brand-gold/15 text-brand-goldDark dark:text-brand-gold text-xs font-mono font-bold" x-text="`${cartItemsCount()} وجبة`"></span>
+        </div>
+        <button @click="showCart = false" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center text-sm font-bold">
+          ✕
+        </button>
+      </div>
+
+      <!-- Cart Items & Form -->
+      <div class="flex-1 overflow-y-auto p-5 space-y-5 no-scrollbar">
+        
+        <!-- Order Type Picker (Pickup / Delivery) -->
+        <div class="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-800/90 p-1 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <button 
+            @click="orderType = 'pickup'"
+            class="py-2.5 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2"
+            :class="orderType === 'pickup' ? 'bg-brand-gold text-slate-950 shadow-md' : 'text-slate-600 dark:text-slate-400'"
+          >
+            <span>🏪</span>
+            <span>استلام من الفرع</span>
+          </button>
+
+          <button 
+            @click="orderType = 'delivery'"
+            class="py-2.5 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2"
+            :class="orderType === 'delivery' ? 'bg-brand-gold text-slate-950 shadow-md' : 'text-slate-600 dark:text-slate-400'"
+          >
+            <span>🛵</span>
+            <span>توصيل (مجاناً)</span>
+          </button>
+        </div>
+
+        <!-- Customer Inputs -->
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم الكريم:</label>
+            <input 
+              type="text" 
+              x-model="customerName" 
+              placeholder="اكتب اسمك..." 
+              class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-brand-gold text-right"
+            />
+          </div>
+
+          <div x-show="orderType === 'delivery'">
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">عنوان التوصيل:</label>
+            <input 
+              type="text" 
+              x-model="customerAddress" 
+              placeholder="الحي، الشارع، رقم العمارة أو البيت..." 
+              class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-brand-gold text-right"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">ملاحظات على الطلب:</label>
+            <input 
+              type="text" 
+              x-model="orderNotes" 
+              placeholder="مثال: بدون بصل، صوص ثوم زيادة..." 
+              class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-brand-gold text-right"
+            />
+          </div>
+        </div>
+
+        <!-- Cart Items List -->
+        <div class="space-y-3 pt-2">
+          <h4 class="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center justify-between">
+            <span>الوجبات المحددة:</span>
+            <button x-show="cart.length > 0" @click="cart = []" class="text-[10px] text-red-500 font-bold hover:underline">تفريغ السلة</button>
+          </h4>
+
+          <template x-if="cart.length === 0">
+            <div class="py-12 text-center text-slate-400 space-y-2">
+              <span class="text-3xl block">🛒</span>
+              <p class="text-xs font-bold">السلة فارغة حالياً</p>
+              <p class="text-[11px] text-slate-500">اختر وجباتك من المنيو لتظهر هنا</p>
+            </div>
+          </template>
+
+          <template x-for="item in cart" :key="item.cartId">
+            <div class="p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2">
+              
+              <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                <img :src="item.image" class="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
+                <div class="min-w-0 flex-1">
+                  <h5 class="text-xs font-black text-slate-900 dark:text-white truncate" x-text="item.name"></h5>
+                  <span class="block text-xs font-mono font-black text-amber-600 dark:text-brand-gold mt-0.5" x-text="`${itemTotal(item)} ر.س`"></span>
+                </div>
+              </div>
+
+              <!-- Quantity buttons -->
+              <div class="flex items-center gap-1.5 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+                <button @click="updateQty(item.cartId, -1)" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 font-black text-xs text-slate-700 dark:text-slate-300">
+                  -
+                </button>
+                <span class="w-6 text-center font-mono font-black text-xs" x-text="item.quantity"></span>
+                <button @click="updateQty(item.cartId, 1)" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 font-black text-xs text-slate-700 dark:text-slate-300">
+                  +
+                </button>
+              </div>
+
+            </div>
+          </template>
+        </div>
+
+      </div>
+
+      <!-- Cart Footer / Checkout Button -->
+      <div x-show="cart.length > 0" class="p-5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-[#0F172A] space-y-3">
+        
+        <div class="space-y-1.5 text-xs font-bold">
+          <div class="flex justify-between text-slate-500 dark:text-slate-400">
+            <span>المجموع الفرعي:</span>
+            <span class="font-mono" x-text="`${calculateSubtotal()} ر.س`"></span>
+          </div>
+          <div class="flex justify-between text-slate-500 dark:text-slate-400">
+            <span>رسوم التوصيل:</span>
+            <span class="text-emerald-500 font-black">مجاناً 🆓</span>
+          </div>
+          <div class="flex justify-between text-sm font-black text-slate-900 dark:text-white pt-2 border-t border-slate-100 dark:border-slate-800">
+            <span>الإجمالي النهائي:</span>
+            <span class="text-brand-gold font-mono text-base" x-text="`${calculateTotal()} ر.س`"></span>
+          </div>
+        </div>
+
+        <button 
+          @click="submitOrderToWhatsApp()" 
+          class="w-full h-14 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-700 hover:to-green-600 text-white font-black text-sm shadow-xl flex items-center justify-center gap-2.5 active:scale-98 transition-all"
+        >
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.386 0 12.031c0 2.127.553 4.185 1.6 6.002L.202 23.364l5.485-1.439a12.022 12.022 0 0 0 6.344 1.777c6.646 0 12.031-5.386 12.031-12.032S18.677 0 12.031 0zm0 21.671a9.98 9.98 0 0 1-5.1-1.391l-.365-.217-3.791.995.998-3.696-.238-.378a9.957 9.957 0 0 1-1.536-5.323C2.001 6.136 6.505 1.632 12.031 1.632s10.03 4.504 10.03 10.03-4.504 10.03-10.03 10.03z"/></svg>
+          <span>إرسال وتأكيد الطلب عبر الواتساب</span>
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- About Store & Hours Modal -->
+  <div 
+    x-show="showHoursModal" 
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" 
+    x-transition 
+  >
+    <div 
+      class="w-full max-w-sm bg-white dark:bg-[#1E293B] rounded-3xl p-6 relative shadow-2xl border border-slate-200 dark:border-slate-700 text-right space-y-4"
+      @click.away="showHoursModal = false"
+    >
+      <button 
+        @click="showHoursModal = false" 
+        class="absolute top-4 left-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center text-xs font-bold"
+      >
+        ✕
+      </button>
+
+      <div class="text-center">
+        <div class="w-14 h-14 rounded-2xl bg-brand-gold/15 text-brand-gold flex items-center justify-center text-2xl mx-auto mb-2 border border-brand-gold/30">
+          🕒
+        </div>
+        <h3 class="text-base font-black text-slate-900 dark:text-white">ساعات العمل والتوصيل</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">مطعم دبل يرحب بكم يومياً</p>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <template x-for="day in ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']" :key="day">
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700">
+            <span class="font-black text-slate-800 dark:text-slate-200" x-text="day"></span>
+            <span class="font-mono font-bold text-brand-goldDark dark:text-brand-gold">03:00 PM – 02:30 AM</span>
+          </div>
+        </template>
+      </div>
+
+      <div class="pt-2">
+        <a 
+          href="tel:0555107546" 
+          class="w-full py-3 rounded-xl bg-brand-gold text-slate-950 font-black text-xs shadow-md flex items-center justify-center gap-2 block text-center"
+        >
+          <span>📞 الاتصال المباشر: 0555107546</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Application Logic -->
+  <script>
+    function doubleStoreApp() {
+      return {
+        darkMode: false,
+        searchQuery: '',
+        activeCategory: 'all',
+        showCart: false,
+        showHoursModal: false,
+        selectedItem: null,
+        modalQty: 1,
+        orderType: 'delivery',
+        customerName: '',
+        customerAddress: '',
+        orderNotes: '',
+        notification: { show: false, message: '' },
+        cart: [],
+
+        init() {
+          const savedTheme = localStorage.getItem('double_theme');
+          if (savedTheme) {
+            this.darkMode = savedTheme === 'dark';
+          } else {
+            this.darkMode = false;
           }
-        } catch(e) {
-          console.warn('[DB.getAll] /api/db fetch notice:', e.message || e);
-        }
+          this.applyTheme();
+        },
 
-        // 2. Direct Query Neon Postgres as lightweight query (under 500KB)
-        try {
-          const neonRes = await executeNeonSql(`
-            SELECT 
-              id, code, full_name, phone, email, nationality, city, age, 
-              education, current_job, years_experience, expected_salary, skills, 
-              vat_experience, status, submitted_at, interview, photo_base64, 
-              (cv_file IS NOT NULL) as has_cv 
-            FROM applicants 
-            ORDER BY id DESC;
-          `);
-          if (neonRes && Array.isArray(neonRes.rows) && neonRes.rows.length > 0) {
-            const mapped = neonRes.rows.map(r => ({
-              id: r.id,
-              code: r.code,
-              fullName: r.full_name,
-              phone: r.phone,
-              email: r.email,
-              nationality: r.nationality,
-              city: r.city,
-              age: r.age,
-              education: r.education,
-              currentJob: r.current_job,
-              yearsExperience: r.years_experience,
-              expectedSalary: r.expected_salary,
-              skills: r.skills,
-              vatExperience: r.vat_experience,
-              status: r.status,
-              submittedAt: r.submitted_at,
-              interview: typeof r.interview === 'string' ? JSON.parse(r.interview) : r.interview,
-              photoBase64: r.photo_base64 || null,
-              hasCv: Boolean(r.has_cv),
-              cvFile: r.has_cv ? { name: 'السيرة الذاتية (CV)', size: 'PDF' } : null
-            }));
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mapped));
-            return mapped;
+        toggleTheme() {
+          this.darkMode = !this.darkMode;
+          localStorage.setItem('double_theme', this.darkMode ? 'dark' : 'light');
+          this.applyTheme();
+        },
+
+        applyTheme() {
+          if (this.darkMode) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
           }
-        } catch(e) {
-          console.error('[DB.getAll] Neon direct fallback failed:', e);
-        }
+        },
 
-        // 3. Fallback to Local Cache only if network completely unavailable
-        try {
-          const local = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('almustashar_neon_synced_v1');
-          if (local) {
-            const parsed = JSON.parse(local);
-            console.log('[DB.getAll] Fallback to localStorage, count:', parsed.length);
-            return parsed;
+        categories: [
+          { id: 'shawarma', name: 'شاورما', icon: '🌯' },
+          { id: 'grills', name: 'مشويات', icon: '🍢' },
+          { id: 'broasted', name: 'البروستد', icon: '🍗' },
+          { id: 'burger', name: 'البرجر', icon: '🍔' },
+          { id: 'pizza', name: 'البيتزا', icon: '🍕' },
+          { id: 'pastries', name: 'الفطاير', icon: '🥐' },
+          { id: 'drinks', name: 'المشروبات', icon: '🥤' },
+          { id: 'sauces_appetizers', name: 'الصوصات + مقبلات', icon: '🥗' }
+        ],
+
+        // Exact Official Menu items with User Authentic Photos
+        menuItems: [
+          // 🌯 الشاورما
+          { id: 'sh1', name: 'شاورما صغير', price: 5, category: 'shawarma', badge: '🔥 الأكثر طلباً', image: './images/img_sh_small.jpg' },
+          { id: 'sh2', name: 'صاروخ', price: 9, category: 'shawarma', badge: '⭐ مميز', image: './images/img_sh_sarookh.jpg' },
+          { id: 'sh3', name: 'عربي 8 قطع', price: 16, category: 'shawarma', image: './images/img_sh_arabi_8.jpg' },
+          { id: 'sh4', name: 'عربي 16 قطع', price: 27, category: 'shawarma', badge: '👑 وجبة دبل', image: './images/img_sh_arabi_16.jpg' },
+          { id: 'sh5', name: 'شاورما تبولة', price: 6, category: 'shawarma', image: './images/img_sh_tabbouleh.jpg' },
+          { id: 'sh6', name: 'شاورما حمص', price: 11, category: 'shawarma', image: './images/img_sh_hummus.jpg' },
+
+          // 🍢 مشويات
+          { id: 'g1', name: 'شيش', price: 9, category: 'grills', badge: '🍢 طازج', image: './images/img_grill_shish.jpg' },
+          { id: 'g2', name: 'كباب دجاج', price: 9, category: 'grills', image: './images/img_grill_kebab_chicken.jpg' },
+          { id: 'g3', name: 'كباب لحم', price: 9, category: 'grills', image: './images/img_grill_kebab_meat.jpg' },
+
+          // 🍗 البروستد
+          { id: 'br1', name: 'بروستد عادي', price: 18, category: 'broasted', badge: '🍗 مقرمش', image: './images/img_broasted_regular.jpg' },
+          { id: 'br2', name: 'بروستد حراق', price: 18, category: 'broasted', badge: '🌶️ حراق', image: './images/img_broasted_spicy.jpg' },
+
+          // 🍔 البرجر
+          { id: 'bg1', name: 'برجر لحم', price: 11, category: 'burger', image: './images/img_burger_meat.jpg' },
+          { id: 'bg2', name: 'برجر دجاج مشوي', price: 11, category: 'burger', image: './images/img_burger_chicken.jpg' },
+          { id: 'bg3', name: 'برجر دجاج كرسبي', price: 13, category: 'burger', badge: '🔥 كرسبي', image: './images/img_burger_crispy.jpg' },
+
+          // 🍕 البيتزا
+          { id: 'pz1', name: 'بيتزا نقانق', price: 14, category: 'pizza', image: './images/img_pizza_sausage.jpg' },
+          { id: 'pz2', name: 'بيتزا دجاج مكسيكانو', price: 16, category: 'pizza', badge: '🌶️ مكسيكانو', image: './images/img_pizza_mexicano.jpg' },
+          { id: 'pz3', name: 'بيتزا لحم', price: 16, category: 'pizza', image: './images/img_pizza_meat.jpg' },
+          { id: 'pz4', name: 'بيتزا عكاوي', price: 14, category: 'pizza', image: './images/img_pizza_akkawi.jpg' },
+          { id: 'pz5', name: 'بيتزا دجاج رانش', price: 16, category: 'pizza', badge: '🔥 الأكثر طلباً', image: './images/img_pizza_ranch.jpg' },
+          { id: 'pz6', name: 'عش بلبل مع عسل', price: 14, category: 'pizza', image: './images/img_pizza_osh_bulbul.jpg' },
+          { id: 'pz7', name: 'بيتزا خضار', price: 14, category: 'pizza', image: './images/img_pizza_veggie.jpg' },
+
+          // 🥐 الفطاير
+          { id: 'ft1', name: 'محمره + عكاوي', price: 13, category: 'pastries', image: './images/img_fatayer_akkawi.jpg' },
+          { id: 'ft2', name: 'محمره + لحم', price: 13, category: 'pastries', image: './images/img_fatayer_meat.jpg' },
+          { id: 'ft3', name: 'محمره + دجاج مكسيكانو', price: 13, category: 'pastries', image: './images/img_fatayer_mexicano.jpg' },
+          { id: 'ft4', name: 'محمره + دجاج الفريدو', price: 13, category: 'pastries', image: './images/img_fatayer_alfredo.jpg' },
+          { id: 'ft5', name: 'محمره + مسخن', price: 13, category: 'pastries', badge: '⭐ مميز', image: './images/img_fatayer_musakhan.jpg' },
+          { id: 'ft6', name: 'بوكس ميني 12 قطع', price: 16, category: 'pastries', badge: '🎁 توفير', image: './images/img_fatayer_box_12.jpg' },
+          { id: 'ft7', name: 'بوكس ميني 24 قطع', price: 31, category: 'pastries', badge: '🎁 عائلي', image: './images/img_fatayer_box_24.jpg' },
+
+          // 🥤 المشروبات
+          { id: 'dr1', name: 'بيبسي', price: 3, category: 'drinks', image: './images/img_drink_pepsi.jpg' },
+          { id: 'dr2', name: 'بيبسي دايت', price: 2, category: 'drinks', image: './images/img_drink_diet.jpg' },
+          { id: 'dr3', name: 'سفن', price: 3, category: 'drinks', image: './images/img_drink_7up.jpg' },
+          { id: 'dr4', name: 'حمضيات', price: 3, category: 'drinks', image: './images/img_drink_citrus.jpg' },
+          { id: 'dr5', name: 'عصير ربيع', price: 2, category: 'drinks', image: './images/img_drink_juice.jpg' },
+          { id: 'dr6', name: 'ماء', price: 1, category: 'drinks', image: './images/img_drink_water.jpg' },
+
+          // 🥗 الصوصات + مقبلات
+          { id: 'sc1', name: 'صوص دبل عادي', price: 2, category: 'sauces_appetizers', image: './images/img_sauce_double.jpg' },
+          { id: 'sc2', name: 'صوص دبل حراق', price: 2, category: 'sauces_appetizers', badge: '🌶️', image: './images/img_sauce_spicy.jpg' },
+          { id: 'sc3', name: 'صوص ثوم', price: 2, category: 'sauces_appetizers', image: './images/img_sauce_garlic.jpg' },
+          { id: 'sc4', name: 'حمص', price: 4, category: 'sauces_appetizers', image: './images/img_app_hummus.jpg' },
+          { id: 'sc5', name: 'تبولة', price: 5, category: 'sauces_appetizers', image: './images/img_app_tabbouleh.jpg' },
+          { id: 'sc6', name: 'فتوش', price: 5, category: 'sauces_appetizers', image: './images/img_app_fattoush.jpg' }
+        ],
+
+        getCategoryName(catId) {
+          const found = this.categories.find(c => c.id === catId);
+          return found ? found.name : '';
+        },
+
+        filteredItems() {
+          let list = this.menuItems;
+          if (this.activeCategory !== 'all') {
+            list = list.filter(i => i.category === this.activeCategory);
           }
-        } catch(e) {
-          console.error('[DB.getAll] LocalStorage failed:', e);
-        }
+          if (this.searchQuery.trim()) {
+            const q = this.searchQuery.toLowerCase().trim();
+            list = list.filter(i => i.name.toLowerCase().includes(q));
+          }
+          return list;
+        },
 
-        return [];
-      },
+        openItemModal(item) {
+          this.selectedItem = item;
+          this.modalQty = 1;
+        },
 
-      async save(applicant, isUpdate = false) {
-        // Case 1: Admin status or interview update
-        if (isUpdate) {
-          try {
-            await executeNeonSql(`
-              UPDATE applicants SET
-                status = $1,
-                interview = $2
-              WHERE code = $3;
-            `, [
-              applicant.status || 'SUBMITTED',
-              applicant.interview ? JSON.stringify(applicant.interview) : null,
-              applicant.code
-            ]);
-          } catch(e) {}
+        addModalItemToCart() {
+          if (!this.selectedItem) return;
+          this.addToCartWithQty(this.selectedItem, this.modalQty);
+          this.selectedItem = null;
+        },
 
-          try {
-            fetchWithTimeout(`/api/db?_t=${Date.now()}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: 'UPDATE_STATUS', applicant })
-            }, 4000).catch(()=>{});
-          } catch(e) {}
+        quickAdd(item) {
+          this.addToCartWithQty(item, 1);
+        },
 
-          return applicant;
-        }
+        addToCartWithQty(item, qty) {
+          const cartId = item.id;
+          const existing = this.cart.find(i => i.cartId === cartId);
 
-        // Case 2: Pure New Application (ALWAYS INSERT WITH UNIQUE CODE)
-        try {
-          const liveRes = await executeNeonSql("SELECT code FROM applicants WHERE code LIKE 'APP-%';");
-          let maxNum = 0;
-          if (liveRes && Array.isArray(liveRes.rows)) {
-            liveRes.rows.forEach(r => {
-              const num = parseInt((r.code || '').replace(/\D/g, ''), 10);
-              if (!isNaN(num) && num > maxNum) maxNum = num;
+          if (existing) {
+            existing.quantity += qty;
+          } else {
+            this.cart.push({
+              ...item,
+              cartId: cartId,
+              quantity: qty
             });
           }
-          applicant.code = `APP-${String(maxNum + 1).padStart(4, '0')}`;
-          applicant.id = String(Date.now()) + '-' + Math.floor(Math.random() * 1000);
-        } catch(e) {}
 
-        // Direct pure INSERT to Neon Postgres
-        try {
-          await executeNeonSql(`
-            INSERT INTO applicants (
-              id, code, full_name, phone, email, nationality, city, age, 
-              education, current_job, years_experience, expected_salary, skills, 
-              vat_experience, status, submitted_at, interview, photo_base64, cv_file
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19);
-          `, [
-            applicant.id,
-            applicant.code,
-            applicant.fullName || '',
-            applicant.phone || '',
-            applicant.email || '',
-            applicant.nationality || '',
-            applicant.city || '',
-            applicant.age || '',
-            applicant.education || '',
-            applicant.currentJob || '',
-            applicant.yearsExperience || '',
-            applicant.expectedSalary || '',
-            applicant.skills || '',
-            applicant.vatExperience || '',
-            applicant.status || 'SUBMITTED',
-            applicant.submittedAt || new Date().toLocaleDateString('ar-SA'),
-            applicant.interview ? JSON.stringify(applicant.interview) : null,
-            applicant.photoBase64 || null,
-            applicant.cvFile ? JSON.stringify(applicant.cvFile) : null
-          ]);
-        } catch(e) {}
+          this.notification.message = 'تمت إضافة "' + item.name + '" إلى السلة (' + qty + ')';
+          this.notification.show = true;
+          setTimeout(() => this.notification.show = false, 2000);
+        },
 
-        // Post to /api/db endpoint with cache-buster
-        try {
-          const apiRes = await fetchWithTimeout(`/api/db?_t=${Date.now()}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ applicant })
-          }, 4000);
-          if (apiRes.ok) {
-            const json = await apiRes.json();
-            if (json.applicant && json.applicant.code) {
-              applicant.code = json.applicant.code;
+        updateQty(cartId, delta) {
+          const item = this.cart.find(i => i.cartId === cartId);
+          if (item) {
+            item.quantity += delta;
+            if (item.quantity <= 0) {
+              this.cart = this.cart.filter(i => i.cartId !== cartId);
             }
           }
-        } catch(e) {}
+        },
 
-        return applicant;
-      },
+        itemTotal(item) {
+          return item.price * item.quantity;
+        },
 
-      async delete(code) {
-        try {
-          if (code) {
-            await executeNeonSql('DELETE FROM applicants WHERE code = $1;', [code]);
-          } else {
-            await executeNeonSql('DELETE FROM applicants;');
+        calculateSubtotal() {
+          return this.cart.reduce((acc, item) => acc + this.itemTotal(item), 0);
+        },
+
+        calculateTotal() {
+          return this.calculateSubtotal();
+        },
+
+        cartItemsCount() {
+          return this.cart.reduce((acc, item) => acc + item.quantity, 0);
+        },
+
+        submitOrderToWhatsApp() {
+          if (!this.customerName.trim()) {
+            this.notification.message = 'يرجى كتابة الاسم لإتمام الطلب';
+            this.notification.show = true;
+            setTimeout(() => this.notification.show = false, 3000);
+            return;
           }
-        } catch(e) {}
-        try {
-          fetch(`/api/db?code=${encodeURIComponent(code)}`, { method: 'DELETE' }).catch(() => {});
-        } catch(e) {}
-      }
-    };
 
-    /* ---------------- Icons ---------------- */
-    const Icon = {
-      Scale: ({ size = 18 }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
-        </svg>
-      ),
-      CheckCircle2: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
-        </svg>
-      ),
-      Upload: ({ size = 18 }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
-        </svg>
-      ),
-      Video: ({ size = 18 }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
-        </svg>
-      ),
-      Check: ({ size = 18, color = "currentColor" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
-      ),
-      Circle: ({ size = 18, color = "currentColor", fill = "none" }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color} strokeWidth="1.8">
-          <circle cx="12" cy="12" r="10"/>
-        </svg>
-      ),
-      Trash: ({ size = 16 }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-        </svg>
-      ),
-      RefreshCw: ({ size = 16, className = "" }) => (
-        <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>
-        </svg>
-      ),
-      Shield: ({ size = 18 }) => (
-        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
-        </svg>
-      )
-    };
+          if (this.orderType === 'delivery' && !this.customerAddress.trim()) {
+            this.notification.message = 'يرجى كتابة عنوان التوصيل';
+            this.notification.show = true;
+            setTimeout(() => this.notification.show = false, 3000);
+            return;
+          }
 
-    const STAGES = [
-      { key: "SUBMITTED", label: "تم الإرسال" },
-      { key: "RECEIVED", label: "تم الاستلام" },
-      { key: "CV_VIEWED", label: "فحص الـ CV" },
-      { key: "SHORTLISTED", label: "القائمة المختصرة" },
-      { key: "INTERVIEW_SCHEDULED", label: "مقابلة مجدولة" },
-      { key: "INTERVIEW_COMPLETED", label: "تمت المقابلة" },
-      { key: "DECISION", label: "القرار النهائي" },
-    ];
+          const itemsText = this.cart.map(item =>
+            '▪️ *' + item.name + '* × ' + item.quantity + ' = ' + this.itemTotal(item) + ' ر.س'
+          ).join('\n');
 
-    /* ---------------- Navbar ---------------- */
-    function Navbar({ view, setView }) {
-      return (
-        <header className="bg-white border-b border-[#E2E8F0] sticky top-0 z-40 px-3 md:px-4 py-2.5">
-          <div className="max-w-3xl mx-auto flex items-center justify-between">
-            <button onClick={() => setView("form")} className="flex items-center gap-2.5 text-right">
-              <div className="w-8 h-8 rounded-lg bg-brand-800 text-white flex items-center justify-center shadow-sm">
-                <Icon.Scale size={16} />
-              </div>
-              <div>
-                <h1 className="font-extrabold text-xs md:text-sm text-slateText-title leading-tight">بوابة التوظيف الإلكترونية</h1>
-                <p className="text-[10px] text-brand-700 font-semibold">استمارة التقديم والتوظيف</p>
-              </div>
-            </button>
+          const message = '🌟 *طلب جديد من متجر مطعم دبل | DOUBEL* 🌟\n' +
+            '━━━━━━━━━━━━━━━━━━━━\n' +
+            '👤 *اسم العميل:* ' + this.customerName + '\n' +
+            '🚚 *نوع الطلب:* ' + (this.orderType === 'delivery' ? 'توصيل دليفري (مجاناً 🛵)' : 'استلام من الفرع 🏪') + '\n' +
+            (this.orderType === 'delivery' && this.customerAddress ? '📍 *عنوان التوصيل:* ' + this.customerAddress + '\n' : '') +
+            (this.orderNotes ? '💡 *ملاحظات:* ' + this.orderNotes + '\n' : '') +
+            '━━━━━━━━━━━━━━━━━━━━\n' +
+            '📝 *تفاصيل الطلب:*\n' + itemsText + '\n' +
+            '━━━━━━━━━━━━━━━━━━━━\n' +
+            '💰 *الإجمالي النهائي:* ' + this.calculateTotal() + ' ريال سعودي\n\n' +
+            '🙏 *شكراً لاختياركم مطعم دبل!*';
 
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => setView("form")}
-                className={`text-[11px] md:text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${view === 'form' ? 'bg-brand-800 text-white' : 'bg-slate-100 text-slateText-body'}`}
-              >
-                استمارة التقديم
-              </button>
-              <button
-                onClick={() => setView("dashboard")}
-                className={`text-[11px] md:text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${view === 'dashboard' ? 'bg-brand-800 text-white' : 'bg-slate-100 text-slateText-body'}`}
-              >
-                استعلام عن طلب
-              </button>
-            </div>
-          </div>
-        </header>
-      );
-    }
-
-    /* ---------------- Google-Style Form ---------------- */
-    function GoogleStyleForm({ onSubmit, isSubmitting }) {
-      const [data, setData] = useState({
-        fullName: "",
-        phone: "",
-        email: "",
-        nationality: "",
-        city: "",
-        age: "",
-        education: "",
-        currentJob: "",
-        yearsExperience: "",
-        expectedSalary: "",
-        skills: "",
-        vatExperience: "",
-        photoBase64: null,
-        cvFile: null,
-      });
-      const [error, setError] = useState("");
-
-      const set = (k, v) => setData(d => ({ ...d, [k]: v }));
-
-      const handlePhoto = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let w = img.width;
-            let h = img.height;
-            const maxW = 500;
-            if (w > maxW) {
-              h = Math.round((h * maxW) / w);
-              w = maxW;
-            }
-            canvas.width = w;
-            canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-            const compressed = canvas.toDataURL('image/jpeg', 0.7);
-            set("photoBase64", compressed);
-          };
-          img.src = ev.target.result;
-        };
-        reader.readAsDataURL(file);
-      };
-
-      const handleCv = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          set("cvFile", {
-            name: file.name,
-            size: (file.size / 1024).toFixed(0) + " KB",
-            dataUrl: ev.target.result,
-            type: file.type || 'application/pdf'
-          });
-        };
-        reader.readAsDataURL(file);
-      };
-
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!data.fullName.trim()) { setError("يرجى كتابة الاسم الرباعي كاملاً."); return; }
-        if (!data.phone.trim()) { setError("يرجى كتابة رقم الهاتف (واتساب)."); return; }
-        if (!data.education.trim()) { setError("يرجى تحديد أو كتابة المؤهل العلمي."); return; }
-        if (!data.yearsExperience.trim()) { setError("يرجى تحديد سنوات الخبرة."); return; }
-        setError("");
-        onSubmit(data);
-      };
-
-      return (
-        <div className="max-w-2xl mx-auto px-3.5 md:px-6 py-6 md:py-10 space-y-5 animate-fade-in text-right">
+          window.open('https://wa.me/966555107546?text=' + encodeURIComponent(message), '_blank');
           
-          {/* Main Top Header Card */}
-          <div className="g-card g-header p-6 md:p-8 space-y-4 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-brand-800 text-white flex items-center justify-center shadow-sm">
-                  <Icon.Scale size={20} />
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-xs md:text-sm text-slateText-title">بوابة التوظيف واستقطاب الكفاءات</h3>
-                  <p className="text-[11px] text-brand-700 font-semibold">إدارة الموارد البشرية والتوظيف</p>
-                </div>
-              </div>
-              <span className="text-[11px] font-bold px-3 py-1 bg-brand-50 text-brand-800 rounded-full border border-brand-200/80">
-                توظيف مباشر
-              </span>
-            </div>
-
-            <div>
-              <h1 className="text-xl md:text-2xl font-black text-slateText-title leading-snug">
-                استمارة التقديم على وظيفة محاسب مالي
-              </h1>
-              <p className="text-xs md:text-sm text-slateText-muted mt-2 leading-relaxed">
-                يرجى تعبئة الحقول أدناه وإرفاق سيرتك الذاتية وصورتك الشخصية بدقة للانضمام إلى فريق العمل المالي.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 pt-2">
-              <span className="text-[11px] font-bold bg-slate-100 text-slateText-body px-3 py-1 rounded-lg">💼 دوام كامل</span>
-              <span className="text-[11px] font-bold bg-slate-100 text-slateText-body px-3 py-1 rounded-lg">📊 الإدارة المالية والحسابات</span>
-              <span className="text-[11px] font-bold bg-brand-50 text-brand-800 px-3 py-1 rounded-lg border border-brand-200">✨ فرصة وظيفية</span>
-            </div>
-
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-slateText-muted">
-              <span>جميع البيانات تخضع لسرية تامة لأغراض التوظيف</span>
-              <span className="text-red-500 font-bold">* حقول إلزامية</span>
-            </div>
-          </div>
-
-          {/* Validation Alert */}
-          {error && (
-            <div className="p-4 bg-red-50 text-red-700 rounded-2xl text-xs font-bold text-center border border-red-200 shadow-sm flex items-center justify-center gap-2 animate-shake">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-              <span>{error}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-
-            {/* Section 1: Personal Details */}
-            <div className="g-card p-5 md:p-7 space-y-4 shadow-sm">
-              <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-                <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-800 flex items-center justify-center text-xs font-bold">1</span>
-                <h2 className="text-sm font-extrabold text-slateText-title">البيانات الشخصية ومعلومات الاتصال</h2>
-              </div>
-              
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-2">
-                  الاسم الرباعي <span className="text-red-500 font-bold">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={data.fullName}
-                  onChange={e => set("fullName", e.target.value)}
-                  placeholder="اكتب اسمك الكامل كما هو في الهوية أو جواز السفر..."
-                  className="w-full h-12 px-4 rounded-xl border border-slate-200 text-xs md:text-sm bg-slate-50/60 outline-none text-right transition-all focus:border-brand-800 focus:bg-white focus:ring-4 focus:ring-brand-500/10"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slateText-body mb-2">
-                    رقم الهاتف (واتساب) <span className="text-red-500 font-bold">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    dir="ltr"
-                    value={data.phone}
-                    onChange={e => set("phone", e.target.value)}
-                    placeholder="05XXXXXXXX"
-                    className="w-full h-12 px-4 rounded-xl border border-slate-200 text-xs md:text-sm bg-slate-50/60 outline-none text-right transition-all focus:border-brand-800 focus:bg-white focus:ring-4 focus:ring-brand-500/10"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slateText-body mb-2">
-                    البريد الإلكتروني
-                  </label>
-                  <input
-                    type="email"
-                    dir="ltr"
-                    value={data.email}
-                    onChange={e => set("email", e.target.value)}
-                    placeholder="example@domain.com"
-                    className="w-full h-12 px-4 rounded-xl border border-slate-200 text-xs md:text-sm bg-slate-50/60 outline-none text-right transition-all focus:border-brand-800 focus:bg-white focus:ring-4 focus:ring-brand-500/10"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slateText-body mb-2">الجنسية</label>
-                  <input
-                    type="text"
-                    value={data.nationality}
-                    onChange={e => set("nationality", e.target.value)}
-                    placeholder="مثال: سعودي / مصري / أردني..."
-                    className="w-full h-12 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/60 outline-none text-right transition-all focus:border-brand-800 focus:bg-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slateText-body mb-2">مدينة الإقامة الحالية</label>
-                  <input
-                    type="text"
-                    value={data.city}
-                    onChange={e => set("city", e.target.value)}
-                    placeholder="اكتب المدينة الحالية..."
-                    className="w-full h-12 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/60 outline-none text-right transition-all focus:border-brand-800 focus:bg-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slateText-body mb-2">العمر</label>
-                  <input
-                    type="number"
-                    value={data.age}
-                    onChange={e => set("age", e.target.value)}
-                    placeholder="مثال: 27"
-                    className="w-full h-12 px-3.5 rounded-xl border border-slate-200 text-xs bg-slate-50/60 outline-none text-right transition-all focus:border-brand-800 focus:bg-white"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Section 2: Qualifications & Experience */}
-            <div className="g-card p-5 md:p-7 space-y-4 shadow-sm">
-              <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-                <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-800 flex items-center justify-center text-xs font-bold">2</span>
-                <h2 className="text-sm font-extrabold text-slateText-title">المؤهلات والخبرات المهنية</h2>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-2">
-                  المؤهل العلمي والتخصص <span className="text-red-500 font-bold">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={data.education}
-                  onChange={e => set("education", e.target.value)}
-                  placeholder="مثال: بكالوريوس محاسبة / دبلوم محاسبة مالية..."
-                  className="w-full h-12 px-4 rounded-xl border border-slate-200 text-xs md:text-sm bg-slate-50/60 outline-none text-right transition-all focus:border-brand-800 focus:bg-white focus:ring-4 focus:ring-brand-500/10"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slateText-body mb-2">
-                    سنوات الخبرة في مجال المحاسبة <span className="text-red-500 font-bold">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={data.yearsExperience}
-                    onChange={e => set("yearsExperience", e.target.value)}
-                    placeholder="مثال: سنتين / 3 سنوات / خريج جديد..."
-                    className="w-full h-12 px-4 rounded-xl border border-slate-200 text-xs md:text-sm bg-slate-50/60 outline-none text-right transition-all focus:border-brand-800 focus:bg-white focus:ring-4 focus:ring-brand-500/10"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slateText-body mb-2">
-                    الوظيفة الحالية أو آخر جهة عمل
-                  </label>
-                  <input
-                    type="text"
-                    value={data.currentJob}
-                    onChange={e => set("currentJob", e.target.value)}
-                    placeholder="مثال: محاسب عام بشركة... / متفرغ حالياً"
-                    className="w-full h-12 px-4 rounded-xl border border-slate-200 text-xs md:text-sm bg-slate-50/60 outline-none text-right transition-all focus:border-brand-800 focus:bg-white"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-2">
-                  البرامج والأنظمة المحاسبية التي تجيد استخدامها
-                </label>
-                <input
-                  type="text"
-                  value={data.skills}
-                  onChange={e => set("skills", e.target.value)}
-                  placeholder="مثال: Excel متقدم, Odoo, SAP, دفترة, سماك, قيود..."
-                  className="w-full h-12 px-4 rounded-xl border border-slate-200 text-xs md:text-sm bg-slate-50/60 outline-none text-right transition-all focus:border-brand-800 focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-2">
-                  الراتب المتوقع (بالريال السعودي)
-                </label>
-                <input
-                  type="text"
-                  value={data.expectedSalary}
-                  onChange={e => set("expectedSalary", e.target.value)}
-                  placeholder="اكتب الراتب المتوقع... (مثال: 3,000 ريال)"
-                  className="w-full h-12 px-4 rounded-xl border border-slate-200 text-xs md:text-sm bg-slate-50/60 outline-none text-right transition-all focus:border-brand-800 focus:bg-white focus:ring-4 focus:ring-brand-500/10"
-                />
-              </div>
-            </div>
-
-            {/* Section 3: Professional Questions */}
-            <div className="g-card p-5 md:p-7 space-y-4 shadow-sm">
-              <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-                <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-800 flex items-center justify-center text-xs font-bold">3</span>
-                <h2 className="text-sm font-extrabold text-slateText-title">الأسئلة والمهارات الضريبية</h2>
-              </div>
-
-              <div>
-                <label className="block text-xs md:text-sm font-bold text-slateText-body mb-3">
-                  هل لديك خبرة عملية في التعامل مع ضريبة القيمة المضافة وهيئة الزكاة والضريبة والجمارك (ZATCA)؟
-                </label>
-                <div className="grid grid-cols-2 gap-3 max-w-sm">
-                  {["نعم", "لا"].map(opt => {
-                    const isSelected = data.vatExperience === opt;
-                    return (
-                      <button
-                        key={opt}
-                        type="button"
-                        onClick={() => set("vatExperience", opt)}
-                        className={`h-11 rounded-xl text-xs md:text-sm font-bold border transition-all flex items-center justify-center gap-2 ${
-                          isSelected
-                            ? 'bg-brand-800 text-white border-brand-800 shadow-sm ring-2 ring-brand-200'
-                            : 'bg-slate-50 text-slateText-body border-slate-200 hover:bg-slate-100'
-                        }`}
-                      >
-                        {isSelected && <Icon.Check size={14} color="#FFFFFF" />}
-                        <span>{opt}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Section 4: Attachments */}
-            <div className="g-card p-5 md:p-7 space-y-4 shadow-sm">
-              <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-                <span className="w-6 h-6 rounded-lg bg-brand-50 text-brand-800 flex items-center justify-center text-xs font-bold">4</span>
-                <h2 className="text-sm font-extrabold text-slateText-title">المستندات والمرفقات الرسمية</h2>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                
-                {/* Photo Upload Box */}
-                <div className={`p-4 rounded-2xl border-2 border-dashed text-center space-y-3 transition-colors ${data.photoBase64 ? 'bg-green-50/40 border-green-300' : 'bg-slate-50/70 border-slate-300 hover:border-brand-400'}`}>
-                  <div className="flex items-center justify-center gap-1.5 text-slateText-title font-bold text-xs">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                    <span>الصورة الشخصية <span className="text-red-500 font-bold">*</span></span>
-                  </div>
-
-                  {data.photoBase64 ? (
-                    <div className="space-y-2">
-                      <img src={data.photoBase64} alt="المعاينة" className="w-20 h-20 rounded-xl object-cover mx-auto border-2 border-green-400 shadow-sm" />
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="text-[11px] font-bold text-green-700">✓ تم إرفاق الصورة</span>
-                        <button
-                          type="button"
-                          onClick={() => set("photoBase64", null)}
-                          className="text-[10px] text-red-600 font-bold hover:underline"
-                        >
-                          حذف / تغيير
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="text-[11px] text-slateText-muted">صورة واضحة بخلفية مناسبة (JPG / PNG) <span className="text-red-500 font-bold">مطلوبة *</span></p>
-                      <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-brand-800 rounded-xl text-xs font-extrabold cursor-pointer border border-slate-200 shadow-sm hover:bg-brand-50 transition-colors">
-                        <Icon.Upload size={14} />
-                        <span>اختيار صورة</span>
-                        <input type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
-                      </label>
-                    </div>
-                  )}
-                </div>
-
-                {/* CV Upload Box */}
-                <div className={`p-4 rounded-2xl border-2 border-dashed text-center space-y-3 transition-colors ${data.cvFile ? 'bg-green-50/40 border-green-300' : 'bg-slate-50/70 border-slate-300 hover:border-red-400'}`}>
-                  <div className="flex items-center justify-center gap-1.5 text-slateText-title font-bold text-xs">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
-                    <span>السيرة الذاتية (CV) <span className="text-red-500 font-bold">*</span></span>
-                  </div>
-
-                  {data.cvFile ? (
-                    <div className="space-y-2">
-                      <div className="w-12 h-12 rounded-xl bg-red-100 text-red-600 flex items-center justify-center mx-auto text-xs font-black">
-                        PDF
-                      </div>
-                      <p className="text-xs font-bold text-slateText-title truncate px-2">{data.cvFile.name}</p>
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="text-[11px] font-bold text-green-700">✓ ({data.cvFile.size})</span>
-                        <button
-                          type="button"
-                          onClick={() => set("cvFile", null)}
-                          className="text-[10px] text-red-600 font-bold hover:underline"
-                        >
-                          حذف / تغيير
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="text-[11px] text-slateText-muted">ملف السيرة الذاتية بصيغة (PDF / Word) <span className="text-red-500 font-bold">مطلوب *</span></p>
-                      <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-red-700 rounded-xl text-xs font-extrabold cursor-pointer border border-slate-200 shadow-sm hover:bg-red-50 transition-colors">
-                        <Icon.Upload size={14} />
-                        <span>إرفاق ملف السيرة الذاتية</span>
-                        <input type="file" accept=".pdf,.doc,.docx" onChange={handleCv} className="hidden" />
-                      </label>
-                    </div>
-                  )}
-                </div>
-
-              </div>
-            </div>
-
-            {/* Submit Action Card */}
-            <div className="g-card p-5 md:p-6 space-y-3 bg-gradient-to-r from-brand-50/50 via-white to-brand-50/30 border-brand-200">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full h-14 bg-brand-800 text-white rounded-2xl font-black text-sm md:text-base shadow-md hover:bg-brand-900 active:scale-[0.99] transition-all disabled:opacity-60 flex items-center justify-center gap-2.5"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Icon.RefreshCw size={18} className="animate-spin" />
-                    <span>جارٍ إرسال وحفظ الطلب في النظام...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>إرسال طلب التوظيف وتأكيد البيانات</span>
-                    <span className="text-lg">➔</span>
-                  </>
-                )}
-              </button>
-
-              <div className="flex items-center justify-center gap-1.5 text-[11px] text-slateText-muted font-medium text-center">
-                <Icon.Shield size={13} />
-                <span>سيتم تزويدك برقم مرجعي لمتابعة حالة طلبك فور الإرسال</span>
-              </div>
-            </div>
-
-          </form>
-        </div>
-      );
-    }
-
-    /* ---------------- Success Screen ---------------- */
-    function SuccessScreen({ applicant, goDashboard }) {
-      return (
-        <div className="max-w-md mx-auto px-4 py-12 text-center animate-fade-in space-y-4">
-          <div className="w-14 h-14 rounded-full bg-green-50 text-green-600 border border-green-200 flex items-center justify-center mx-auto">
-            <Icon.CheckCircle2 size={30} color="#16A34A" />
-          </div>
-          <h1 className="text-xl font-extrabold text-slateText-title">تم إرسال وحفظ طلبك بنجاح!</h1>
-          <p className="text-xs text-slateText-muted leading-relaxed">
-            مرحباً <strong>{applicant.fullName}</strong>، تم تسجيل وتأكيد طلبك في قاعدة البيانات.
-          </p>
-          <div className="inline-block px-5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold">
-            <span className="text-slateText-muted">رقم طلبك المرجعي: </span>
-            <strong className="text-brand-800 font-mono text-sm">{applicant.code}</strong>
-          </div>
-          <div className="pt-2">
-            <button onClick={goDashboard} className="w-full h-11 bg-brand-800 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-brand-900">
-              الانتقال لشاشة متابعة طلبي ➔
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    /* ---------------- Query Dashboard ---------------- */
-    function ApplicantDashboard({ applicants: propApplicants, activeApplicant, onRefresh, onGoApply }) {
-      const [searchQuery, setSearchQuery] = useState(activeApplicant ? activeApplicant.code : '');
-      const [selectedApplicant, setSelectedApplicant] = useState(activeApplicant || null);
-      const [loading, setLoading] = useState(false);
-      const [hasSearched, setHasSearched] = useState(Boolean(activeApplicant));
-      const [applicants, setApplicants] = useState(propApplicants || []);
-
-      // Synchronize internal state with prop
-      useEffect(() => {
-        setApplicants(propApplicants || []);
-      }, [propApplicants]);
-
-      // Refresh data on mount
-      useEffect(() => {
-        const loadFresh = async () => {
-          setLoading(true);
-          const fresh = await onRefresh();
-          setLoading(false);
-          if (fresh && Array.isArray(fresh)) {
-            setApplicants(fresh);
-            if (searchQuery.trim()) {
-              const match = findMatchingApplicant(fresh, searchQuery);
-              if (match) setSelectedApplicant(match);
-            } else if (activeApplicant) {
-              const match = findMatchingApplicant(fresh, activeApplicant.code);
-              if (match) setSelectedApplicant(match);
-            }
-          }
-        };
-        loadFresh();
-      }, []);
-
-      function findMatchingApplicant(list, query) {
-        if (!query || !query.trim() || !Array.isArray(list)) return null;
-        const q = normalizeStr(query);
-        const qCleanPhone = q.replace(/^(\+?966|00966|0)/, '');
-
-        return list.find(a => {
-          const codeNorm = normalizeStr(a.code || '');
-          const phoneNorm = normalizeStr(a.phone || '');
-          const phoneClean = phoneNorm.replace(/^(\+?966|00966|0)/, '');
-          const nameNorm = normalizeStr(a.fullName || '');
-          const emailNorm = (a.email || '').toLowerCase().trim();
-
-          // 1. Code match (supports partial: "0002" or "app-0002" or "2")
-          if (codeNorm.includes(q) || q.includes(codeNorm)) return true;
-          const codeDigits = codeNorm.replace(/app/g, '').replace(/-/g, '');
-          const qDigits = q.replace(/app/g, '').replace(/-/g, '');
-          if (codeDigits && qDigits && (codeDigits.includes(qDigits) || qDigits.includes(codeDigits))) return true;
-
-          // 2. Phone match
-          if (phoneNorm.includes(q) || q.includes(phoneNorm)) return true;
-          if (qCleanPhone.length >= 6 && phoneClean.includes(qCleanPhone)) return true;
-          if (phoneClean.length >= 6 && qCleanPhone.includes(phoneClean)) return true;
-
-          // 3. Name match
-          if (nameNorm.includes(q) || q.includes(nameNorm)) return true;
-
-          // 4. Email match
-          if (emailNorm && emailNorm.includes(query.toLowerCase().trim())) return true;
-
-          return false;
-        });
-      }
-
-      const handleManualSearch = async (e) => {
-        if (e) e.preventDefault();
-        if (!searchQuery.trim()) return;
-        setLoading(true);
-        setHasSearched(true);
-        const fresh = await onRefresh();
-        setLoading(false);
-        if (fresh && Array.isArray(fresh)) setApplicants(fresh);
-        const found = findMatchingApplicant(fresh || applicants, searchQuery);
-        setSelectedApplicant(found || null);
-      };
-
-      const handleInputChange = (e) => {
-        const val = e.target.value;
-        setSearchQuery(val);
-        if (val.trim()) {
-          setHasSearched(true);
-          const found = findMatchingApplicant(applicants, val);
-          if (found) setSelectedApplicant(found);
-        } else {
-          setHasSearched(false);
-          setSelectedApplicant(null);
-        }
-      };
-
-      const getStageIdx = (status) => {
-        const idx = STAGES.findIndex(s => s.key === status);
-        return idx >= 0 ? idx : 0;
-      };
-
-      const statusArabic = (s) => {
-        const map = {
-          SUBMITTED: 'تم استلام الطلب بنجاح',
-          RECEIVED: 'تم تسجيل الطلب في النظام',
-          CV_VIEWED: 'تمت مراجعة السيرة الذاتية',
-          SHORTLISTED: 'في القائمة المختصرة (مرشح)',
-          INTERVIEW_SCHEDULED: '📅 تمت جدولة موعد المقابلة',
-          INTERVIEW_COMPLETED: 'تمت المقابلة — بانتظار القرار',
-          ACCEPTED: 'تهانينا! تم القبول المبدئي ✓',
-          REJECTED: 'نعتذر لعدم التوفيق في هذه المرحلة'
-        };
-        return map[s] || s;
-      };
-
-      // Extract interview details
-      let interviewData = null;
-      if (selectedApplicant) {
-        if (typeof selectedApplicant.interview === 'string') {
-          try { interviewData = JSON.parse(selectedApplicant.interview); } catch(e) {}
-        } else if (selectedApplicant.interview && typeof selectedApplicant.interview === 'object') {
-          interviewData = selectedApplicant.interview;
-        } else if (selectedApplicant.status === 'INTERVIEW_SCHEDULED') {
-          interviewData = {
-            date: '2026-08-25',
-            time: '19:00',
-            meetLink: 'https://meet.google.com/ahh-wubn-okf'
-          };
+          this.cart = [];
+          this.showCart = false;
+          this.notification.message = 'تم تجهيز الطلب وإرساله إلى الواتساب بنجاح! 🎉';
+          this.notification.show = true;
+          setTimeout(() => this.notification.show = false, 4000);
         }
       }
-
-      return (
-        <div className="max-w-2xl mx-auto px-3 md:px-4 py-5 md:py-8 space-y-4 animate-fade-in text-right">
-          
-          {/* Search Box Card */}
-          <div className="g-card p-5 space-y-3.5 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm md:text-base font-black text-slateText-title">الاستعلام ومتابعة حالة الطلب</h2>
-              <button
-                onClick={async () => {
-                  setLoading(true);
-                  const fresh = await onRefresh();
-                  setLoading(false);
-                  if (searchQuery.trim()) {
-                    const match = findMatchingApplicant(fresh, searchQuery);
-                    if (match) setSelectedApplicant(match);
-                  }
-                }}
-                className="text-xs text-brand-800 hover:text-brand-900 font-bold flex items-center gap-1.5 px-2.5 py-1 bg-brand-50 rounded-lg transition-colors"
-              >
-                <Icon.RefreshCw size={12} className={loading ? "animate-spin" : ""} />
-                <span>تحديث البيانات</span>
-              </button>
-            </div>
-            <p className="text-xs text-slateText-muted leading-relaxed">
-              أدخل رقم الطلب المرجعي (مثال: <strong className="font-mono text-brand-800">APP-0001</strong>) أو رقم هاتفك الذي سجلت به:
-            </p>
-
-            <form onSubmit={handleManualSearch} className="flex gap-2">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={handleInputChange}
-                placeholder="رقم الطلب (APP-0001) أو رقم الجوال..."
-                className="flex-1 h-12 px-4 rounded-xl border border-slate-200 text-xs md:text-sm bg-slate-50 outline-none text-right focus:border-brand-800 focus:bg-white focus:ring-2 focus:ring-brand-100"
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-6 h-12 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs md:text-sm font-black shadow-sm transition-transform active:scale-98 flex items-center gap-1.5"
-              >
-                {loading ? <Icon.RefreshCw size={14} className="animate-spin" /> : <span>بحث 🔍</span>}
-              </button>
-            </form>
-          </div>
-
-          {/* Applicant Result */}
-          {selectedApplicant ? (
-            <div className="space-y-4">
-              
-              {/* Header Info Card */}
-              <div className="g-card p-5 space-y-4 shadow-sm border border-slate-200">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-mono text-xs font-black text-brand-800 bg-brand-50 px-2.5 py-0.5 rounded-lg border border-brand-200">{selectedApplicant.code}</span>
-                      <span className="text-[10px] text-slateText-muted">{selectedApplicant.submittedAt || ''}</span>
-                    </div>
-                    <h3 className="text-base md:text-lg font-black text-slateText-title">{selectedApplicant.fullName}</h3>
-                    <p className="text-xs text-slateText-muted font-mono" dir="ltr">{selectedApplicant.phone}</p>
-                  </div>
-                  <span className={`text-xs font-black px-3.5 py-1.5 rounded-xl border ${
-                    selectedApplicant.status === 'INTERVIEW_SCHEDULED' ? 'bg-purple-100 text-purple-900 border-purple-300 ring-2 ring-purple-100' :
-                    selectedApplicant.status === 'ACCEPTED' ? 'bg-green-100 text-green-900 border-green-300' :
-                    selectedApplicant.status === 'REJECTED' ? 'bg-red-100 text-red-900 border-red-300' :
-                    'bg-brand-50 text-brand-900 border-brand-200'
-                  }`}>
-                    {statusArabic(selectedApplicant.status)}
-                  </span>
-                </div>
-
-                {/* Status Timeline */}
-                <div className="overflow-x-auto no-scrollbar pt-3 border-t border-slate-100">
-                  <div style={{ minWidth: 520 }} className="flex flex-row w-full">
-                    {STAGES.map((s, i) => {
-                      const activeIdx = getStageIdx(selectedApplicant.status);
-                      const done = i < activeIdx;
-                      const isCur = i === activeIdx;
-                      return (
-                        <div key={s.key} className="flex-1 flex flex-col items-center">
-                          <div className="flex items-center w-full">
-                            {i !== 0 && <div className={`flex-1 h-0.5 ${done || isCur ? 'bg-green-600' : 'bg-slate-200'}`} />}
-                            <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center ${done ? 'bg-green-50 border-green-600 text-green-600' : isCur ? 'bg-brand-50 border-brand-800 text-brand-800 ring-2 ring-brand-200' : 'border-slate-300 text-slate-300'}`}>
-                              {done ? <Icon.Check size={11} color="#16A34A" /> : isCur ? <span className="pulse-dot w-2 h-2 rounded-full bg-brand-800" /> : <Icon.Circle size={6} />}
-                            </div>
-                            {i !== STAGES.length - 1 && <div className={`flex-1 h-0.5 ${done ? 'bg-green-600' : 'bg-slate-200'}`} />}
-                          </div>
-                          <p className="text-[10px] text-center mt-1.5 font-bold text-slateText-muted">{s.label}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* SCHEDULED INTERVIEW CARD (Prominent & Clear) */}
-              {(selectedApplicant.status === 'INTERVIEW_SCHEDULED' || interviewData) && (
-                <div className="g-card p-5 md:p-6 space-y-4 bg-gradient-to-br from-purple-50 via-white to-purple-50/40 border-2 border-purple-300 shadow-md animate-fade-in">
-                  <div className="flex items-center justify-between border-b border-purple-100 pb-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-2xl bg-purple-700 text-white flex items-center justify-center shadow-sm">
-                        <Icon.Video size={20} />
-                      </div>
-                      <div>
-                        <strong className="text-sm md:text-base font-black text-purple-950 block">موعد المقابلة الشخصية المحددة</strong>
-                        <span className="text-[11px] text-purple-800 font-semibold">عبر منصة Google Meet المرئية</span>
-                      </div>
-                    </div>
-                    <span className="text-[11px] font-black px-3 py-1 bg-purple-200 text-purple-900 rounded-full">
-                      مؤكدة 📅
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="bg-white p-3.5 rounded-2xl border border-purple-200 text-center shadow-sm">
-                      <span className="text-slateText-muted block text-[11px] font-bold mb-1">تاريخ المقابلة</span>
-                      <strong className="text-sm font-black text-purple-950 font-mono">
-                        {interviewData ? interviewData.date : '2026-08-25'}
-                      </strong>
-                    </div>
-                    <div className="bg-white p-3.5 rounded-2xl border border-purple-200 text-center shadow-sm">
-                      <span className="text-slateText-muted block text-[11px] font-bold mb-1">وقت المقابلة</span>
-                      <strong className="text-sm font-black text-purple-950 font-mono">
-                        {interviewData ? interviewData.time : '07:00 م'}
-                      </strong>
-                    </div>
-                  </div>
-
-                  <a
-                    href={(interviewData && interviewData.meetLink) || 'https://meet.google.com/ahh-wubn-okf'}
-                    target="_blank"
-                    className="w-full py-3.5 bg-purple-700 hover:bg-purple-800 text-white font-black rounded-2xl text-xs md:text-sm shadow-md transition-transform active:scale-98 flex items-center justify-center gap-2 text-center"
-                  >
-                    <span>الدخول إلى غرفة المقابلة (Google Meet)</span>
-                    <span className="text-base">➔</span>
-                  </a>
-
-                  <p className="text-[11px] text-purple-900 font-semibold text-center leading-relaxed">
-                    يرجى التواجد قبل الموعد المحدد بـ 5 دقائق والتأكد من تفعيل الكاميرا والميكروفون.
-                  </p>
-                </div>
-              )}
-
-              {/* Applicant Details Overview */}
-              <div className="g-card p-5 grid grid-cols-2 gap-3 text-xs shadow-sm border border-slate-200">
-                <div className="bg-slate-50 p-3 rounded-xl">
-                  <span className="text-slateText-muted block text-[10px]">المؤهل العلمي</span>
-                  <strong>{selectedApplicant.education}</strong>
-                </div>
-                <div className="bg-slate-50 p-3 rounded-xl">
-                  <span className="text-slateText-muted block text-[10px]">سنوات الخبرة</span>
-                  <strong>{selectedApplicant.yearsExperience}</strong>
-                </div>
-                <div className="bg-slate-50 p-3 rounded-xl">
-                  <span className="text-slateText-muted block text-[10px]">مدينة الإقامة</span>
-                  <strong>{selectedApplicant.city || 'غير محدد'}</strong>
-                </div>
-                <div className="bg-slate-50 p-3 rounded-xl">
-                  <span className="text-slateText-muted block text-[10px]">الراتب المتوقع</span>
-                  <strong className="text-brand-800">{selectedApplicant.expectedSalary || 'غير محدد'}</strong>
-                </div>
-              </div>
-            </div>
-          ) : hasSearched ? (
-            <div className="g-card p-8 text-center space-y-3 shadow-sm border border-slate-200">
-              <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto text-lg font-bold">
-                ✕
-              </div>
-              <h4 className="text-sm font-bold text-slateText-title">لم يتم العثور على طلب بهذا الرقم أو الهاتف</h4>
-              <p className="text-xs text-slateText-muted max-w-sm mx-auto">
-                يرجى التأكد من كتابة رقم الطلب بالشكل الصحيح (مثال: APP-0001) أو كتابة نفس رقم الجوال المستخدم أثناء التقديم.
-              </p>
-              <div className="pt-2 flex justify-center gap-2">
-                <button
-                  onClick={async () => {
-                    setLoading(true);
-                    await onRefresh();
-                    setLoading(false);
-                  }}
-                  className="px-4 py-2 border border-slate-200 text-slateText-body text-xs font-bold rounded-xl hover:bg-slate-50"
-                >
-                  إعادة التحميل 🔄
-                </button>
-                <button onClick={onGoApply} className="px-4 py-2 bg-brand-800 text-white text-xs font-bold rounded-xl shadow-sm hover:bg-brand-900">
-                  تقديم طلب جديد ➔
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="g-card p-8 text-center space-y-2 shadow-sm border border-slate-200">
-              <div className="w-12 h-12 rounded-full bg-brand-50 text-brand-800 flex items-center justify-center mx-auto mb-2">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-              </div>
-              <p className="text-xs font-bold text-slateText-body">أدخل رقم الطلب أو رقم هاتفك أعلاه</p>
-              <p className="text-[11px] text-slateText-muted">ستظهر لك تفاصيل حالة طلبك وموعد المقابلة المرئية فور الاستعلام</p>
-            </div>
-          )}
-
-        </div>
-      );
     }
-
-    /* ---------------- Admin Panel ---------------- */
-    function AdminAuthModal({ onSuccess, onClose }) {
-      const [loginId, setLoginId] = useState('');
-      const [password, setPassword] = useState('');
-      const [errorMsg, setErrorMsg] = useState('');
-
-      const handleLogin = (e) => {
-        e.preventDefault();
-        const norm = normalizeStr(loginId);
-        const validIdentifiers = [
-          '0550340929',
-          '966550340929',
-          '550340929',
-          '0555102513',
-          '966555102513',
-          '555102513',
-          'bodasalem0098@gmail.com',
-          'moabdo038@gmail.com',
-          'admin@almustashar.com'
-        ];
-        
-        if (!validIdentifiers.includes(norm) && !validIdentifiers.includes(loginId.trim().toLowerCase())) {
-          setErrorMsg('رقم الهاتف أو الحساب غير مصرح له بالدخول.');
-          return;
-        }
-        if (password.trim() !== '102044') {
-          setErrorMsg('كلمة المرور غير صحيحة.');
-          return;
-        }
-        onSuccess();
-      };
-
-      return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in text-right">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full border border-slate-200 shadow-2xl space-y-4">
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-800 flex items-center justify-center mx-auto mb-2 shadow-sm">
-                <Icon.Shield size={22} />
-              </div>
-              <h3 className="font-black text-base text-slateText-title">تسجيل دخول لوحة الإدارة</h3>
-              <p className="text-[11px] text-slateText-muted mt-0.5">لوحة تحكم إدارة التوظيف للمصرح لهم فقط</p>
-            </div>
-
-            {errorMsg && <div className="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl text-center border border-red-200">{errorMsg}</div>}
-
-            <form onSubmit={handleLogin} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1.5">رقم الهاتف أو البريد الإلكتروني</label>
-                <input
-                  type="text"
-                  dir="ltr"
-                  value={loginId}
-                  onChange={e => setLoginId(e.target.value)}
-                  placeholder="05xxxxxxxx"
-                  required
-                  className="w-full h-11 px-3.5 rounded-xl text-xs outline-none border border-slate-200 bg-slate-50 text-center font-mono focus:border-brand-800 focus:bg-white"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slateText-body mb-1.5">كلمة المرور</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••"
-                  required
-                  className="w-full h-11 px-3.5 rounded-xl text-xs outline-none border border-slate-200 bg-slate-50 text-center font-mono tracking-widest text-sm focus:border-brand-800 focus:bg-white"
-                />
-              </div>
-              <div className="flex gap-2 pt-2">
-                <button type="submit" className="flex-1 h-11 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs font-black shadow-md transition-transform active:scale-98">
-                  تسجيل الدخول ➔
-                </button>
-                <button type="button" onClick={onClose} className="px-4 h-11 border border-slate-200 text-slateText-body rounded-xl text-xs font-bold hover:bg-slate-50">
-                  إلغاء
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      );
-    }
-
-    function AdminDashboardView({ applicants, onUpdateStatus, onScheduleInterview, onDeleteApplicant, onResetAll, onRefresh }) {
-      const [list, setList] = useState(applicants || []);
-      const [selected, setSelected] = useState(applicants[0] || null);
-      const [searchQuery, setSearchQuery] = useState('');
-      const [scheduleOpen, setScheduleOpen] = useState(false);
-      const [intDate, setIntDate] = useState('2026-08-25');
-      const [intTime, setIntTime] = useState('19:00');
-      const [meetLink, setMeetLink] = useState('https://meet.google.com/ahh-wubn-okf');
-      const [filter, setFilter] = useState('ALL');
-      const [natFilter, setNatFilter] = useState('ALL');
-      const [previewPhoto, setPreviewPhoto] = useState(null);
-      const [previewCv, setPreviewCv] = useState(null);
-      const [isRefreshing, setIsRefreshing] = useState(false);
-
-      const doRefresh = async () => {
-        setIsRefreshing(true);
-        try {
-          if (onRefresh) {
-            const fresh = await onRefresh();
-            if (Array.isArray(fresh)) {
-              setList(fresh);
-              setSelected(prev => prev ? (fresh.find(f => f.code === prev.code) || fresh[0]) : fresh[0]);
-            }
-          }
-        } catch(e) {}
-        finally {
-          setIsRefreshing(false);
-        }
-      };
-
-      // Auto-refresh immediately upon entering admin view + periodic background sync every 4s
-      useEffect(() => {
-        doRefresh();
-        const interval = setInterval(doRefresh, 4000);
-        return () => clearInterval(interval);
-      }, []);
-
-      useEffect(() => {
-        if (Array.isArray(applicants)) {
-          setList(applicants);
-          if (!selected && applicants.length > 0) setSelected(applicants[0]);
-          if (selected) {
-            const fresh = applicants.find(a => a.code === selected.code);
-            if (fresh) setSelected(fresh);
-          }
-        }
-      }, [applicants]);
-
-      const handleManualRefresh = () => {
-        doRefresh();
-      };
-
-      const statusLabel = (s) => {
-        const map = { SUBMITTED:'جديد', CV_VIEWED:'تم فحص CV', SHORTLISTED:'مرشح', INTERVIEW_SCHEDULED:'مقابلة محددة', ACCEPTED:'مقبول ✓', REJECTED:'مرفوض ✕' };
-        return map[s] || s;
-      };
-      const statusColor = (s) => {
-        if (s === 'ACCEPTED') return 'bg-green-100 text-green-800 border-green-300';
-        if (s === 'REJECTED') return 'bg-red-100 text-red-800 border-red-300';
-        if (s === 'INTERVIEW_SCHEDULED') return 'bg-purple-100 text-purple-800 border-purple-300';
-        if (s === 'SHORTLISTED') return 'bg-blue-100 text-blue-800 border-blue-300';
-        if (s === 'CV_VIEWED') return 'bg-amber-100 text-amber-800 border-amber-300';
-        return 'bg-slate-100 text-slate-700 border-slate-300';
-      };
-
-      // Available nationalities
-      const availableNats = Array.from(new Set(list.map(a => (a.nationality || '').trim()).filter(Boolean)));
-      const baseNats = ['مصري', 'سعودي', 'أردني', 'سوري', 'يمني', 'سوداني'];
-      const uniqueNats = Array.from(new Set([...baseNats, ...availableNats]));
-
-      const filtered = list.filter(a => {
-        const matchStatus = filter === 'ALL' || a.status === filter;
-        if (!matchStatus) return false;
-        
-        if (natFilter !== 'ALL') {
-          const aNat = normalizeStr(a.nationality || '');
-          const targetNat = normalizeStr(natFilter);
-          if (!aNat.includes(targetNat)) return false;
-        }
-
-        if (!searchQuery.trim()) return true;
-        const q = normalizeStr(searchQuery);
-        return normalizeStr(a.fullName).includes(q) ||
-               normalizeStr(a.code).includes(q) ||
-               normalizeStr(a.phone).includes(q) ||
-               normalizeStr(a.education).includes(q) ||
-               normalizeStr(a.nationality).includes(q);
-      });
-
-      return (
-        <div className="max-w-5xl mx-auto px-3 md:px-4 py-4 md:py-8 space-y-4 animate-fade-in text-right">
-          
-          <div className="g-card p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
-            <div>
-              <h2 className="text-sm md:text-base font-black text-slateText-title">لوحة إدارة المتقدمين والتوظيف</h2>
-              <p className="text-[11px] text-slateText-muted">إجمالي المتقدمين في النظام: <strong className="text-brand-800 text-sm font-black">{list.length}</strong> متقدم</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleManualRefresh}
-                disabled={isRefreshing}
-                className="px-4 py-2 rounded-xl bg-brand-800 hover:bg-brand-900 text-white text-xs font-black shadow-sm flex items-center gap-2 transition-transform active:scale-95 disabled:opacity-75"
-              >
-                <Icon.RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
-                <span>{isRefreshing ? "جارٍ التحديث..." : `تحديث الطلبات (${list.length}) 🔄`}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Search and Filters Section */}
-          <div className="space-y-2.5">
-            {/* Search Input */}
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="🔍 بحث سريع بالاسم، رقم الطلب، الهاتف، أو الجنسية..."
-                className="w-full h-11 pr-4 pl-9 rounded-xl border border-slate-200 text-xs md:text-sm bg-white shadow-sm outline-none text-right focus:border-brand-800 focus:ring-2 focus:ring-brand-100"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute left-3 top-3 text-xs text-slateText-muted hover:text-slateText-title font-bold"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-
-            {/* Status Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-              {[
-                { key: 'ALL', label: 'كل الحالات', count: list.length },
-                { key: 'SUBMITTED', label: 'جدد', count: list.filter(a=>a.status==='SUBMITTED').length },
-                { key: 'INTERVIEW_SCHEDULED', label: 'مقابلات', count: list.filter(a=>a.status==='INTERVIEW_SCHEDULED').length },
-                { key: 'ACCEPTED', label: 'مقبولين', count: list.filter(a=>a.status==='ACCEPTED').length },
-                { key: 'REJECTED', label: 'مرفوضين', count: list.filter(a=>a.status==='REJECTED').length },
-                { key: 'CV_VIEWED', label: 'فحص CV', count: list.filter(a=>a.status==='CV_VIEWED').length },
-              ].map(tab => (
-                <button
-                  key={tab.key}
-                  onClick={() => setFilter(tab.key)}
-                  className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border whitespace-nowrap transition-all flex-shrink-0 ${
-                    filter === tab.key
-                      ? 'bg-brand-800 text-white border-brand-800 shadow-sm'
-                      : 'bg-white text-slateText-body border-slate-200 hover:bg-slate-50'
-                  }`}
-                >
-                  {tab.label} ({tab.count})
-                </button>
-              ))}
-            </div>
-
-            {/* Nationality Filter Bar */}
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 pt-0.5">
-              <span className="text-[11px] font-black text-slateText-title flex-shrink-0 ml-1">🌍 الجنسية:</span>
-              <button
-                onClick={() => setNatFilter('ALL')}
-                className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border whitespace-nowrap transition-all flex-shrink-0 ${
-                  natFilter === 'ALL'
-                    ? 'bg-slate-800 text-white border-slate-800 shadow-sm'
-                    : 'bg-white text-slateText-body border-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                الكل ({applicants.length})
-              </button>
-              {uniqueNats.map(nat => {
-                const count = applicants.filter(a => normalizeStr(a.nationality || '').includes(normalizeStr(nat))).length;
-                if (count === 0 && !['مصري', 'سعودي'].includes(nat)) return null;
-                const isSelected = natFilter === nat;
-                return (
-                  <button
-                    key={nat}
-                    onClick={() => setNatFilter(isSelected ? 'ALL' : nat)}
-                    className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border whitespace-nowrap transition-all flex-shrink-0 flex items-center gap-1 ${
-                      isSelected
-                        ? 'bg-brand-700 text-white border-brand-700 shadow-sm ring-2 ring-brand-200'
-                        : 'bg-white text-slateText-body border-slate-200 hover:bg-brand-50 hover:text-brand-800'
-                    }`}
-                  >
-                    <span>{nat}</span>
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slateText-muted'}`}>
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="block lg:hidden">
-            <div className="flex items-center justify-between mb-1.5 px-1">
-              <span className="text-[11px] font-bold text-slateText-muted">اختر المتقدم ({filtered.length}):</span>
-              {selected && <span className="text-[11px] font-extrabold text-brand-800">الحالي: {selected.fullName}</span>}
-            </div>
-            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-              {filtered.map(app => {
-                const isCurrent = selected?.code === app.code;
-                return (
-                  <button
-                    key={app.code}
-                    onClick={() => setSelected(app)}
-                    className={`flex items-center gap-2 p-2.5 rounded-2xl border flex-shrink-0 transition-all text-right ${
-                      isCurrent
-                        ? 'bg-brand-800 text-white border-brand-800 shadow-md ring-2 ring-brand-200'
-                        : 'bg-white text-slateText-title border-slate-200 shadow-sm hover:bg-slate-50'
-                    }`}
-                  >
-                    {app.photoBase64 ? (
-                      <img src={app.photoBase64} alt="" className="w-9 h-9 rounded-xl object-cover border border-white/30 flex-shrink-0" />
-                    ) : (
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs flex-shrink-0 ${isCurrent ? 'bg-white/20 text-white' : 'bg-brand-50 text-brand-800'}`}>
-                        {(app.fullName || '?')[0]}
-                      </div>
-                    )}
-                    <div className="min-w-0 pr-1">
-                      <div className="text-xs font-bold truncate max-w-[110px]">{app.fullName}</div>
-                      <div className={`text-[9px] font-mono ${isCurrent ? 'text-white/80' : 'text-slateText-muted'}`}>{app.code}</div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-            
-            <div className="hidden lg:block lg:col-span-2 space-y-2 max-h-[75vh] overflow-y-auto no-scrollbar">
-              {filtered.length === 0 ? (
-                <div className="g-card p-6 text-center text-xs text-slateText-muted">
-                  لا توجد طلبات مطابقة للبحث أو التصنيف.
-                </div>
-              ) : (
-                filtered.map(app => (
-                  <div
-                    key={app.code}
-                    onClick={() => setSelected(app)}
-                    className={`g-card p-3.5 cursor-pointer transition-all hover:shadow-md ${
-                      selected?.code === app.code ? 'border-brand-800 ring-2 ring-brand-100 shadow-md bg-brand-50/20' : ''
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      {app.photoBase64 ? (
-                        <img src={app.photoBase64} alt="" className="w-10 h-10 rounded-xl object-cover border border-slate-200 flex-shrink-0" />
-                      ) : (
-                        <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-800 flex items-center justify-center flex-shrink-0 text-sm font-bold">
-                          {(app.fullName || '?')[0]}
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-1">
-                          <strong className="text-xs font-bold text-slateText-title truncate">{app.fullName}</strong>
-                          <span className="font-mono text-[9px] font-bold text-brand-800 bg-brand-50 px-1.5 py-0.5 rounded flex-shrink-0">{app.code}</span>
-                        </div>
-                        <div className="flex items-center justify-between gap-1 mt-1">
-                          <span className="text-[10px] text-slateText-muted truncate">{app.phone} · {app.education}</span>
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border flex-shrink-0 ${statusColor(app.status)}`}>
-                            {statusLabel(app.status)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="lg:col-span-3">
-              {selected ? (
-                <div className="space-y-4">
-                  
-                  <div className="g-card p-4 bg-gradient-to-r from-brand-50/40 via-white to-brand-50/30 border-brand-200/70 shadow-sm">
-                    <div className="grid grid-cols-2 gap-3">
-                      
-                      <div
-                        onClick={() => { if (selected.photoBase64) setPreviewPhoto(selected.photoBase64); }}
-                        className={`p-3 rounded-2xl border bg-white text-center transition-all ${
-                          selected.photoBase64
-                            ? 'cursor-pointer hover:border-brand-800 hover:shadow-md border-slate-200 active:scale-98'
-                            : 'border-dashed border-slate-300 opacity-80'
-                        }`}
-                      >
-                        <div className="flex items-center justify-center gap-1.5 mb-2 text-brand-800">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                          <span className="text-[11px] font-extrabold">الصورة الشخصية</span>
-                        </div>
-                        {selected.photoBase64 ? (
-                          <div className="relative group mx-auto w-20 h-20">
-                            <img src={selected.photoBase64} alt="الصورة" className="w-20 h-20 rounded-xl object-cover border-2 border-brand-200 shadow-sm" />
-                            <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center text-white text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                              🔍 تكبير
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="w-20 h-20 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto text-[11px] text-slateText-muted">
-                            لم ترفق صورة
-                          </div>
-                        )}
-                        {selected.photoBase64 && (
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); setPreviewPhoto(selected.photoBase64); }}
-                            className="w-full mt-2 py-1 bg-brand-50 text-brand-800 rounded-lg text-[10px] font-bold hover:bg-brand-100"
-                          >
-                            عرض الصورة 🔍
-                          </button>
-                        )}
-                      </div>
-
-                      <div
-                        onClick={() => { if (selected.cvFile) openCvInBrowser(selected.cvFile, selected.code); }}
-                        className={`p-3 rounded-2xl border bg-white text-center transition-all ${
-                          selected.cvFile
-                            ? 'cursor-pointer hover:border-red-500 hover:shadow-md border-slate-200 active:scale-98'
-                            : 'border-dashed border-slate-300 opacity-80'
-                        }`}
-                      >
-                        <div className="flex items-center justify-center gap-1.5 mb-2 text-red-600">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                          <span className="text-[11px] font-extrabold">السيرة الذاتية (CV)</span>
-                        </div>
-                        {selected.cvFile ? (
-                          <div className="mx-auto w-20 h-20 rounded-xl bg-red-50 border-2 border-red-200 flex flex-col items-center justify-center text-red-600 p-1">
-                            <span className="text-base font-black">PDF</span>
-                            <span className="text-[9px] font-bold text-slateText-body truncate w-full px-1">CV</span>
-                          </div>
-                        ) : (
-                          <div className="w-20 h-20 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto text-[11px] text-slateText-muted">
-                            لم يرفق ملف
-                          </div>
-                        )}
-                        {selected.cvFile && (
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); openCvInBrowser(selected.cvFile, selected.code); }}
-                            className="w-full mt-2 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold hover:bg-red-100"
-                          >
-                            فتح الـ CV مباشرة 👁️
-                          </button>
-                        )}
-                      </div>
-
-                    </div>
-                  </div>
-
-                  <div className="g-card p-5 space-y-4 shadow-sm">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-mono text-xs font-bold text-brand-800 bg-brand-50 px-2 py-0.5 rounded-lg border border-brand-100">{selected.code}</span>
-                          <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${statusColor(selected.status)}`}>
-                            {statusLabel(selected.status)}
-                          </span>
-                        </div>
-                        <h3 className="text-base md:text-lg font-extrabold text-slateText-title">{selected.fullName}</h3>
-                        <p className="text-xs text-slateText-muted font-mono" dir="ltr">{selected.phone}</p>
-                        {selected.email && <p className="text-xs text-slateText-muted font-mono" dir="ltr">{selected.email}</p>}
-                        <p className="text-[10px] text-slateText-light mt-1">تاريخ التقديم: {selected.submittedAt || 'غير محدد'}</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
-                      
-                      <button
-                        onClick={() => setScheduleOpen(true)}
-                        className={`h-12 rounded-xl text-xs md:text-sm font-extrabold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-98 ${
-                          selected.status === 'INTERVIEW_SCHEDULED'
-                            ? 'bg-purple-800 text-white ring-2 ring-purple-300'
-                            : 'bg-purple-50 text-purple-800 border-2 border-purple-300 hover:bg-purple-100'
-                        }`}
-                      >
-                        <span>📅 تحديد موعد مقابلة</span>
-                      </button>
-
-                      <button
-                        onClick={() => onUpdateStatus(selected.code, 'REJECTED')}
-                        className={`h-12 rounded-xl text-xs md:text-sm font-extrabold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-98 ${
-                          selected.status === 'REJECTED'
-                            ? 'bg-red-700 text-white ring-2 ring-red-300'
-                            : 'bg-red-50 text-red-700 border-2 border-red-300 hover:bg-red-100'
-                        }`}
-                      >
-                        <span>✕ رفض المتقدم</span>
-                      </button>
-
-                    </div>
-
-                    <div className="pt-2 flex flex-wrap items-center gap-1.5">
-                      <span className="text-[10px] text-slateText-muted font-bold ml-1">تغيير يدوي:</span>
-                      {[
-                        { key: 'ACCEPTED', label: '✓ قبول المتقدم' },
-                        { key: 'CV_VIEWED', label: 'فحص CV' },
-                        { key: 'SHORTLISTED', label: 'ترشيح' },
-                        { key: 'SUBMITTED', label: 'إعادة كجديد' },
-                      ].map(s => (
-                        <button
-                          key={s.key}
-                          onClick={() => onUpdateStatus(selected.code, s.key)}
-                          className={`text-[10px] font-bold px-2 py-1 rounded-lg border transition-colors ${
-                            selected.status === s.key ? statusColor(s.key) + ' font-black ring-1' : 'bg-slate-50 text-slateText-body border-slate-200 hover:bg-white'
-                          }`}
-                        >
-                          {s.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {selected.interview && (
-                    <div className="g-card p-5 space-y-3 bg-purple-50/50 border-2 border-purple-200 shadow-sm animate-fade-in">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-xs md:text-sm font-extrabold text-purple-950 flex items-center gap-1.5">
-                          <span>📅 المقابلة المحددة عبر Google Meet</span>
-                        </h4>
-                        <span className="text-[10px] font-bold px-2 py-0.5 bg-purple-200/70 text-purple-900 rounded-full">مؤكدة</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="bg-white p-3 rounded-xl border border-purple-100 text-center">
-                          <span className="text-[10px] text-slateText-muted block mb-0.5">التاريخ</span>
-                          <strong className="text-purple-950">{selected.interview.date}</strong>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border border-purple-100 text-center">
-                          <span className="text-[10px] text-slateText-muted block mb-0.5">الوقت</span>
-                          <strong className="text-purple-950">{selected.interview.time}</strong>
-                        </div>
-                      </div>
-                      {selected.interview.meetLink && (
-                        <a
-                          href={selected.interview.meetLink}
-                          target="_blank"
-                          className="block text-center py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-black rounded-xl text-xs shadow-sm transition-transform active:scale-98"
-                        >
-                          فتح رابط Google Meet للمقابلة ➔
-                        </a>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="g-card p-5 space-y-3 shadow-sm">
-                    <h4 className="text-xs font-bold text-brand-800 uppercase tracking-wide border-b border-slate-100 pb-2">البيانات والمعلومات الكاملة</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-                      <div className="bg-slate-50 p-3 rounded-xl">
-                        <span className="text-slateText-muted block text-[10px]">الاسم الكامل</span>
-                        <strong>{selected.fullName}</strong>
-                      </div>
-                      <div className="bg-slate-50 p-3 rounded-xl">
-                        <span className="text-slateText-muted block text-[10px]">رقم الهاتف</span>
-                        <strong dir="ltr">{selected.phone}</strong>
-                      </div>
-                      <div className="bg-slate-50 p-3 rounded-xl">
-                        <span className="text-slateText-muted block text-[10px]">البريد الإلكتروني</span>
-                        <strong dir="ltr">{selected.email || 'لم يسجل'}</strong>
-                      </div>
-                      <div className="bg-slate-50 p-3 rounded-xl">
-                        <span className="text-slateText-muted block text-[10px]">الجنسية</span>
-                        <strong>{selected.nationality || 'لم يحدد'}</strong>
-                      </div>
-                      <div className="bg-slate-50 p-3 rounded-xl">
-                        <span className="text-slateText-muted block text-[10px]">المدينة</span>
-                        <strong>{selected.city || 'لم يحدد'}</strong>
-                      </div>
-                      <div className="bg-slate-50 p-3 rounded-xl">
-                        <span className="text-slateText-muted block text-[10px]">العمر</span>
-                        <strong>{selected.age || 'لم يحدد'}</strong>
-                      </div>
-                      <div className="bg-slate-50 p-3 rounded-xl">
-                        <span className="text-slateText-muted block text-[10px]">المؤهل العلمي</span>
-                        <strong>{selected.education || 'لم يحدد'}</strong>
-                      </div>
-                      <div className="bg-slate-50 p-3 rounded-xl">
-                        <span className="text-slateText-muted block text-[10px]">الوظيفة الحالية</span>
-                        <strong>{selected.currentJob || 'لم يحدد'}</strong>
-                      </div>
-                      <div className="bg-slate-50 p-3 rounded-xl">
-                        <span className="text-slateText-muted block text-[10px]">سنوات الخبرة</span>
-                        <strong>{selected.yearsExperience || 'لم يحدد'}</strong>
-                      </div>
-                      <div className="bg-slate-50 p-3 rounded-xl">
-                        <span className="text-slateText-muted block text-[10px]">الراتب المتوقع</span>
-                        <strong className="text-brand-800">{selected.expectedSalary || 'غير محدد'}</strong>
-                      </div>
-                      <div className="bg-slate-50 p-3 rounded-xl md:col-span-2">
-                        <span className="text-slateText-muted block text-[10px]">البرامج والمهارات</span>
-                        <strong>{selected.skills || 'لم تسجل'}</strong>
-                      </div>
-                      <div className="bg-slate-50 p-3 rounded-xl">
-                        <span className="text-slateText-muted block text-[10px]">خبرة ضريبة القيمة المضافة</span>
-                        <strong>{selected.vatExperience || 'لم يحدد'}</strong>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end pt-2">
-                    <button
-                      onClick={() => onDeleteApplicant(selected.code)}
-                      className="px-4 py-2 rounded-xl bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100 flex items-center gap-1.5"
-                    >
-                      <Icon.Trash size={13} /> حذف هذا المتقدم نهائياً
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="g-card p-10 text-center space-y-2">
-                  <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slateText-light">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                  </div>
-                  <p className="text-xs font-bold text-slateText-body">اختر متقدماً من القائمة أعلاه لعرض ملفه</p>
-                  <p className="text-[11px] text-slateText-muted">يمكنك رفض المتقدم أو تحديد موعد مقابلة شخصية معه بضغطة زر</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {previewPhoto && (
-            <div
-              className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in"
-              onClick={() => setPreviewPhoto(null)}
-            >
-              <div
-                className="bg-white rounded-2xl p-4 max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col space-y-3 border border-slate-300 shadow-2xl"
-                onClick={e => e.stopPropagation()}
-              >
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                  <span className="text-xs font-bold text-slateText-title">الصورة الشخصية — {selected?.fullName}</span>
-                  <button
-                    onClick={() => setPreviewPhoto(null)}
-                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slateText-body text-sm font-bold"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className="flex-1 overflow-auto flex items-center justify-center bg-slate-900/5 rounded-xl p-2">
-                  <img src={previewPhoto} alt="صورة المتقدم الكاملة" className="max-w-full max-h-[70vh] rounded-xl object-contain shadow-sm" />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {scheduleOpen && selected && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in text-right">
-              <div className="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 border border-slate-200 shadow-2xl">
-                <div className="border-b border-slate-100 pb-3">
-                  <h3 className="font-black text-sm md:text-base text-slateText-title">📅 تحديد موعد مقابلة شخصية</h3>
-                  <p className="text-xs text-brand-800 font-bold mt-0.5">للمتقدم: {selected.fullName}</p>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold mb-1.5 text-slateText-body">تاريخ المقابلة</label>
-                  <input type="date" value={intDate} onChange={e => setIntDate(e.target.value)} className="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs bg-slate-50 outline-none focus:border-brand-800" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold mb-1.5 text-slateText-body">وقت المقابلة</label>
-                  <input type="time" value={intTime} onChange={e => setIntTime(e.target.value)} className="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs bg-slate-50 outline-none focus:border-brand-800" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold mb-1.5 text-slateText-body">رابط Google Meet</label>
-                  <input type="text" value={meetLink} onChange={e => setMeetLink(e.target.value)} className="w-full h-11 px-3 border border-slate-200 rounded-xl text-xs bg-slate-50 outline-none focus:border-brand-800" dir="ltr" />
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <button
-                    onClick={() => {
-                      onScheduleInterview(selected.code, { date: intDate, time: intTime, meetLink });
-                      setScheduleOpen(false);
-                    }}
-                    className="flex-1 h-12 bg-purple-700 hover:bg-purple-800 text-white text-xs font-extrabold rounded-xl shadow-sm transition-transform active:scale-98"
-                  >
-                    تأكيد وحفظ الموعد ✓
-                  </button>
-                  <button onClick={() => setScheduleOpen(false)} className="px-4 h-12 border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-50">إلغاء</button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    /* ---------------- Main Root App ---------------- */
-    function App() {
-      const [view, setView] = useState("form");
-      const [applicants, setApplicants] = useState([]);
-      const [activeApplicant, setActiveApplicant] = useState(null);
-      const [isSubmitting, setIsSubmitting] = useState(false);
-      const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
-      const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-
-      const refreshData = async () => {
-        const list = await DB.getAll();
-        setApplicants(list);
-        return list;
-      };
-
-      useEffect(() => {
-        refreshData();
-      }, []);
-
-      const handleFormSubmit = async (formData) => {
-        setIsSubmitting(true);
-        const newApplicant = {
-          id: String(Date.now()),
-          code: '',
-          isNew: true,
-          fullName: formData.fullName,
-          phone: formData.phone,
-          email: formData.email,
-          nationality: formData.nationality,
-          city: formData.city,
-          age: formData.age,
-          education: formData.education,
-          currentJob: formData.currentJob,
-          yearsExperience: formData.yearsExperience,
-          expectedSalary: formData.expectedSalary,
-          skills: formData.skills,
-          vatExperience: formData.vatExperience,
-          photoBase64: formData.photoBase64,
-          cvFile: formData.cvFile,
-          status: 'SUBMITTED',
-          submittedAt: new Date().toLocaleDateString('ar-SA'),
-          interview: null
-        };
-
-        const saved = await DB.save(newApplicant);
-        await refreshData();
-        setActiveApplicant(saved || newApplicant);
-        setIsSubmitting(false);
-        setView("success");
-      };
-
-      const updateStatus = async (code, newStatus) => {
-        const target = applicants.find(a => a.code === code);
-        if (target) {
-          const updatedTarget = { ...target, status: newStatus };
-          await DB.save(updatedTarget, true);
-          const updated = applicants.map(a => a.code === code ? updatedTarget : a);
-          setApplicants(updated);
-          if (activeApplicant?.code === code) setActiveApplicant(updatedTarget);
-        }
-      };
-
-      const scheduleInt = async (code, interviewData) => {
-        const target = applicants.find(a => a.code === code);
-        if (target) {
-          const updatedTarget = { ...target, status: 'INTERVIEW_SCHEDULED', interview: interviewData };
-          await DB.save(updatedTarget, true);
-          const updated = applicants.map(a => a.code === code ? updatedTarget : a);
-          setApplicants(updated);
-          if (activeApplicant?.code === code) setActiveApplicant(updatedTarget);
-        }
-      };
-
-      const deleteApplicant = async (code) => {
-        if (confirm(`هل أنت متأكد من حذف المتقدم ${code} نهائياً؟`)) {
-          await DB.delete(code);
-          const updated = applicants.filter(a => a.code !== code);
-          setApplicants(updated);
-          if (activeApplicant?.code === code) setActiveApplicant(null);
-        }
-      };
-
-      const resetAll = async () => {
-        if (confirm('هل تريد تصفير جميع بيانات المتقدمين والبدء من الصفر؟')) {
-          await DB.delete('');
-          localStorage.clear();
-          setApplicants([]);
-          setActiveApplicant(null);
-          alert('تم تصفير قاعدة البيانات بنجاح.');
-        }
-      };
-
-      return (
-        <div className="min-h-screen flex flex-col bg-[#F8FAF9]">
-          <Navbar view={view} setView={setView} />
-
-          <main className="flex-1">
-            {view === "form" && (
-              <GoogleStyleForm
-                onSubmit={handleFormSubmit}
-                isSubmitting={isSubmitting}
-              />
-            )}
-
-            {view === "success" && activeApplicant && (
-              <SuccessScreen
-                applicant={activeApplicant}
-                goDashboard={() => setView("dashboard")}
-              />
-            )}
-
-            {view === "dashboard" && (
-              <ApplicantDashboard
-                applicants={applicants}
-                activeApplicant={activeApplicant}
-                onRefresh={refreshData}
-                onGoApply={() => setView("form")}
-              />
-            )}
-
-            {view === "admin" && isAdminLoggedIn && (
-              <AdminDashboardView
-                applicants={applicants}
-                onUpdateStatus={updateStatus}
-                onScheduleInterview={scheduleInt}
-                onDeleteApplicant={deleteApplicant}
-                onResetAll={resetAll}
-                onRefresh={refreshData}
-              />
-            )}
-          </main>
-
-          <footer className="mt-auto bg-white border-t border-[#E2E8F0] py-5 px-3 text-xs text-slateText-muted">
-            <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-right">
-              <div className="flex items-center gap-1.5">
-                <Icon.Scale size={15} />
-                <span className="font-bold text-slateText-body">بوابة التوظيف واستقطاب الكفاءات الإلكترونية</span>
-              </div>
-              <div
-                onClick={() => setIsAdminModalOpen(true)}
-                className="cursor-default select-none text-[11px] text-slateText-light hover:text-slateText-muted"
-              >
-                © 2026 جميع الحقوق محفوظة · بوابة التوظيف
-              </div>
-            </div>
-          </footer>
-
-          {isAdminModalOpen && (
-            <AdminAuthModal
-              onSuccess={() => {
-                setIsAdminModalOpen(false);
-                setIsAdminLoggedIn(true);
-                setView("admin");
-              }}
-              onClose={() => setIsAdminModalOpen(false)}
-            />
-          )}
-        </div>
-      );
-    }
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
   </script>
+
 </body>
 </html>
