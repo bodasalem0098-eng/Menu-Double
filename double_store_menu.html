@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>مطعم دبل | Double Restaurant Menu</title>
+  <link rel="icon" href="https://res.cloudinary.com/do0u3he16/image/upload/v1778623162/94e560b7-648d-4293-8f92-292d31693ea1_-----01-2-01_nqreth.jpg" />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Alpine.js -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              gold: '#F59E0B',
+              goldLight: '#FDE68A',
+              goldDark: '#D97706',
+              amber: '#B45309',
+              darkBg: '#0F172A',
+              darkCard: '#1E293B',
+              darkBorder: '#334155',
+              crimson: '#991B1B',
+              crimsonDark: '#7F1D1D',
+            }
+          },
+          fontFamily: {
+            sans: ['Cairo', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      font-family: 'Cairo', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+    [x-cloak] { display: none !important; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .gold-glow {
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.35);
+    }
+    .card-shine {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-shine:active {
+      transform: scale(0.97);
+    }
+    .pulse-amber {
+      animation: pulseAmber 2s infinite;
+    }
+    @keyframes pulseAmber {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.04); opacity: 0.9; }
+    }
+  </style>
+</head>
+
+<body x-data="doubleStoreApp()" x-cloak class="bg-[#F8FAF9] dark:bg-[#0B1120] text-slate-900 dark:text-slate-100 min-h-screen pb-28 selection:bg-brand-gold selection:text-black">
+
+  <!-- Top Announcement Bar -->
+  <div class="bg-gradient-to-r from-brand-amber via-brand-gold to-brand-goldDark text-black text-center py-1.5 px-3 font-black text-xs tracking-wide shadow-md flex items-center justify-center gap-2">
+    <span>🛵</span>
+    <span>عـرض خـاص: التوصيـل مـجـانـاً للطلبات المباشرة</span>
+    <span>🔥</span>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="fixed top-12 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm px-4 pointer-events-none">
+    <template x-if="notification.show">
+      <div class="bg-slate-900/95 dark:bg-black/95 text-white py-3.5 px-5 rounded-2xl shadow-2xl border border-brand-gold/40 flex items-center gap-3 backdrop-blur-md animate__animated animate__fadeInDown pointer-events-auto">
+        <div class="w-8 h-8 rounded-xl bg-brand-gold text-black flex items-center justify-center font-black text-sm flex-shrink-0">
+          ✓
+        </div>
+        <div class="flex-1 text-right">
+          <p class="font-bold text-xs" x-text="notification.message"></p>
+        </div>
+      </div>
+    </template>
+  </div>
+
+  <!-- Main Container -->
+  <div class="max-w-xl mx-auto min-h-screen bg-white dark:bg-[#0F172A] shadow-2xl border-x border-slate-200 dark:border-slate-800/80 relative">
+
+    <!-- Top Navigation Controls (Header Bar) -->
+    <div class="sticky top-0 z-40 bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-md px-4 py-2.5 flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800/80">
+      
+      <!-- Theme & Language Switchers -->
+      <div class="flex items-center gap-2">
+        <button @click="toggleTheme()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-brand-gold text-base transition-transform active:scale-95 shadow-sm border border-slate-200 dark:border-slate-700">
+          <span x-show="darkMode">☀️</span>
+          <span x-show="!darkMode">🌙</span>
+        </button>
+
+        <div class="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold border border-slate-200 dark:border-slate-700">
+          <span>🇸🇦</span>
+          <span>AR</span>
+        </div>
+      </div>
+
+      <!-- Center Store Title -->
+      <div class="flex items-center gap-2 font-black text-sm text-slate-800 dark:text-white">
+        <span class="text-brand-gold">🍽️</span>
+        <span>مطعم دبل</span>
+      </div>
+
+      <!-- Share / Contact Quick Link -->
+      <button @click="showHoursModal = true" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 text-sm transition-transform active:scale-95 shadow-sm border border-slate-200 dark:border-slate-700">
+        🕒
+      </button>
+    </div>
+
+    <!-- Instagram Store Profile Section -->
+    <div class="relative">
+      
+      <!-- Cover Banner -->
+      <div class="h-44 sm:h-52 w-full relative overflow-hidden bg-slate-900">
+        <img 
+          src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80" 
+          alt="Double Restaurant Cover" 
+          class="w-full h-full object-cover object-center opacity-85 hover:scale-105 transition-transform duration-700"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/40 to-transparent"></div>
+      </div>
+
+      <!-- Floating WhatsApp Quick Button on Cover -->
+      <a 
+        href="https://wa.me/966555107546?text=مرحباً%20مطعم%20دبل،%20أود%20الاستفسار%20عن%20المنيو" 
+        target="_blank"
+        class="absolute top-4 left-4 w-11 h-11 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all z-10 border-2 border-white dark:border-slate-900"
+      >
+        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+          <path d="M12.031 0C5.385 0 0 5.386 0 12.031c0 2.127.553 4.185 1.6 6.002L.202 23.364l5.485-1.439a12.022 12.022 0 0 0 6.344 1.777c6.646 0 12.031-5.386 12.031-12.032S18.677 0 12.031 0zm0 21.671a9.98 9.98 0 0 1-5.1-1.391l-.365-.217-3.791.995.998-3.696-.238-.378a9.957 9.957 0 0 1-1.536-5.323C2.001 6.136 6.505 1.632 12.031 1.632s10.03 4.504 10.03 10.03-4.504 10.03-10.03 10.03z"/>
+        </svg>
+      </a>
+
+      <!-- Profile Header Body -->
+      <div class="px-5 pt-0 pb-4 relative -mt-16 sm:-mt-20">
+        
+        <div class="flex items-end justify-between gap-4 mb-4">
+          
+          <!-- Social Icons on Left (Instagram style) -->
+          <div class="flex items-center gap-2 mb-2">
+            <!-- Instagram -->
+            <a href="https://www.instagram.com/shawarma.doubel?igsh=M2lxeGRkMjl4MXJk" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 flex items-center justify-center hover:bg-gradient-to-tr hover:from-[#f09433] hover:via-[#dc2743] hover:to-[#bc1888] hover:text-white transition-all shadow-sm">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <!-- TikTok -->
+            <a href="https://www.tiktok.com/@shawarma.doubel" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 flex items-center justify-center hover:bg-black hover:text-white transition-all shadow-sm">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.89-.6-4.13-1.47V15.5a8.074 8.074 0 0 1-3.21 6.53 8.12 8.12 0 0 1-10.89-1.12A8.135 8.135 0 0 1 10.44 7.6c.45-.06.91-.07 1.36-.01V11.8a4.13 4.13 0 0 0-3.32 3.6c-.34 2.24 1.33 4.41 3.58 4.75a4.136 4.136 0 0 0 4.67-4.12V.02h-4.21z"/></svg>
+            </a>
+            <!-- Snapchat -->
+            <a href="https://www.snapchat.com/add/shawarma.doubel" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 flex items-center justify-center hover:bg-[#FFFC00] hover:text-black transition-all shadow-sm">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.4c-4.1 0-7 3-7 6.1 0 .6.3 1.2.6 1.8.3.6.4 1.1.4 1.7 0 1.2-.8 1.8-1.7 1.8-.1 0-.3 0-.4-.1-.1-.7-.8-1.2-1.5-1.2-.8 0-1.5.7-1.5 1.5 0 .2 0 .4.1.6 1.1.5 1.7 1.4 1.7 2.4 0 2.2 2.1 3.5 4.5 3.5.3 0 .6 0 .8-.1.7.9 1.9 1.5 3.2 1.5 1.3 0 2.4-.6 3.2-1.5.3.1.6.1.8.1 2.4 0 4.5-1.3 4.5-3.5 0-1 .6-1.9 1.7-2.4.1-.2.1-.4.1-.6 0-.8-.7-1.5-1.5-1.5-.7 0-1.4.5-1.5 1.2-.1 0-.3.1-.4.1-.9 0-1.7-.6-1.7-1.8 0-.6.1-1.1.4-1.7.3-.6.6-1.2.6-1.8 0-3.1-2.9-6.1-7-6.1z"/></svg>
+            </a>
+          </div>
+
+          <!-- Circular Profile Photo (Overlapping banner) -->
+          <div class="relative">
+            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 bg-gradient-to-tr from-brand-amber via-brand-gold to-yellow-300 gold-glow shadow-2xl overflow-hidden">
+              <img 
+                src="https://res.cloudinary.com/do0u3he16/image/upload/v1778623162/94e560b7-648d-4293-8f92-292d31693ea1_-----01-2-01_nqreth.jpg" 
+                alt="مطعم دبل" 
+                class="w-full h-full object-cover rounded-full bg-white dark:bg-slate-900 border-2 border-white dark:border-slate-900"
+              />
+            </div>
+            <div class="absolute bottom-1 right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900 flex items-center justify-center text-[10px] text-white font-bold" title="مفتوح الآن">
+              ✓
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Restaurant Title & Bio -->
+        <div class="text-right space-y-1.5">
+          <div class="flex items-center justify-start gap-2">
+            <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">مطعم دبل <span class="text-brand-gold font-mono">DOUBLE</span></h1>
+            <span class="px-2 py-0.5 rounded-full bg-brand-gold/10 text-brand-gold text-[10px] font-extrabold border border-brand-gold/30">
+              مطعم معتمد ⭐
+            </span>
+          </div>
+
+          <p class="text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 leading-relaxed">
+            أشهى وألذ المشويات، الشاورما، الفطائر، المناقيش والبيتزا بأعلى جودة طازجة يومياً 🔥
+          </p>
+
+          <!-- Location with Maps link -->
+          <div class="flex items-center justify-start gap-2 pt-1">
+            <a 
+              href="https://maps.app.goo.gl/iQPoxnSL24Umq9rR6?g_st=ac" 
+              target="_blank" 
+              class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-brand-gold transition-colors"
+            >
+              <span class="text-brand-gold text-sm">📍</span>
+              <span class="underline decoration-dotted underline-offset-4">موقعنا على الخريطة (Google Maps)</span>
+              <span class="text-[10px] text-brand-gold font-mono font-bold">Open Maps ➔</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div class="grid grid-cols-2 gap-2.5 mt-4">
+          <a 
+            href="tel:0555107546" 
+            class="h-11 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-black text-xs flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 active:scale-98 transition-all hover:border-brand-gold"
+          >
+            <span>📞</span>
+            <span>اتصال بالدليفري</span>
+          </a>
+
+          <button 
+            @click="showHoursModal = true" 
+            class="h-11 rounded-2xl bg-brand-gold/10 text-brand-goldDark dark:text-brand-gold font-black text-xs flex items-center justify-center gap-2 border border-brand-gold/30 active:scale-98 transition-all hover:bg-brand-gold/20"
+          >
+            <span>🕒</span>
+            <span>أوقات العمل (3م – 2:30ص)</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Search Input -->
+    <div class="px-4 mb-3">
+      <div class="relative">
+        <input 
+          type="text" 
+          x-model="searchQuery" 
+          placeholder="🔍 ابحث عن وجبتك المفضلة (شاورما، بيتزا، برجر...)" 
+          class="w-full h-11 pr-10 pl-4 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/80 text-xs sm:text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 transition-all placeholder:text-slate-400 text-right"
+        />
+        <div class="absolute right-3.5 top-3 text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <button 
+          x-show="searchQuery" 
+          @click="searchQuery = ''" 
+          class="absolute left-3 top-3 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-white"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Sticky Category Pills Bar (Horizontal Scroll) -->
+    <div class="sticky top-[53px] z-30 bg-white/95 dark:bg-[#0F172A]/95 backdrop-blur-md py-2.5 px-4 border-y border-slate-200/80 dark:border-slate-800/80 shadow-sm overflow-x-auto no-scrollbar">
+      <div class="flex items-center gap-2 min-w-max pb-0.5">
+        
+        <!-- All category -->
+        <button 
+          @click="activeCategory = 'all'"
+          class="px-4 py-2 rounded-full text-xs font-black transition-all flex items-center gap-1.5 whitespace-nowrap"
+          :class="activeCategory === 'all' ? 'bg-gradient-to-r from-brand-amber to-brand-gold text-black shadow-md font-black ring-2 ring-brand-gold/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'"
+        >
+          <span>🔥</span>
+          <span>الكل</span>
+        </button>
+
+        <template x-for="cat in categories" :key="cat.id">
+          <button 
+            @click="activeCategory = cat.id"
+            class="px-4 py-2 rounded-full text-xs font-black transition-all flex items-center gap-1.5 whitespace-nowrap"
+            :class="activeCategory === cat.id ? 'bg-gradient-to-r from-brand-amber to-brand-gold text-black shadow-md font-black ring-2 ring-brand-gold/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'"
+          >
+            <span x-text="cat.icon"></span>
+            <span x-text="cat.name"></span>
+          </button>
+        </template>
+      </div>
+    </div>
+
+    <!-- Product Section / 2-Columns Grid -->
+    <div class="p-4 space-y-4">
+      
+      <!-- Category Title & Items Count -->
+      <div class="flex items-center justify-between px-1">
+        <h2 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-brand-gold"></span>
+          <span x-text="activeCategory === 'all' ? 'جميع الأصناف المتاحة' : categories.find(c => c.id === activeCategory)?.name"></span>
+        </h2>
+        <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 font-mono" x-text="`(${filteredItems().length} صنف)`"></span>
+      </div>
+
+      <!-- 2-Columns Grid (Mobile 2 cols, Tablet/Desktop 3 cols) -->
+      <div class="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4">
+        
+        <template x-for="item in filteredItems()" :key="item.id">
+          <div 
+            @click="openItemModal(item)"
+            class="card-shine bg-white dark:bg-[#1E293B] rounded-3xl p-3 sm:p-3.5 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-brand-gold/50 flex flex-col justify-between cursor-pointer group relative overflow-hidden"
+          >
+            
+            <!-- Food Image Box -->
+            <div class="relative w-full aspect-square rounded-2xl overflow-hidden mb-2.5 bg-slate-100 dark:bg-slate-800">
+              <img 
+                :src="item.image || getPlaceholder(item.category)" 
+                :alt="item.name"
+                class="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
+                loading="lazy"
+              />
+              
+              <!-- Quick Add Button (+) overlay -->
+              <button 
+                type="button"
+                @click.stop="quickAdd(item)"
+                class="absolute bottom-2 left-2 w-9 h-9 rounded-2xl bg-brand-gold hover:bg-brand-goldDark text-black font-black flex items-center justify-center shadow-lg transition-transform active:scale-90 z-10 border border-white/20"
+                title="إضافة للسلة"
+              >
+                <svg class="w-5 h-5 stroke-[2.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+              </button>
+
+              <!-- Category Tag Pill -->
+              <span 
+                x-show="item.badge" 
+                class="absolute top-2 right-2 px-2 py-0.5 rounded-lg bg-red-600 text-white text-[9px] font-black shadow-sm"
+                x-text="item.badge"
+              ></span>
+            </div>
+
+            <!-- Meal Information -->
+            <div class="space-y-1 text-right flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white line-clamp-1 group-hover:text-brand-gold transition-colors" x-text="item.name"></h3>
+                <p x-show="item.description" class="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5" x-text="item.description"></p>
+              </div>
+
+              <!-- Price Tag -->
+              <div class="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 mt-2">
+                <div class="flex items-baseline gap-1 font-mono">
+                  <span class="text-xs sm:text-sm font-black text-brand-amber dark:text-brand-gold" x-text="getItemDisplayPrice(item)"></span>
+                  <span class="text-[9px] font-bold text-slate-500">ر.س</span>
+                </div>
+                <span class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500" x-show="item.sizes">أحجام ▾</span>
+              </div>
+            </div>
+
+          </div>
+        </template>
+
+      </div>
+
+      <!-- Empty Search State -->
+      <div x-show="filteredItems().length === 0" class="py-16 text-center space-y-3">
+        <div class="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto text-2xl">
+          🔍
+        </div>
+        <h4 class="text-sm font-black text-slate-800 dark:text-white">لم نجد نتائج مطابقة لبحثك</h4>
+        <p class="text-xs text-slate-500">جرّب البحث بكلمة أخرى أو اختر قسماً من القائمة أعلاه</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Floating Bottom Navigation Bar (Instagram & Store style) -->
+  <div class="fixed bottom-0 left-0 right-0 z-50 p-3 pointer-events-none">
+    <div class="max-w-md mx-auto bg-slate-900/95 dark:bg-black/95 text-white backdrop-blur-lg rounded-3xl p-2 px-4 shadow-2xl border border-slate-800 dark:border-brand-gold/30 flex items-center justify-between pointer-events-auto">
+      
+      <!-- Menu Link -->
+      <button 
+        @click="activeCategory = 'all'; window.scrollTo({top: 0, behavior: 'smooth'})" 
+        class="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl text-slate-400 hover:text-brand-gold transition-colors flex-1"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+        <span class="text-[10px] font-black">القائمة</span>
+      </button>
+
+      <!-- Center Floating Cart Button (Elevated) -->
+      <div class="relative -top-5 flex flex-col items-center">
+        <button 
+          @click="showCart = true" 
+          class="w-14 h-14 rounded-full bg-gradient-to-tr from-brand-amber via-brand-gold to-yellow-300 text-black flex items-center justify-center shadow-xl hover:scale-108 active:scale-95 transition-all border-4 border-white dark:border-[#0F172A] gold-glow"
+        >
+          <div class="relative">
+            <svg class="w-6 h-6 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" />
+              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+            </svg>
+            <span 
+              x-show="cartItemsCount() > 0" 
+              class="absolute -top-2 -right-2 bg-red-600 text-white font-black text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-black shadow-md animate__animated animate__bounceIn"
+              x-text="cartItemsCount()"
+            ></span>
+          </div>
+        </button>
+        <span class="text-[10px] font-black text-brand-gold mt-1 font-mono" x-show="cartItemsCount() > 0" x-text="`${calculateTotal()} ر.س`"></span>
+        <span class="text-[10px] font-black text-slate-300 mt-1" x-show="cartItemsCount() === 0">السلة</span>
+      </div>
+
+      <!-- About Store Link -->
+      <button 
+        @click="showHoursModal = true" 
+        class="flex flex-col items-center justify-center gap-1 p-2 rounded-2xl text-slate-400 hover:text-brand-gold transition-colors flex-1"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span class="text-[10px] font-black">عن المتجر</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- Item Details Modal (Select Sizes / Extras) -->
+  <div 
+    x-show="selectedItem" 
+    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md" 
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+  >
+    <div 
+      class="w-full max-w-md bg-white dark:bg-[#1E293B] rounded-t-[32px] sm:rounded-3xl p-6 relative shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto no-scrollbar text-right"
+      @click.away="selectedItem = null"
+    >
+      
+      <button 
+        @click="selectedItem = null" 
+        class="absolute top-4 left-4 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center text-sm font-bold shadow-sm"
+      >
+        ✕
+      </button>
+
+      <template x-if="selectedItem">
+        <div class="space-y-4">
+          
+          <!-- Item Image -->
+          <div class="w-full h-48 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-sm">
+            <img :src="selectedItem.image || getPlaceholder(selectedItem.category)" :alt="selectedItem.name" class="w-full h-full object-cover" />
+          </div>
+
+          <div>
+            <h3 class="text-lg font-black text-slate-900 dark:text-white" x-text="selectedItem.name"></h3>
+            <p x-show="selectedItem.description" class="text-xs text-slate-500 dark:text-slate-400 mt-1" x-text="selectedItem.description"></p>
+          </div>
+
+          <!-- Size / Variant Options -->
+          <div x-show="selectedItem.sizes || selectedItem.variants" class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <label class="block text-xs font-black text-slate-700 dark:text-slate-300">اختر الحجم / النوع:</label>
+            <div class="grid grid-cols-3 gap-2">
+              
+              <!-- Sizes (small, medium, large) -->
+              <template x-if="selectedItem.sizes">
+                <template x-for="(price, sizeKey) in selectedItem.sizes" :key="sizeKey">
+                  <button 
+                    @click="modalSelectedVariant = { key: sizeKey, label: sizeLabel(sizeKey), price: price }"
+                    class="p-2.5 rounded-2xl border text-center transition-all"
+                    :class="modalSelectedVariant?.key === sizeKey ? 'bg-brand-gold text-black border-brand-gold font-black shadow-md' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold'"
+                  >
+                    <span class="block text-xs" x-text="sizeLabel(sizeKey)"></span>
+                    <span class="block text-xs font-mono font-black mt-0.5" x-text="`${price} ر.س`"></span>
+                  </button>
+                </template>
+              </template>
+
+              <!-- Variants (single, double, family) -->
+              <template x-if="selectedItem.variants">
+                <template x-for="(price, varKey) in selectedItem.variants" :key="varKey">
+                  <button 
+                    @click="modalSelectedVariant = { key: varKey, label: variantLabel(varKey), price: price }"
+                    class="p-2.5 rounded-2xl border text-center transition-all"
+                    :class="modalSelectedVariant?.key === varKey ? 'bg-brand-gold text-black border-brand-gold font-black shadow-md' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold'"
+                  >
+                    <span class="block text-xs" x-text="variantLabel(varKey)"></span>
+                    <span class="block text-xs font-mono font-black mt-0.5" x-text="`${price} ر.س`"></span>
+                  </button>
+                </template>
+              </template>
+
+            </div>
+          </div>
+
+          <!-- Quantity Selector & Add Button -->
+          <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
+            
+            <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-2xl p-1 border border-slate-200 dark:border-slate-700">
+              <button @click="modalQty = Math.max(1, modalQty - 1)" class="w-9 h-9 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-black text-base shadow-sm">
+                -
+              </button>
+              <span class="w-10 text-center font-black font-mono text-sm" x-text="modalQty"></span>
+              <button @click="modalQty++" class="w-9 h-9 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-black text-base shadow-sm">
+                +
+              </button>
+            </div>
+
+            <button 
+              @click="addModalItemToCart()" 
+              class="flex-1 h-12 rounded-2xl bg-gradient-to-r from-brand-amber to-brand-gold text-black font-black text-sm shadow-xl flex items-center justify-center gap-2 active:scale-98 transition-all"
+            >
+              <span>إضافة للسلة</span>
+              <span class="font-mono" x-text="`(${getModalCalculatedPrice()} ر.س)`"></span>
+            </button>
+
+          </div>
+
+        </div>
+      </template>
+
+    </div>
+  </div>
+
+  <!-- Cart Slide-out Drawer -->
+  <div 
+    x-show="showCart" 
+    class="fixed inset-0 z-50 overflow-hidden" 
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+  >
+    <div class="absolute inset-0 bg-black/75 backdrop-blur-md" @click="showCart = false"></div>
+
+    <div 
+      class="absolute top-0 bottom-0 left-0 max-w-md w-full bg-white dark:bg-[#0F172A] shadow-2xl flex flex-col border-r border-slate-200 dark:border-slate-800 text-right"
+      x-transition:enter="transition ease-out duration-300"
+      x-transition:enter-start="-translate-x-full"
+      x-transition:enter-end="translate-x-0"
+      x-transition:leave="transition ease-in duration-200"
+      x-transition:leave-start="translate-x-0"
+      x-transition:leave-end="-translate-x-full"
+    >
+      
+      <!-- Cart Header -->
+      <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🛒</span>
+          <h2 class="text-lg font-black text-slate-900 dark:text-white">سلة الطلبات</h2>
+          <span class="px-2 py-0.5 rounded-full bg-brand-gold/10 text-brand-gold text-xs font-mono font-bold" x-text="`${cartItemsCount()} وجبة`"></span>
+        </div>
+        <button @click="showCart = false" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center text-sm font-bold">
+          ✕
+        </button>
+      </div>
+
+      <!-- Cart Items & Form -->
+      <div class="flex-1 overflow-y-auto p-5 space-y-5 no-scrollbar">
+        
+        <!-- Order Type Picker (Pickup / Delivery) -->
+        <div class="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-800/90 p-1 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <button 
+            @click="orderType = 'pickup'"
+            class="py-2.5 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2"
+            :class="orderType === 'pickup' ? 'bg-brand-gold text-black shadow-md' : 'text-slate-600 dark:text-slate-400'"
+          >
+            <span>🏪</span>
+            <span>استلام من الفرع</span>
+          </button>
+
+          <button 
+            @click="orderType = 'delivery'"
+            class="py-2.5 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2"
+            :class="orderType === 'delivery' ? 'bg-brand-gold text-black shadow-md' : 'text-slate-600 dark:text-slate-400'"
+          >
+            <span>🛵</span>
+            <span>توصيل دليفري (مجاناً)</span>
+          </button>
+        </div>
+
+        <!-- Customer Inputs -->
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الاسم الكريم:</label>
+            <input 
+              type="text" 
+              x-model="customerName" 
+              placeholder="اكتب اسمك..." 
+              class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-brand-gold text-right"
+            />
+          </div>
+
+          <div x-show="orderType === 'delivery'">
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">عنوان التوصيل:</label>
+            <input 
+              type="text" 
+              x-model="customerAddress" 
+              placeholder="الحي، الشارع، رقم العمارة أو البيت..." 
+              class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-brand-gold text-right"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">ملاحظات على الطلب:</label>
+            <input 
+              type="text" 
+              x-model="orderNotes" 
+              placeholder="مثال: بدون بصل، صوص ثوم زيادة..." 
+              class="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-brand-gold text-right"
+            />
+          </div>
+        </div>
+
+        <!-- Cart Items List -->
+        <div class="space-y-3 pt-2">
+          <h4 class="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center justify-between">
+            <span>الوجبات المحددة:</span>
+            <button x-show="cart.length > 0" @click="cart = []" class="text-[10px] text-red-500 font-bold hover:underline">تفريغ السلة</button>
+          </h4>
+
+          <template x-if="cart.length === 0">
+            <div class="py-12 text-center text-slate-400 space-y-2">
+              <span class="text-3xl block">🛒</span>
+              <p class="text-xs font-bold">السلة فارغة حالياً</p>
+              <p class="text-[11px] text-slate-500">اختر وجباتك المفضلة من المنيو لتظهر هنا</p>
+            </div>
+          </template>
+
+          <template x-for="item in cart" :key="item.cartId">
+            <div class="p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-2">
+              
+              <div class="min-w-0 flex-1">
+                <h5 class="text-xs font-black text-slate-900 dark:text-white truncate" x-text="item.name"></h5>
+                <span x-show="item.selectedVariant" class="text-[10px] font-bold text-brand-gold" x-text="`[${item.selectedVariant.label}]`"></span>
+                <span class="block text-xs font-mono font-black text-brand-amber dark:text-brand-gold mt-0.5" x-text="`${itemTotal(item)} ر.س`"></span>
+              </div>
+
+              <!-- Quantity buttons -->
+              <div class="flex items-center gap-1.5 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+                <button @click="updateQty(item.cartId, -1)" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 font-black text-xs text-slate-700 dark:text-slate-300">
+                  -
+                </button>
+                <span class="w-6 text-center font-mono font-black text-xs" x-text="item.quantity"></span>
+                <button @click="updateQty(item.cartId, 1)" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 font-black text-xs text-slate-700 dark:text-slate-300">
+                  +
+                </button>
+              </div>
+
+            </div>
+          </template>
+        </div>
+
+      </div>
+
+      <!-- Cart Footer / Checkout Button -->
+      <div x-show="cart.length > 0" class="p-5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-[#0F172A] space-y-3">
+        
+        <div class="space-y-1.5 text-xs font-bold">
+          <div class="flex justify-between text-slate-500 dark:text-slate-400">
+            <span>المجموع الفرعي:</span>
+            <span class="font-mono" x-text="`${calculateSubtotal()} ر.س`"></span>
+          </div>
+          <div class="flex justify-between text-slate-500 dark:text-slate-400">
+            <span>رسوم التوصيل:</span>
+            <span class="text-emerald-500 font-black">مجاناً 🆓</span>
+          </div>
+          <div class="flex justify-between text-sm font-black text-slate-900 dark:text-white pt-2 border-t border-slate-100 dark:border-slate-800">
+            <span>الإجمالي النهائي:</span>
+            <span class="text-brand-gold font-mono text-base" x-text="`${calculateTotal()} ر.س`"></span>
+          </div>
+        </div>
+
+        <button 
+          @click="submitOrderToWhatsApp()" 
+          class="w-full h-14 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-700 hover:to-green-600 text-white font-black text-sm shadow-xl flex items-center justify-center gap-2.5 active:scale-98 transition-all"
+        >
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.386 0 12.031c0 2.127.553 4.185 1.6 6.002L.202 23.364l5.485-1.439a12.022 12.022 0 0 0 6.344 1.777c6.646 0 12.031-5.386 12.031-12.032S18.677 0 12.031 0zm0 21.671a9.98 9.98 0 0 1-5.1-1.391l-.365-.217-3.791.995.998-3.696-.238-.378a9.957 9.957 0 0 1-1.536-5.323C2.001 6.136 6.505 1.632 12.031 1.632s10.03 4.504 10.03 10.03-4.504 10.03-10.03 10.03z"/></svg>
+          <span>إرسال وتأكيد الطلب عبر الواتساب</span>
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- About Store & Hours Modal -->
+  <div 
+    x-show="showHoursModal" 
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" 
+    x-transition 
+  >
+    <div 
+      class="w-full max-w-sm bg-white dark:bg-[#1E293B] rounded-3xl p-6 relative shadow-2xl border border-slate-200 dark:border-slate-700 text-right space-y-4"
+      @click.away="showHoursModal = false"
+    >
+      <button 
+        @click="showHoursModal = false" 
+        class="absolute top-4 left-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center text-xs font-bold"
+      >
+        ✕
+      </button>
+
+      <div class="text-center">
+        <div class="w-14 h-14 rounded-2xl bg-brand-gold/10 text-brand-gold flex items-center justify-center text-2xl mx-auto mb-2 border border-brand-gold/30">
+          🕒
+        </div>
+        <h3 class="text-base font-black text-slate-900 dark:text-white">ساعات العمل والتوصيل</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">مطعم دبل يرحب بكم يومياً</p>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <template x-for="day in ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']" :key="day">
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700">
+            <span class="font-black text-slate-800 dark:text-slate-200" x-text="day"></span>
+            <span class="font-mono font-bold text-brand-gold">03:00 PM – 02:30 AM</span>
+          </div>
+        </template>
+      </div>
+
+      <div class="pt-2">
+        <a 
+          href="tel:0555107546" 
+          class="w-full py-3 rounded-xl bg-brand-gold text-black font-black text-xs shadow-md flex items-center justify-center gap-2 block text-center"
+        >
+          <span>📞 الاتصال المباشر: 0555107546</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Application Logic -->
+  <script>
+    function doubleStoreApp() {
+      return {
+        darkMode: true,
+        searchQuery: '',
+        activeCategory: 'all',
+        showCart: false,
+        showHoursModal: false,
+        selectedItem: null,
+        modalSelectedVariant: null,
+        modalQty: 1,
+        orderType: 'delivery',
+        customerName: '',
+        customerAddress: '',
+        orderNotes: '',
+        notification: { show: false, message: '' },
+        cart: [],
+
+        init() {
+          const savedTheme = localStorage.getItem('double_theme');
+          if (savedTheme) {
+            this.darkMode = savedTheme === 'dark';
+          } else {
+            this.darkMode = true;
+          }
+          this.applyTheme();
+        },
+
+        toggleTheme() {
+          this.darkMode = !this.darkMode;
+          localStorage.setItem('double_theme', this.darkMode ? 'dark' : 'light');
+          this.applyTheme();
+        },
+
+        applyTheme() {
+          if (this.darkMode) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        },
+
+        categories: [
+          { id: 'shawarma', name: 'الشاورما', icon: '🌯' },
+          { id: 'grills', name: 'المشاوي', icon: '🍢' },
+          { id: 'pizza', name: 'البيتزا', icon: '🍕' },
+          { id: 'pastries', name: 'الفطائر', icon: '🥐' },
+          { id: 'manaqeesh', name: 'المناقيش', icon: '🫓' },
+          { id: 'burger', name: 'البرجر', icon: '🍔' },
+          { id: 'sandwiches', name: 'الساندوتشات', icon: '🌮' },
+          { id: 'appetizers', name: 'المقبلات', icon: '🥗' },
+          { id: 'drinks', name: 'المشروبات', icon: '🥤' }
+        ],
+
+        menuItems: [
+          // Shawarma
+          { id: 'sh1', name: 'شاورما دجاج صغير', price: 5, category: 'shawarma', badge: 'الأكثر طلباً', image: 'https://images.unsplash.com/photo-1561651823-34feb02250e4?auto=format&fit=crop&w=600&q=80' },
+          { id: 'sh2', name: 'شاورما لحم صغير', price: 6, category: 'shawarma', image: 'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=600&q=80' },
+          { id: 'sh3', name: 'شاورما طاووق دجاج', price: 9, category: 'shawarma', image: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=600&q=80' },
+          { id: 'sh4', name: 'شاورما ماريا لحم', price: 11, category: 'shawarma', image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80' },
+          { id: 'sh5', name: 'صاروخ نص متر دجاج', price: 18, category: 'shawarma', badge: 'دبل مميز', image: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=600&q=80' },
+          { id: 'sh6', name: 'صاروخ نص متر لحم', price: 20, category: 'shawarma', badge: 'دبل مميز', image: 'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=600&q=80' },
+          { id: 'sh7', name: 'شاورما فرط دجاج (125 جم)', price: 12, category: 'shawarma', image: 'https://images.unsplash.com/photo-1561651823-34feb02250e4?auto=format&fit=crop&w=600&q=80' },
+          { id: 'sh8', name: 'شاورما فرط لحم (125 جم)', price: 22, category: 'shawarma', image: 'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=600&q=80' },
+          { id: 'sh9', name: 'فتة شاورما دجاج', sizes: { medium: 17, large: 22 }, category: 'shawarma', image: 'https://images.unsplash.com/photo-1561651823-34feb02250e4?auto=format&fit=crop&w=600&q=80' },
+          { id: 'sh10', name: 'فتة شاورما لحم', sizes: { medium: 20, large: 25 }, category: 'shawarma', image: 'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=600&q=80' },
+          { id: 'sh11', name: 'وجبة عربي دجاج', variants: { single: 15, double: 25, family: 37 }, category: 'shawarma', badge: 'وجبة دبل', image: 'https://images.unsplash.com/photo-1561651823-34feb02250e4?auto=format&fit=crop&w=600&q=80' },
+          { id: 'sh12', name: 'وجبة عربي لحم', variants: { single: 17, double: 27, family: 40 }, category: 'shawarma', badge: 'وجبة دبل', image: 'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=600&q=80' },
+
+          // Grills
+          { id: 'g5', name: 'وجبة كباب دجاج', description: 'يقدم مع خبز + خضار', price: 20, category: 'grills', badge: 'مشويات طازجة', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80' },
+          { id: 'g6', name: 'وجبة كباب لحم', description: 'يقدم مع خبز + خضار', price: 25, category: 'grills', badge: 'مشويات طازجة', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80' },
+          { id: 'g7', name: 'شيش طاووق', description: 'يقدم مع خبز + خضار + بطاطس', price: 25, category: 'grills', image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=600&q=80' },
+          { id: 'g8', name: 'أوصال لحم', description: 'يقدم مع خبز + خضار + بطاطس', price: 25, category: 'grills', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80' },
+          { id: 'g9', name: 'مكس كباب لحم ودجاج', description: 'يقدم مع خبز + خضار + بطاطس + ثوم', price: 30, category: 'grills', badge: 'مكس مشكل', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80' },
+          { id: 'g10', name: 'مكس أوصال لحم مع شيش طاووق', description: 'يقدم مع خبز + خضار + بطاطس', price: 30, category: 'grills', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80' },
+          { id: 'g11', name: 'ريش خروف مشوية', description: 'يقدم مع خبز + خضار + بطاطس + ثوم', price: 35, category: 'grills', badge: 'فاخر', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80' },
+          { id: 'g12', name: 'وجبة دبل (مكس عائلي)', description: 'يقدم مع رز + خضار + ثوم', price: 50, category: 'grills', badge: 'VIP دبل', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80' },
+
+          // Pizza
+          { id: 'pz1', name: 'بيتزا دجاج رانش', sizes: { small: 10, medium: 15, large: 25 }, category: 'pizza', badge: 'الأكثر مبيعاً', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80' },
+          { id: 'pz2', name: 'بيتزا دجاج باربيكيو', sizes: { small: 10, medium: 15, large: 25 }, category: 'pizza', image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80' },
+          { id: 'pz3', name: 'بيتزا عش بلبل', sizes: { small: 10, medium: 15, large: 20 }, category: 'pizza', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80' },
+          { id: 'pz4', name: 'بيتزا مارجريتا', sizes: { small: 10, medium: 15, large: 20 }, category: 'pizza', image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=600&q=80' },
+          { id: 'pz5', name: 'بيتزا خضار', sizes: { small: 10, medium: 15, large: 20 }, category: 'pizza', image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80' },
+          { id: 'pz7', name: 'بيتزا شاورما دجاج', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza', badge: 'ابتكار دبل', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80' },
+          { id: 'pz8', name: 'بيتزا شاورما لحم', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza', image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80' },
+          { id: 'pz9', name: 'بيتزا مكس لحوم', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80' },
+          { id: 'pz11', name: 'بيتزا بيبيروني', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza', image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=600&q=80' },
+
+          // Pastries
+          { id: 'p2', name: 'فطيرة جبن عكاوي', price: 10, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+          { id: 'p3', name: 'فطيرة دجاج', price: 10, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+          { id: 'p4', name: 'فطيرة لحم', price: 10, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+          { id: 'p5', name: 'فطيرة زعتر', price: 8, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+          { id: 'p8', name: 'فطيرة لبنة وزعتر', price: 8, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+          { id: 'p9', name: 'فطيرة جبن بالعسل', price: 8, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+          { id: 'b4', name: 'بوكس فطائر مشكل (10 قطع)', price: 15, category: 'pastries', badge: 'عائلي', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+          { id: 'b5', name: 'بوكس فطائر مشكل (20 قطعة)', price: 30, category: 'pastries', badge: 'عائلي', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+
+          // Manaqeesh
+          { id: 'm1', name: 'مناقيش لحم', price: 10, category: 'manaqeesh', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+          { id: 'm2', name: 'مناقيش دجاج', price: 10, category: 'manaqeesh', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+          { id: 'm3', name: 'مناقيش عكاوي', price: 10, category: 'manaqeesh', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+          { id: 'm4', name: 'مناقيش لبنة', price: 8, category: 'manaqeesh', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+          { id: 'b1', name: 'بوكس مناقيش كبير (28 قطعة)', price: 35, category: 'manaqeesh', badge: 'توفير', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+
+          // Burger
+          { id: 'br1', name: 'برجر دجاج', variants: { single: 8, double: 13 }, category: 'burger', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80' },
+          { id: 'br2', name: 'برجر كرسبي مقرمش', variants: { single: 8, double: 13 }, category: 'burger', badge: 'مقرمش', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80' },
+          { id: 'br3', name: 'برجر لحم مشوي', variants: { single: 9, double: 15 }, category: 'burger', image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80' },
+          { id: 'br4', name: 'وجبة برجر دجاج كومبو', description: 'يقدم مع مشروب + بطاطس مقرمشة', price: 18, category: 'burger', badge: 'وجبة كاملة', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80' },
+          { id: 'br5', name: 'وجبة برجر لحم كومبو', description: 'يقدم مع مشروب + بطاطس مقرمشة', price: 19, category: 'burger', badge: 'وجبة كاملة', image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80' },
+
+          // Sandwiches
+          { id: 'sw1', name: 'صاروخ كباب دجاج', price: 10, category: 'sandwiches', image: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=600&q=80' },
+          { id: 'sw2', name: 'صاروخ شيش طاووق', price: 10, category: 'sandwiches', image: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=600&q=80' },
+          { id: 'sw3', name: 'صاروخ كباب لحم', price: 12, category: 'sandwiches', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80' },
+
+          // Appetizers
+          { id: 'ap1', name: 'حمص بيروتي فاخر', price: 5, category: 'appetizers', image: 'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?auto=format&fit=crop&w=600&q=80' },
+          { id: 'ap2', name: 'متبل باذنجان مشوي', price: 5, category: 'appetizers', image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80' },
+          { id: 'ap3', name: 'سلطة خضراء طازجة', price: 5, category: 'appetizers', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80' },
+          { id: 'ad1', name: 'إضافة جبن / صوصات دبل', price: 2, category: 'appetizers', image: 'https://images.unsplash.com/photo-1582293041079-7814c2f12063?auto=format&fit=crop&w=600&q=80' },
+
+          // Drinks
+          { id: 'dr1', name: 'حمضيات بارد', price: 3, category: 'drinks', image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80' },
+          { id: 'dr2', name: 'بيبسي بارد', price: 3, category: 'drinks', image: 'https://images.unsplash.com/photo-1629203851122-3726ecdf080e?auto=format&fit=crop&w=600&q=80' },
+          { id: 'dr3', name: 'سفن اب منعش', price: 3, category: 'drinks', image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80' },
+          { id: 'dr5', name: 'مياه معدنية نقية', price: 1, category: 'drinks', image: 'https://images.unsplash.com/photo-1559839914-ba2a0f8eb84a?auto=format&fit=crop&w=600&q=80' }
+        ],
+
+        getPlaceholder(cat) {
+          const map = {
+            shawarma: 'https://images.unsplash.com/photo-1561651823-34feb02250e4?auto=format&fit=crop&w=600&q=80',
+            grills: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
+            pizza: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80',
+            pastries: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80',
+            manaqeesh: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80',
+            burger: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
+            sandwiches: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=600&q=80',
+            appetizers: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+            drinks: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80'
+          };
+          return map[cat] || 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80';
+        },
+
+        filteredItems() {
+          let list = this.menuItems;
+          if (this.activeCategory !== 'all') {
+            list = list.filter(i => i.category === this.activeCategory);
+          }
+          if (this.searchQuery.trim()) {
+            const q = this.searchQuery.toLowerCase().trim();
+            list = list.filter(i => 
+              i.name.toLowerCase().includes(q) || 
+              (i.description && i.description.toLowerCase().includes(q))
+            );
+          }
+          return list;
+        },
+
+        getItemDisplayPrice(item) {
+          if (item.price) return item.price;
+          if (item.sizes) {
+            const vals = Object.values(item.sizes);
+            return Math.min(...vals);
+          }
+          if (item.variants) {
+            const vals = Object.values(item.variants);
+            return Math.min(...vals);
+          }
+          return 0;
+        },
+
+        sizeLabel(key) {
+          const map = { small: 'صغير', medium: 'وسط', large: 'كبير' };
+          return map[key] || key;
+        },
+
+        variantLabel(key) {
+          const map = { single: 'سنجل (فردي)', double: 'دبل (مزدوج)', family: 'عائلي كبير' };
+          return map[key] || key;
+        },
+
+        openItemModal(item) {
+          this.selectedItem = item;
+          this.modalQty = 1;
+          if (item.sizes) {
+            const firstKey = Object.keys(item.sizes)[0];
+            this.modalSelectedVariant = { key: firstKey, label: this.sizeLabel(firstKey), price: item.sizes[firstKey] };
+          } else if (item.variants) {
+            const firstKey = Object.keys(item.variants)[0];
+            this.modalSelectedVariant = { key: firstKey, label: this.variantLabel(firstKey), price: item.variants[firstKey] };
+          } else {
+            this.modalSelectedVariant = null;
+          }
+        },
+
+        getModalCalculatedPrice() {
+          if (!this.selectedItem) return 0;
+          const unit = this.modalSelectedVariant?.price || this.selectedItem.price || 0;
+          return unit * this.modalQty;
+        },
+
+        addModalItemToCart() {
+          if (!this.selectedItem) return;
+          this.addToCartWithQty(this.selectedItem, this.modalSelectedVariant, this.modalQty);
+          this.selectedItem = null;
+        },
+
+        quickAdd(item) {
+          if (item.sizes || item.variants) {
+            this.openItemModal(item);
+            return;
+          }
+          this.addToCartWithQty(item, null, 1);
+        },
+
+        addToCartWithQty(item, variant, qty) {
+          const cartId = `${item.id}-${variant?.key || 'default'}`;
+          const existing = this.cart.find(i => i.cartId === cartId);
+
+          if (existing) {
+            existing.quantity += qty;
+          } else {
+            this.cart.push({
+              ...item,
+              cartId: cartId,
+              selectedVariant: variant,
+              quantity: qty
+            });
+          }
+
+          this.notification.message = `تمت إضافة "${item.name}" إلى السلة (${qty})`;
+          this.notification.show = true;
+          setTimeout(() => this.notification.show = false, 2500);
+        },
+
+        updateQty(cartId, delta) {
+          const item = this.cart.find(i => i.cartId === cartId);
+          if (item) {
+            item.quantity += delta;
+            if (item.quantity <= 0) {
+              this.cart = this.cart.filter(i => i.cartId !== cartId);
+            }
+          }
+        },
+
+        itemTotal(item) {
+          const price = item.selectedVariant?.price || item.price || 0;
+          return price * item.quantity;
+        },
+
+        calculateSubtotal() {
+          return this.cart.reduce((acc, item) => acc + this.itemTotal(item), 0);
+        },
+
+        calculateTotal() {
+          return this.calculateSubtotal();
+        },
+
+        cartItemsCount() {
+          return this.cart.reduce((acc, item) => acc + item.quantity, 0);
+        },
+
+        submitOrderToWhatsApp() {
+          if (!this.customerName.trim()) {
+            this.notification.message = 'يرجى كتابة الاسم لإتمام الطلب';
+            this.notification.show = true;
+            setTimeout(() => this.notification.show = false, 3000);
+            return;
+          }
+
+          if (this.orderType === 'delivery' && !this.customerAddress.trim()) {
+            this.notification.message = 'يرجى كتابة عنوان التوصيل';
+            this.notification.show = true;
+            setTimeout(() => this.notification.show = false, 3000);
+            return;
+          }
+
+          const itemsText = this.cart.map(item =>
+            `▪️ *${item.name}* ${item.selectedVariant ? `(${item.selectedVariant.label})` : ''} × ${item.quantity} = ${this.itemTotal(item)} ر.س`
+          ).join('\n');
+
+          const message = `🌟 *طلب جديد من متجر مطعم دبل | DOUBLE* 🌟\n` +
+            `━━━━━━━━━━━━━━━━━━━━\n` +
+            `👤 *اسم العميل:* ${this.customerName}\n` +
+            `🚚 *نوع الطلب:* ${this.orderType === 'delivery' ? 'توصيل دليفري (مجاناً 🛵)' : 'استلام من الفرع 🏪'}\n` +
+            (this.orderType === 'delivery' && this.customerAddress ? `📍 *عنوان التوصيل:* ${this.customerAddress}\n` : '') +
+            (this.orderNotes ? `💡 *ملاحظات:* ${this.orderNotes}\n` : '') +
+            `━━━━━━━━━━━━━━━━━━━━\n` +
+            `📝 *تفاصيل الطلب:*\n${itemsText}\n` +
+            `━━━━━━━━━━━━━━━━━━━━\n` +
+            `💰 *الإجمالي النهائي:* ${this.calculateTotal()} ريال سعودي\n\n` +
+            `🙏 *شكراً لاختياركم مطعم دبل!*`;
+
+          window.open(`https://wa.me/966555107546?text=${encodeURIComponent(message)}`, '_blank');
+          
+          this.cart = [];
+          this.showCart = false;
+          this.notification.message = 'تم تجهيز الطلب وإرساله إلى الواتساب بنجاح! 🎉';
+          this.notification.show = true;
+          setTimeout(() => this.notification.show = false, 4000);
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
