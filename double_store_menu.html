@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="dark">
+<html lang="ar" dir="rtl">
 
 <head>
   <meta charset="UTF-8" />
@@ -734,7 +734,7 @@
   <script>
     function doubleStoreApp() {
       return {
-        darkMode: true,
+        darkMode: false,
         searchQuery: '',
         activeCategory: 'all',
         showCart: false,
@@ -754,7 +754,7 @@
           if (savedTheme) {
             this.darkMode = savedTheme === 'dark';
           } else {
-            this.darkMode = true;
+            this.darkMode = false;
           }
           this.applyTheme();
         },
