@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>مطعم دبل | Double Restaurant Menu</title>
+  <title>مطعم دبل | DOUBEL Menu</title>
   <link rel="icon" href="https://res.cloudinary.com/do0u3he16/image/upload/v1778623162/94e560b7-648d-4293-8f92-292d31693ea1_-----01-2-01_nqreth.jpg" />
   
   <!-- Fonts -->
@@ -59,10 +59,10 @@
       box-shadow: 0 0 25px rgba(245, 158, 11, 0.35);
     }
     .card-shine {
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .card-shine:active {
-      transform: scale(0.97);
+      transform: scale(0.985);
     }
   </style>
 </head>
@@ -143,7 +143,7 @@
 
       <!-- Floating WhatsApp Quick Button on Cover -->
       <a 
-        href="https://wa.me/966555107546?text=مرحباً%20مطعم%20دبل،%20أود%20الاستفسار%20عن%20المنيو" 
+        href="https://wa.me/966555107546?text=مرحباً%20مطعم%20دبل،%20أود%20الطلب%20من%20المنيو" 
         target="_blank"
         class="absolute top-4 left-4 w-11 h-11 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-10 border-2 border-white dark:border-slate-900"
         title="تواصل واتساب"
@@ -200,7 +200,7 @@
           </div>
 
           <p class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 leading-relaxed">
-            أشهى المشويات، الشاورما، الفطائر، المناقيش، البرجر والبيتزا بأعلى جودة طازجة يومياً 🔥
+            أشهى الشاورما، المشويات، البروستد، البرجر، البيتزا، الفطائر والمقبلات طازجة يومياً 🔥
           </p>
 
           <!-- Location with Maps link -->
@@ -246,7 +246,7 @@
         <input 
           type="text" 
           x-model="searchQuery" 
-          placeholder="🔍 ابحث عن وجبتك في المنيو (شاورما، بيتزا، برجر، مشاوي...)" 
+          placeholder="🔍 ابحث في المنيو (شاورما، بروستد، برجر، بيتزا...)" 
           class="w-full h-11 pr-10 pl-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-xs sm:text-sm font-bold text-slate-900 dark:text-white outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 transition-all placeholder:text-slate-400 text-right shadow-sm"
         />
         <div class="absolute right-3.5 top-3 text-slate-400">
@@ -289,28 +289,27 @@
       </div>
     </div>
 
-    <!-- Product Section: 2-Columns Food Photo Grid (Original Loved Layout) -->
+    <!-- Clean Menu Items List -->
     <div class="p-4 space-y-4">
       
-      <!-- Category Title & Items Count -->
-      <div class="flex items-center justify-between px-1">
-        <h2 class="text-sm sm:text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+      <!-- Category Header & Items Count -->
+      <div class="flex items-center justify-between px-1 mb-1">
+        <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
           <span class="w-2.5 h-2.5 rounded-full bg-brand-gold"></span>
           <span x-text="activeCategory === 'all' ? 'قائمة الطعام الكاملة' : categories.find(c => c.id === activeCategory)?.name"></span>
         </h2>
         <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 font-mono" x-text="`(${filteredItems().length} صنف)`"></span>
       </div>
 
-      <!-- Clean Professional Menu Items List (No Photos) -->
+      <!-- Clean List Cards Without Photos -->
       <div class="space-y-2.5">
         
         <template x-for="item in filteredItems()" :key="item.id">
           <div 
-            @click="openItemModal(item)"
-            class="card-shine bg-white dark:bg-[#1E293B] rounded-2xl p-3.5 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-brand-gold/50 flex items-center justify-between gap-3 cursor-pointer group"
+            class="card-shine bg-white dark:bg-[#1E293B] rounded-2xl p-3.5 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-brand-gold/50 flex items-center justify-between gap-3 group"
           >
             
-            <!-- Right: Item Name, Badges, Description, and Options -->
+            <!-- Right: Item Name + Category Tag -->
             <div class="space-y-1 text-right flex-1 min-w-0">
               <div class="flex items-center gap-2 flex-wrap">
                 <h3 class="text-xs sm:text-sm font-black text-slate-900 dark:text-white group-hover:text-brand-gold transition-colors" x-text="item.name"></h3>
@@ -320,13 +319,7 @@
                   x-text="item.badge"
                 ></span>
               </div>
-
-              <p x-show="item.description" class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 leading-relaxed" x-text="item.description"></p>
-              
-              <div class="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500 font-bold pt-0.5">
-                <span x-show="item.sizes">🍕 متوفر بعدة أحجام (صغير / وسط / كبير)</span>
-                <span x-show="item.variants">⭐ متوفر (سنجل / دبل / عائلي)</span>
-              </div>
+              <p class="text-[10px] text-slate-400 font-bold" x-text="getCategoryName(item.category)"></p>
             </div>
 
             <!-- Left: Price + Quick Add Button -->
@@ -334,7 +327,7 @@
               
               <!-- Price Block -->
               <div class="text-left font-mono">
-                <span class="block text-xs sm:text-sm font-black text-amber-600 dark:text-brand-gold" x-text="getItemDisplayPrice(item)"></span>
+                <span class="block text-xs sm:text-sm font-black text-amber-600 dark:text-brand-gold" x-text="item.price"></span>
                 <span class="block text-[9px] font-bold text-slate-400">ريال</span>
               </div>
 
@@ -411,107 +404,6 @@
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
         <span class="text-[10px] font-black">عن المطعم</span>
       </button>
-
-    </div>
-  </div>
-
-  <!-- Item Details Modal (Select Sizes / Extras) -->
-  <div 
-    x-show="selectedItem" 
-    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md" 
-    x-transition:enter="transition ease-out duration-300"
-    x-transition:enter-start="opacity-0"
-    x-transition:enter-end="opacity-100"
-    x-transition:leave="transition ease-in duration-200"
-    x-transition:leave-start="opacity-100"
-    x-transition:leave-end="opacity-0"
-  >
-    <div 
-      class="w-full max-w-md bg-white dark:bg-[#1E293B] rounded-t-[32px] sm:rounded-3xl p-6 relative shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto no-scrollbar text-right"
-      @click.away="selectedItem = null"
-    >
-      
-      <button 
-        @click="selectedItem = null" 
-        class="absolute top-4 left-4 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center text-sm font-bold shadow-sm"
-      >
-        ✕
-      </button>
-
-      <template x-if="selectedItem">
-        <div class="space-y-4">
-          
-          <div class="flex items-center gap-3">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 shadow-sm border" :class="getCategoryIconStyle(selectedItem.category)">
-              <span x-text="getCategoryIcon(selectedItem.category)"></span>
-            </div>
-            <div>
-              <h3 class="text-base font-black text-slate-900 dark:text-white" x-text="selectedItem.name"></h3>
-              <p x-show="selectedItem.description" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" x-text="selectedItem.description"></p>
-            </div>
-          </div>
-
-          <!-- Size / Variant Options -->
-          <div x-show="selectedItem.sizes || selectedItem.variants" class="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-            <label class="block text-xs font-black text-slate-700 dark:text-slate-300">اختر الحجم / النوع المطلوب:</label>
-            <div class="grid grid-cols-3 gap-2">
-              
-              <!-- Sizes (small, medium, large) -->
-              <template x-if="selectedItem.sizes">
-                <template x-for="(price, sizeKey) in selectedItem.sizes" :key="sizeKey">
-                  <button 
-                    @click="modalSelectedVariant = { key: sizeKey, label: sizeLabel(sizeKey), price: price }"
-                    class="p-3 rounded-2xl border text-center transition-all"
-                    :class="modalSelectedVariant?.key === sizeKey ? 'bg-brand-gold text-slate-950 border-brand-gold font-black shadow-md' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold'"
-                  >
-                    <span class="block text-xs" x-text="sizeLabel(sizeKey)"></span>
-                    <span class="block text-xs font-mono font-black mt-0.5" x-text="`${price} ر.س`"></span>
-                  </button>
-                </template>
-              </template>
-
-              <!-- Variants (single, double, family) -->
-              <template x-if="selectedItem.variants">
-                <template x-for="(price, varKey) in selectedItem.variants" :key="varKey">
-                  <button 
-                    @click="modalSelectedVariant = { key: varKey, label: variantLabel(varKey), price: price }"
-                    class="p-3 rounded-2xl border text-center transition-all"
-                    :class="modalSelectedVariant?.key === varKey ? 'bg-brand-gold text-slate-950 border-brand-gold font-black shadow-md' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold'"
-                  >
-                    <span class="block text-xs" x-text="variantLabel(varKey)"></span>
-                    <span class="block text-xs font-mono font-black mt-0.5" x-text="`${price} ر.س`"></span>
-                  </button>
-                </template>
-              </template>
-
-            </div>
-          </div>
-
-          <!-- Quantity Selector & Add Button -->
-          <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
-            
-            <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-2xl p-1 border border-slate-200 dark:border-slate-700">
-              <button @click="modalQty = Math.max(1, modalQty - 1)" class="w-9 h-9 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-black text-base shadow-sm">
-                -
-              </button>
-              <span class="w-10 text-center font-black font-mono text-sm" x-text="modalQty"></span>
-              <button @click="modalQty++" class="w-9 h-9 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-black text-base shadow-sm">
-                +
-              </button>
-            </div>
-
-            <button 
-              @click="addModalItemToCart()" 
-              class="flex-1 h-12 rounded-2xl bg-gradient-to-r from-amber-500 to-brand-gold text-slate-950 font-black text-sm shadow-xl flex items-center justify-center gap-2 active:scale-98 transition-all"
-            >
-              <span>إضافة للسلة</span>
-              <span class="font-mono" x-text="`(${getModalCalculatedPrice()} ر.س)`"></span>
-            </button>
-
-          </div>
-
-        </div>
-      </template>
 
     </div>
   </div>
@@ -630,7 +522,6 @@
                 <span class="text-xl flex-shrink-0" x-text="getCategoryIcon(item.category)"></span>
                 <div class="min-w-0 flex-1">
                   <h5 class="text-xs font-black text-slate-900 dark:text-white truncate" x-text="item.name"></h5>
-                  <span x-show="item.selectedVariant" class="text-[10px] font-bold text-brand-goldDark dark:text-brand-gold" x-text="`[${item.selectedVariant.label}]`"></span>
                   <span class="block text-xs font-mono font-black text-amber-600 dark:text-brand-gold mt-0.5" x-text="`${itemTotal(item)} ر.س`"></span>
                 </div>
               </div>
@@ -738,9 +629,6 @@
         activeCategory: 'all',
         showCart: false,
         showHoursModal: false,
-        selectedItem: null,
-        modalSelectedVariant: null,
-        modalQty: 1,
         orderType: 'delivery',
         customerName: '',
         customerAddress: '',
@@ -773,126 +661,92 @@
         },
 
         categories: [
-          { id: 'shawarma', name: 'الشاورما', icon: '🌯' },
-          { id: 'grills', name: 'المشاوي', icon: '🍢' },
-          { id: 'pizza', name: 'البيتزا', icon: '🍕' },
-          { id: 'pastries', name: 'الفطائر', icon: '🥐' },
-          { id: 'manaqeesh', name: 'المناقيش', icon: '🫓' },
+          { id: 'shawarma', name: 'شاورما', icon: '🌯' },
+          { id: 'grills', name: 'مشويات', icon: '🍢' },
+          { id: 'broasted', name: 'البروستد', icon: '🍗' },
           { id: 'burger', name: 'البرجر', icon: '🍔' },
-          { id: 'sandwiches', name: 'الساندوتشات', icon: '🌮' },
-          { id: 'appetizers', name: 'المقبلات', icon: '🥗' },
-          { id: 'drinks', name: 'المشروبات', icon: '🥤' }
+          { id: 'pizza', name: 'البيتزا', icon: '🍕' },
+          { id: 'pastries', name: 'الفطاير', icon: '🥐' },
+          { id: 'drinks', name: 'المشروبات', icon: '🥤' },
+          { id: 'sauces_appetizers', name: 'الصوصات + مقبلات', icon: '🥗' }
         ],
 
-        // 100% Authentic Original Menu Items & Exact Prices
+        // Exact official Menu items and prices from user
         menuItems: [
-          // 🌯 الشاورما (Shawarma)
-          { id: 'sh1', name: 'شاورما دجاج صغير', price: 5, category: 'shawarma', badge: '🔥 الأكثر طلباً', image: './shawarma_double.jpg' },
-          { id: 'sh2', name: 'شاورما لحم صغير', price: 6, category: 'shawarma', image: './shawarma_double.jpg' },
-          { id: 'sh3', name: 'شاورما طاووق دجاج', price: 9, category: 'shawarma', image: './shawarma_double.jpg' },
-          { id: 'sh4', name: 'شاورما ماريا لحم', price: 11, category: 'shawarma', image: './shawarma_double.jpg' },
-          { id: 'sh5', name: 'صاروخ نص متر دجاج', price: 18, category: 'shawarma', badge: '👑 دبل مميز', image: './shawarma_double.jpg' },
-          { id: 'sh6', name: 'صاروخ نص متر لحم', price: 20, category: 'shawarma', badge: '👑 دبل مميز', image: './shawarma_double.jpg' },
-          { id: 'sh7', name: 'شاورما فرط دجاج (125 جم)', price: 12, category: 'shawarma', image: './shawarma_double.jpg' },
-          { id: 'sh8', name: 'شاورما فرط لحم (125 جم)', price: 22, category: 'shawarma', image: './shawarma_double.jpg' },
-          { id: 'sh9', name: 'فتة شاورما دجاج', sizes: { medium: 17, large: 22 }, category: 'shawarma', image: './shawarma_double.jpg' },
-          { id: 'sh10', name: 'فتة شاورما لحم', sizes: { medium: 20, large: 25 }, category: 'shawarma', image: './shawarma_double.jpg' },
-          { id: 'sh11', name: 'وجبة عربي دجاج', variants: { single: 15, double: 25, family: 37 }, category: 'shawarma', badge: '⭐ وجبة دبل', image: './shawarma_double.jpg' },
-          { id: 'sh12', name: 'وجبة عربي لحم', variants: { single: 17, double: 27, family: 40 }, category: 'shawarma', badge: '⭐ وجبة دبل', image: './shawarma_double.jpg' },
+          // 🌯 الشاورما
+          { id: 'sh1', name: 'شاورما صغير', price: 5, category: 'shawarma', badge: '🔥 الأكثر طلباً' },
+          { id: 'sh2', name: 'صاروخ', price: 9, category: 'shawarma', badge: '⭐ مميز' },
+          { id: 'sh3', name: 'عربي 8 قطع', price: 16, category: 'shawarma' },
+          { id: 'sh4', name: 'عربي 16 قطع', price: 27, category: 'shawarma', badge: '👑 وجبة دبل' },
+          { id: 'sh5', name: 'شاورما تبولة', price: 6, category: 'shawarma' },
+          { id: 'sh6', name: 'شاورما حمص', price: 11, category: 'shawarma' },
 
-          // 🍢 المشاوي (Grills)
-          { id: 'g5', name: 'وجبة كباب دجاج', description: 'يقدم مع خبز طازج + خضار مشوية وبطاطس', price: 20, category: 'grills', badge: '🍢 طازج يومياً', image: './grills_double.jpg' },
-          { id: 'g6', name: 'وجبة كباب لحم', description: 'يقدم مع خبز طازج + خضار مشوية وبطاطس', price: 25, category: 'grills', badge: '🍢 طازج يومياً', image: './grills_double.jpg' },
-          { id: 'g7', name: 'شيش طاووق', description: 'يقدم مع خبز + خضار + بطاطس مقرمشة', price: 25, category: 'grills', image: './grills_double.jpg' },
-          { id: 'g8', name: 'أوصال لحم بلدي', description: 'يقدم مع خبز + خضار + بطاطس مقرمشة', price: 25, category: 'grills', image: './grills_double.jpg' },
-          { id: 'g9', name: 'مكس كباب لحم ودجاج', description: 'يقدم مع خبز + خضار + بطاطس + ثومية', price: 30, category: 'grills', badge: '🔥 مكس مشكل', image: './grills_double.jpg' },
-          { id: 'g10', name: 'مكس أوصال لحم مع شيش طاووق', description: 'يقدم مع خبز + خضار + بطاطس', price: 30, category: 'grills', image: './grills_double.jpg' },
-          { id: 'g11', name: 'ريش خروف مشوية عالفحم', description: 'يقدم مع خبز + خضار + بطاطس + ثوم', price: 35, category: 'grills', badge: '👑 VIP دبل', image: './grills_double.jpg' },
-          { id: 'g12', name: 'وجبة دبل المشكلة (عائلي)', description: 'يقدم مع أرز فاخر + خضار مشوية + صوصات', price: 50, category: 'grills', badge: '👑 VIP دبل', image: './grills_double.jpg' },
+          // 🍢 مشويات
+          { id: 'g1', name: 'شيش', price: 9, category: 'grills', badge: '🍢 طازج' },
+          { id: 'g2', name: 'كباب دجاج', price: 9, category: 'grills' },
+          { id: 'g3', name: 'كباب لحم', price: 9, category: 'grills' },
 
-          // 🍕 البيتزا (Pizza)
-          { id: 'pz1', name: 'بيتزا دجاج رانش', sizes: { small: 10, medium: 15, large: 25 }, category: 'pizza', badge: '🔥 الأكثر طلباً', image: './pizza_ranch_double.jpg' },
-          { id: 'pz2', name: 'بيتزا دجاج باربيكيو', sizes: { small: 10, medium: 15, large: 25 }, category: 'pizza', image: './pizza_bbq_double.jpg' },
-          { id: 'pz3', name: 'بيتزا عش بلبل', sizes: { small: 10, medium: 15, large: 20 }, category: 'pizza', image: './pizza_double.jpg' },
-          { id: 'pz4', name: 'بيتزا مارجريتا إيطالية', sizes: { small: 10, medium: 15, large: 20 }, category: 'pizza', image: './pizza_double.jpg' },
-          { id: 'pz5', name: 'بيتزا مشكل خضار', sizes: { small: 10, medium: 15, large: 20 }, category: 'pizza', image: './pizza_veggie_double.jpg' },
-          { id: 'pz6', name: 'بيتزا نقانق وهوت دوج', sizes: { small: 10, medium: 15, large: 20 }, category: 'pizza', image: './pizza_double.jpg' },
-          { id: 'pz7', name: 'بيتزا شاورما دجاج', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza', badge: '⭐ ابتكار دبل', image: './pizza_double.jpg' },
-          { id: 'pz8', name: 'بيتزا شاورما لحم', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza', image: './pizza_double.jpg' },
-          { id: 'pz9', name: 'بيتزا مكس لحوم', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza', image: './pizza_double.jpg' },
-          { id: 'pz10', name: 'بيتزا لحم مفروم', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza', image: './pizza_double.jpg' },
-          { id: 'pz11', name: 'بيتزا بيبيروني', sizes: { small: 15, medium: 20, large: 25 }, category: 'pizza', image: './pizza_double.jpg' },
-          { id: 'pz13', name: 'بيتزا مشكل أجبان', sizes: { small: 10, medium: 15, large: 20 }, category: 'pizza', image: './pizza_double.jpg' },
+          // 🍗 البروستد
+          { id: 'br1', name: 'بروستد عادي', price: 18, category: 'broasted', badge: '🍗 مقرمش' },
+          { id: 'br2', name: 'بروستد حراق', price: 18, category: 'broasted', badge: '🌶️ حراق' },
 
-          // 🥐 الفطائر (Pastries)
-          { id: 'p2', name: 'فطيرة جبن عكاوي', price: 10, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'p3', name: 'فطيرة دجاج متبل', price: 10, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'p4', name: 'فطيرة لحم مفروم', price: 10, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'p5', name: 'فطيرة زعتر بلدي', price: 8, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'p7', name: 'فطيرة محمرة شامي', price: 8, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'p8', name: 'فطيرة لبنة وزعتر', price: 8, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'p9', name: 'فطيرة جبن بالعسل', price: 8, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'p10', name: 'فطيرة بيض بالجبن', price: 8, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'p11', name: 'فطيرة لبنة بالعسل', price: 8, category: 'pastries', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'b4', name: 'بوكس فطائر مشكل (10 قطع)', price: 15, category: 'pastries', badge: '🎁 توفير', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'b5', name: 'بوكس فطائر مشكل (20 قطعة)', price: 30, category: 'pastries', badge: '🎁 توفير', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'b6', name: 'بوكس فطائر مشكل (40 قطعة)', price: 60, category: 'pastries', badge: '🎁 عائلي كبير', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+          // 🍔 البرجر
+          { id: 'bg1', name: 'برجر لحم', price: 11, category: 'burger' },
+          { id: 'bg2', name: 'برجر دجاج مشوي', price: 11, category: 'burger' },
+          { id: 'bg3', name: 'برجر دجاج كرسبي', price: 13, category: 'burger', badge: '🔥 كرسبي' },
 
-          // 🫓 المناقيش (Manaqeesh)
-          { id: 'm1', name: 'مناقيش لحم', price: 10, category: 'manaqeesh', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'm2', name: 'مناقيش دجاج', price: 10, category: 'manaqeesh', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'm3', name: 'مناقيش عكاوي', price: 10, category: 'manaqeesh', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'm4', name: 'مناقيش لبنة', price: 8, category: 'manaqeesh', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'm6', name: 'مناقيش زعتر', price: 8, category: 'manaqeesh', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'm7', name: 'مناقيش محمرة', price: 8, category: 'manaqeesh', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'm8', name: 'مناقيش جبن سائل', price: 8, category: 'manaqeesh', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'b1', name: 'بوكس مناقيش كبير (28 قطعة)', price: 35, category: 'manaqeesh', badge: '🎁 توفير كبير', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'b2', name: 'بوكس مناقيش وسط (24 قطعة)', price: 28, category: 'manaqeesh', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
-          { id: 'b3', name: 'بوكس مناقيش صغير (20 قطعة)', price: 22, category: 'manaqeesh', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80' },
+          // 🍕 البيتزا
+          { id: 'pz1', name: 'بيتزا نقانق', price: 14, category: 'pizza' },
+          { id: 'pz2', name: 'بيتزا دجاج مكسيكانو', price: 16, category: 'pizza', badge: '🌶️ مكسيكانو' },
+          { id: 'pz3', name: 'بيتزا لحم', price: 16, category: 'pizza' },
+          { id: 'pz4', name: 'بيتزا عكاوي', price: 14, category: 'pizza' },
+          { id: 'pz5', name: 'بيتزا دجاج رانش', price: 16, category: 'pizza', badge: '🔥 الأكثر طلباً' },
+          { id: 'pz6', name: 'عش بلبل مع عسل', price: 14, category: 'pizza' },
+          { id: 'pz7', name: 'بيتزا خضار', price: 14, category: 'pizza' },
 
-          // 🍔 البرجر (Burgers)
-          { id: 'br1', name: 'برجر دجاج', variants: { single: 8, double: 13 }, category: 'burger', image: './burger_double.jpg' },
-          { id: 'br2', name: 'برجر كرسبي مقرمش', variants: { single: 8, double: 13 }, category: 'burger', badge: '🔥 كرسبي', image: './crispy_double.jpg' },
-          { id: 'br3', name: 'برجر لحم مشوي عالفحم', variants: { single: 9, double: 15 }, category: 'burger', image: './burger_double.jpg' },
-          { id: 'br4', name: 'وجبة برجر دجاج كومبو', description: 'يقدم مع مشروب بارد + بطاطس مقرمشة', price: 18, category: 'burger', badge: '⭐ وجبة كاملة', image: './burger_double.jpg' },
-          { id: 'br5', name: 'وجبة برجر لحم كومبو', description: 'يقدم مع مشروب بارد + بطاطس مقرمشة', price: 19, category: 'burger', badge: '⭐ وجبة كاملة', image: './burger_double.jpg' },
-          { id: 'br6', name: 'برجر شاورما دجاج', price: 8, category: 'burger', image: './burger_double.jpg' },
-          { id: 'br7', name: 'برجر شاورما لحم', price: 9, category: 'burger', image: './burger_double.jpg' },
+          // 🥐 الفطاير
+          { id: 'ft1', name: 'محمره + عكاوي', price: 13, category: 'pastries' },
+          { id: 'ft2', name: 'محمره + لحم', price: 13, category: 'pastries' },
+          { id: 'ft3', name: 'محمره + دجاج مكسيكانو', price: 13, category: 'pastries' },
+          { id: 'ft4', name: 'محمره + دجاج الفريدو', price: 13, category: 'pastries' },
+          { id: 'ft5', name: 'محمره + مسخن', price: 13, category: 'pastries', badge: '⭐ مميز' },
+          { id: 'ft6', name: 'بوكس ميني 12 قطع', price: 16, category: 'pastries', badge: '🎁 توفير' },
+          { id: 'ft7', name: 'بوكس ميني 24 قطع', price: 31, category: 'pastries', badge: '🎁 عائلي' },
 
-          // 🌮 الساندوتشات (Sandwiches)
-          { id: 'sw1', name: 'صاروخ كباب دجاج', price: 10, category: 'sandwiches', image: './shawarma_double.jpg' },
-          { id: 'sw2', name: 'صاروخ شيش طاووق', price: 10, category: 'sandwiches', image: './shawarma_double.jpg' },
-          { id: 'sw3', name: 'صاروخ كباب لحم', price: 12, category: 'sandwiches', image: './shawarma_double.jpg' },
-          { id: 'sw4', name: 'صاروخ أوصال لحم', price: 12, category: 'sandwiches', image: './shawarma_double.jpg' },
+          // 🥤 المشروبات
+          { id: 'dr1', name: 'بيبسي', price: 3, category: 'drinks' },
+          { id: 'dr2', name: 'بيبسي دايت', price: 2, category: 'drinks' },
+          { id: 'dr3', name: 'سفن', price: 3, category: 'drinks' },
+          { id: 'dr4', name: 'حمضيات', price: 3, category: 'drinks' },
+          { id: 'dr5', name: 'عصير ربيع', price: 2, category: 'drinks' },
+          { id: 'dr6', name: 'ماء', price: 1, category: 'drinks' },
 
-          // 🥗 المقبلات (Appetizers)
-          { id: 'ap1', name: 'حمص بيروتي فاخر', price: 5, category: 'appetizers', image: 'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?auto=format&fit=crop&w=600&q=80' },
-          { id: 'ap2', name: 'متبل باذنجان مشوي', price: 5, category: 'appetizers', image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80' },
-          { id: 'ap3', name: 'سلطة خضراء طازجة', price: 5, category: 'appetizers', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80' },
-          { id: 'ad1', name: 'إضافة جبن / صوصات دبل الخاصة', price: 2, category: 'appetizers', image: 'https://images.unsplash.com/photo-1582293041079-7814c2f12063?auto=format&fit=crop&w=600&q=80' },
-          { id: 'ad2', name: 'خبز صاج ساخن', price: 1, category: 'appetizers', image: './shawarma_double.jpg' },
-
-          // 🥤 المشروبات (Drinks)
-          { id: 'dr1', name: 'حمضيات بارد', price: 3, category: 'drinks', image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80' },
-          { id: 'dr2', name: 'بيبسي بارد', price: 3, category: 'drinks', image: 'https://images.unsplash.com/photo-1629203851122-3726ecdf080e?auto=format&fit=crop&w=600&q=80' },
-          { id: 'dr3', name: 'سفن اب منعش', price: 3, category: 'drinks', image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80' },
-          { id: 'dr4', name: 'بيبسي دايت', price: 3, category: 'drinks', image: 'https://images.unsplash.com/photo-1629203851122-3726ecdf080e?auto=format&fit=crop&w=600&q=80' },
-          { id: 'dr5', name: 'مياه معدنية نقية', price: 1, category: 'drinks', image: 'https://images.unsplash.com/photo-1559839914-ba2a0f8eb84a?auto=format&fit=crop&w=600&q=80' }
+          // 🥗 الصوصات + مقبلات
+          { id: 'sc1', name: 'صوص دبل عادي', price: 2, category: 'sauces_appetizers' },
+          { id: 'sc2', name: 'صوص دبل حراق', price: 2, category: 'sauces_appetizers', badge: '🌶️' },
+          { id: 'sc3', name: 'صوص ثوم', price: 2, category: 'sauces_appetizers' },
+          { id: 'sc4', name: 'حمص', price: 4, category: 'sauces_appetizers' },
+          { id: 'sc5', name: 'تبولة', price: 5, category: 'sauces_appetizers' },
+          { id: 'sc6', name: 'فتوش', price: 5, category: 'sauces_appetizers' }
         ],
 
-        getPlaceholder(cat) {
+        getCategoryIcon(cat) {
           const map = {
-            shawarma: './shawarma_double.jpg',
-            grills: './grills_double.jpg',
-            pizza: './pizza_double.jpg',
-            pastries: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80',
-            manaqeesh: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80',
-            burger: './burger_double.jpg',
-            sandwiches: './shawarma_double.jpg',
-            appetizers: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
-            drinks: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80'
+            shawarma: '🌯',
+            grills: '🍢',
+            broasted: '🍗',
+            burger: '🍔',
+            pizza: '🍕',
+            pastries: '🥐',
+            drinks: '🥤',
+            sauces_appetizers: '🥗'
           };
-          return map[cat] || './double_banner.jpg';
+          return map[cat] || '🍽️';
+        },
+
+        getCategoryName(catId) {
+          const found = this.categories.find(c => c.id === catId);
+          return found ? found.name : '';
         },
 
         filteredItems() {
@@ -902,89 +756,28 @@
           }
           if (this.searchQuery.trim()) {
             const q = this.searchQuery.toLowerCase().trim();
-            list = list.filter(i => 
-              i.name.toLowerCase().includes(q) || 
-              (i.description && i.description.toLowerCase().includes(q))
-            );
+            list = list.filter(i => i.name.toLowerCase().includes(q));
           }
           return list;
         },
 
-        getItemDisplayPrice(item) {
-          if (item.price) return item.price;
-          if (item.sizes) {
-            const vals = Object.values(item.sizes);
-            return Math.min(...vals);
-          }
-          if (item.variants) {
-            const vals = Object.values(item.variants);
-            return Math.min(...vals);
-          }
-          return 0;
-        },
-
-        sizeLabel(key) {
-          const map = { small: 'صغير', medium: 'وسط', large: 'كبير' };
-          return map[key] || key;
-        },
-
-        variantLabel(key) {
-          const map = { single: 'سنجل (فردي)', double: 'دبل (مزدوج)', family: 'عائلي كبير' };
-          return map[key] || key;
-        },
-
-        openItemModal(item) {
-          this.selectedItem = item;
-          this.modalQty = 1;
-          if (item.sizes) {
-            const firstKey = Object.keys(item.sizes)[0];
-            this.modalSelectedVariant = { key: firstKey, label: this.sizeLabel(firstKey), price: item.sizes[firstKey] };
-          } else if (item.variants) {
-            const firstKey = Object.keys(item.variants)[0];
-            this.modalSelectedVariant = { key: firstKey, label: this.variantLabel(firstKey), price: item.variants[firstKey] };
-          } else {
-            this.modalSelectedVariant = null;
-          }
-        },
-
-        getModalCalculatedPrice() {
-          if (!this.selectedItem) return 0;
-          const unit = this.modalSelectedVariant?.price || this.selectedItem.price || 0;
-          return unit * this.modalQty;
-        },
-
-        addModalItemToCart() {
-          if (!this.selectedItem) return;
-          this.addToCartWithQty(this.selectedItem, this.modalSelectedVariant, this.modalQty);
-          this.selectedItem = null;
-        },
-
         quickAdd(item) {
-          if (item.sizes || item.variants) {
-            this.openItemModal(item);
-            return;
-          }
-          this.addToCartWithQty(item, null, 1);
-        },
-
-        addToCartWithQty(item, variant, qty) {
-          const cartId = item.id + '-' + (variant?.key || 'default');
+          const cartId = item.id;
           const existing = this.cart.find(i => i.cartId === cartId);
 
           if (existing) {
-            existing.quantity += qty;
+            existing.quantity += 1;
           } else {
             this.cart.push({
               ...item,
               cartId: cartId,
-              selectedVariant: variant,
-              quantity: qty
+              quantity: 1
             });
           }
 
-          this.notification.message = 'تمت إضافة "' + item.name + '" إلى السلة (' + qty + ')';
+          this.notification.message = 'تمت إضافة "' + item.name + '" إلى السلة (1)';
           this.notification.show = true;
-          setTimeout(() => this.notification.show = false, 2500);
+          setTimeout(() => this.notification.show = false, 2000);
         },
 
         updateQty(cartId, delta) {
@@ -998,8 +791,7 @@
         },
 
         itemTotal(item) {
-          const price = item.selectedVariant?.price || item.price || 0;
-          return price * item.quantity;
+          return item.price * item.quantity;
         },
 
         calculateSubtotal() {
@@ -1030,7 +822,7 @@
           }
 
           const itemsText = this.cart.map(item =>
-            '▪️ *' + item.name + '* ' + (item.selectedVariant ? '(' + item.selectedVariant.label + ')' : '') + ' × ' + item.quantity + ' = ' + this.itemTotal(item) + ' ر.س'
+            '▪️ *' + item.name + '* × ' + item.quantity + ' = ' + this.itemTotal(item) + ' ر.س'
           ).join('\n');
 
           const message = '🌟 *طلب جديد من متجر مطعم دبل | DOUBEL* 🌟\n' +
