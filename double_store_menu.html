@@ -320,7 +320,6 @@
                   :alt="item.name"
                   class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   loading="lazy"
-                  @error="$el.src = './double_banner.jpg'"
                 />
               </div>
 
@@ -752,44 +751,44 @@
         // Exact Official Menu items with User Authentic Photos
         menuItems: [
           // 🌯 الشاورما
-          { id: 'sh1', name: 'شاورما صغير', price: 5, category: 'shawarma', badge: '🔥 الأكثر طلباً', image: './images/شاورما دجاج.jpg' },
-          { id: 'sh2', name: 'صاروخ', price: 9, category: 'shawarma', badge: '⭐ مميز', image: './images/صاروخ شاورما صغبر.jpg' },
-          { id: 'sh3', name: 'عربي 8 قطع', price: 16, category: 'shawarma', image: './images/شاورما دجاج 8 قطعة.jpg' },
-          { id: 'sh4', name: 'عربي 16 قطع', price: 27, category: 'shawarma', badge: '👑 وجبة دبل', image: './images/شاورما دجاج 16قطعة.jpg' },
-          { id: 'sh5', name: 'شاورما تبولة', price: 6, category: 'shawarma', image: './images/شاورما  ماريا لحم.jpg' },
-          { id: 'sh6', name: 'شاورما حمص', price: 11, category: 'shawarma', image: './images/حمص شاورما دجاج.jpg' },
+          { id: 'sh1', name: 'شاورما صغير', price: 5, category: 'shawarma', badge: '🔥 الأكثر طلباً', image: './images/img_sh_small.jpg' },
+          { id: 'sh2', name: 'صاروخ', price: 9, category: 'shawarma', badge: '⭐ مميز', image: './images/img_sh_sarookh.jpg' },
+          { id: 'sh3', name: 'عربي 8 قطع', price: 16, category: 'shawarma', image: './images/img_sh_arabi_8.jpg' },
+          { id: 'sh4', name: 'عربي 16 قطع', price: 27, category: 'shawarma', badge: '👑 وجبة دبل', image: './images/img_sh_arabi_16.jpg' },
+          { id: 'sh5', name: 'شاورما تبولة', price: 6, category: 'shawarma', image: './images/img_sh_tabbouleh.jpg' },
+          { id: 'sh6', name: 'شاورما حمص', price: 11, category: 'shawarma', image: './images/img_sh_hummus.jpg' },
 
           // 🍢 مشويات
-          { id: 'g1', name: 'شيش', price: 9, category: 'grills', badge: '🍢 طازج', image: './images/وجبة شيش طاوق.jpg' },
-          { id: 'g2', name: 'كباب دجاج', price: 9, category: 'grills', image: './images/وجبة كباب دجاج.jpg' },
-          { id: 'g3', name: 'كباب لحم', price: 9, category: 'grills', image: './images/وجبة كباب لحم.jpg' },
+          { id: 'g1', name: 'شيش', price: 9, category: 'grills', badge: '🍢 طازج', image: './images/img_grill_shish.jpg' },
+          { id: 'g2', name: 'كباب دجاج', price: 9, category: 'grills', image: './images/img_grill_kebab_chicken.jpg' },
+          { id: 'g3', name: 'كباب لحم', price: 9, category: 'grills', image: './images/img_grill_kebab_meat.jpg' },
 
           // 🍗 البروستد
-          { id: 'br1', name: 'بروستد عادي', price: 18, category: 'broasted', badge: '🍗 مقرمش', image: './images/Picsart_26-05-13_20-59-54-453.jpg' },
-          { id: 'br2', name: 'بروستد حراق', price: 18, category: 'broasted', badge: '🌶️ حراق', image: './images/Picsart_26-05-13_20-59-54-453.jpg' },
+          { id: 'br1', name: 'بروستد عادي', price: 18, category: 'broasted', badge: '🍗 مقرمش', image: './images/img_broasted_regular.jpg' },
+          { id: 'br2', name: 'بروستد حراق', price: 18, category: 'broasted', badge: '🌶️ حراق', image: './images/img_broasted_spicy.jpg' },
 
           // 🍔 البرجر
-          { id: 'bg1', name: 'برجر لحم', price: 11, category: 'burger', image: './images/برجر لحم.jpg' },
-          { id: 'bg2', name: 'برجر دجاج مشوي', price: 11, category: 'burger', image: './images/برجر دجاج.jpg' },
-          { id: 'bg3', name: 'برجر دجاج كرسبي', price: 13, category: 'burger', badge: '🔥 كرسبي', image: './images/برجر كريسبي.jpg' },
+          { id: 'bg1', name: 'برجر لحم', price: 11, category: 'burger', image: './images/img_burger_meat.jpg' },
+          { id: 'bg2', name: 'برجر دجاج مشوي', price: 11, category: 'burger', image: './images/img_burger_chicken.jpg' },
+          { id: 'bg3', name: 'برجر دجاج كرسبي', price: 13, category: 'burger', badge: '🔥 كرسبي', image: './images/img_burger_crispy.jpg' },
 
           // 🍕 البيتزا
-          { id: 'pz1', name: 'بيتزا نقانق', price: 14, category: 'pizza', image: './images/بيتزا نقائق.jpg' },
-          { id: 'pz2', name: 'بيتزا دجاج مكسيكانو', price: 16, category: 'pizza', badge: '🌶️ مكسيكانو', image: './images/بيتزا دجاج باربكيو.jpg' },
-          { id: 'pz3', name: 'بيتزا لحم', price: 16, category: 'pizza', image: './images/بيتزا مكس لحم.jpg' },
-          { id: 'pz4', name: 'بيتزا عكاوي', price: 14, category: 'pizza', image: './images/بيتزا اجبان مشكل.jpg' },
-          { id: 'pz5', name: 'بيتزا دجاج رانش', price: 16, category: 'pizza', badge: '🔥 الأكثر طلباً', image: './images/بيتزا  دجاج الرانش.jpg' },
-          { id: 'pz6', name: 'عش بلبل مع عسل', price: 14, category: 'pizza', image: './images/بيتزا عش البلبل.jpg' },
-          { id: 'pz7', name: 'بيتزا خضار', price: 14, category: 'pizza', image: './images/بيتزا الخضار.jpg' },
+          { id: 'pz1', name: 'بيتزا نقانق', price: 14, category: 'pizza', image: './images/img_pizza_sausage.jpg' },
+          { id: 'pz2', name: 'بيتزا دجاج مكسيكانو', price: 16, category: 'pizza', badge: '🌶️ مكسيكانو', image: './images/img_pizza_mexicano.jpg' },
+          { id: 'pz3', name: 'بيتزا لحم', price: 16, category: 'pizza', image: './images/img_pizza_meat.jpg' },
+          { id: 'pz4', name: 'بيتزا عكاوي', price: 14, category: 'pizza', image: './images/img_pizza_akkawi.jpg' },
+          { id: 'pz5', name: 'بيتزا دجاج رانش', price: 16, category: 'pizza', badge: '🔥 الأكثر طلباً', image: './images/img_pizza_ranch.jpg' },
+          { id: 'pz6', name: 'عش بلبل مع عسل', price: 14, category: 'pizza', image: './images/img_pizza_osh_bulbul.jpg' },
+          { id: 'pz7', name: 'بيتزا خضار', price: 14, category: 'pizza', image: './images/img_pizza_veggie.jpg' },
 
           // 🥐 الفطاير
-          { id: 'ft1', name: 'محمره + عكاوي', price: 13, category: 'pastries', image: './images/منقوشة عكاوي.jpg' },
-          { id: 'ft2', name: 'محمره + لحم', price: 13, category: 'pastries', image: './images/منقوشة لحم.jpg' },
-          { id: 'ft3', name: 'محمره + دجاج مكسيكانو', price: 13, category: 'pastries', image: './images/منقوشة دجاج.jpg' },
-          { id: 'ft4', name: 'محمره + دجاج الفريدو', price: 13, category: 'pastries', image: './images/منقوشة دجاج.jpg' },
-          { id: 'ft5', name: 'محمره + مسخن', price: 13, category: 'pastries', badge: '⭐ مميز', image: './images/فطيرة محمرة.jpg' },
-          { id: 'ft6', name: 'بوكس ميني 12 قطع', price: 16, category: 'pastries', badge: '🎁 توفير', image: './images/بوكس الفطائر.jpg' },
-          { id: 'ft7', name: 'بوكس ميني 24 قطع', price: 31, category: 'pastries', badge: '🎁 عائلي', image: './images/بوكس المناقيش.jpg' },
+          { id: 'ft1', name: 'محمره + عكاوي', price: 13, category: 'pastries', image: './images/img_fatayer_akkawi.jpg' },
+          { id: 'ft2', name: 'محمره + لحم', price: 13, category: 'pastries', image: './images/img_fatayer_meat.jpg' },
+          { id: 'ft3', name: 'محمره + دجاج مكسيكانو', price: 13, category: 'pastries', image: './images/img_fatayer_mexicano.jpg' },
+          { id: 'ft4', name: 'محمره + دجاج الفريدو', price: 13, category: 'pastries', image: './images/img_fatayer_alfredo.jpg' },
+          { id: 'ft5', name: 'محمره + مسخن', price: 13, category: 'pastries', badge: '⭐ مميز', image: './images/img_fatayer_musakhan.jpg' },
+          { id: 'ft6', name: 'بوكس ميني 12 قطع', price: 16, category: 'pastries', badge: '🎁 توفير', image: './images/img_fatayer_box_12.jpg' },
+          { id: 'ft7', name: 'بوكس ميني 24 قطع', price: 31, category: 'pastries', badge: '🎁 عائلي', image: './images/img_fatayer_box_24.jpg' },
 
           // 🥤 المشروبات
           { id: 'dr1', name: 'بيبسي', price: 3, category: 'drinks', image: 'https://images.unsplash.com/photo-1629203851122-3726ecdf080e?auto=format&fit=crop&w=400&q=80' },
@@ -800,12 +799,12 @@
           { id: 'dr6', name: 'ماء', price: 1, category: 'drinks', image: 'https://images.unsplash.com/photo-1559839914-ba2a0f8eb84a?auto=format&fit=crop&w=400&q=80' },
 
           // 🥗 الصوصات + مقبلات
-          { id: 'sc1', name: 'صوص دبل عادي', price: 2, category: 'sauces_appetizers', image: './images/Picsart_26-05-13_21-09-43-197.jpg' },
-          { id: 'sc2', name: 'صوص دبل حراق', price: 2, category: 'sauces_appetizers', badge: '🌶️', image: './images/Picsart_26-05-13_21-09-43-197.jpg' },
-          { id: 'sc3', name: 'صوص ثوم', price: 2, category: 'sauces_appetizers', image: './images/Picsart_26-05-13_21-09-43-197.jpg' },
-          { id: 'sc4', name: 'حمص', price: 4, category: 'sauces_appetizers', image: './images/حمص.jpg' },
-          { id: 'sc5', name: 'تبولة', price: 5, category: 'sauces_appetizers', image: './images/متبل.jpg' },
-          { id: 'sc6', name: 'فتوش', price: 5, category: 'sauces_appetizers', image: './images/متبل.jpg' }
+          { id: 'sc1', name: 'صوص دبل عادي', price: 2, category: 'sauces_appetizers', image: './images/img_sauce_double.jpg' },
+          { id: 'sc2', name: 'صوص دبل حراق', price: 2, category: 'sauces_appetizers', badge: '🌶️', image: './images/img_sauce_spicy.jpg' },
+          { id: 'sc3', name: 'صوص ثوم', price: 2, category: 'sauces_appetizers', image: './images/img_sauce_garlic.jpg' },
+          { id: 'sc4', name: 'حمص', price: 4, category: 'sauces_appetizers', image: './images/img_app_hummus.jpg' },
+          { id: 'sc5', name: 'تبولة', price: 5, category: 'sauces_appetizers', image: './images/img_app_tabbouleh.jpg' },
+          { id: 'sc6', name: 'فتوش', price: 5, category: 'sauces_appetizers', image: './images/img_app_fattoush.jpg' }
         ],
 
         getCategoryName(catId) {
